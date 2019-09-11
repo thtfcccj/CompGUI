@@ -1,0 +1,369 @@
+/***********************************************************************
+
+                  字符串处理扩展模块
+
+***********************************************************************/
+
+#include "StringEx.h"
+#include <string.h>
+
+//-----------------------转换为字符串-显示为最简函数----------------------
+//返回结束位置,最大支持10^8数显示(超过显示99999999)
+char *Value4StringMin(unsigned long Value,
+                      char *pString,//接收缓冲
+                      unsigned char Min)//保证的最小位数
+{
+  if((Value >= 10000) || (Min >= 5)){//高位
+    if(Value > 99999999) Value = 99999999;
+    unsigned char CurMin;
+    if(Min <= 4) CurMin = 0;
+    else CurMin = Min - 4;
+    pString = Value2StringMin(Value / 10000, pString, CurMin);
+    Min = 4;
+  }
+  return Value2StringMin(Value % 10000, pString, Min);//低位
+}
+
+//-----------------------转换为字符串-显示为最简函数----------------------
+//返回结束位置
+char *Value2StringMin(signed short Value,
+                      char *pString,//接收缓冲
+                      unsigned char Min)//保证的最小位数
+{
+  //短整型时
+  //#if(TSIGNED_SIZE >= 2)
+    if((Value >= 10000) || (Min >= 5)){
+      *pString++ = Value / 10000 + '0';
+      Value %= 10000;
+	  Min = 10;
+    }
+    if((Value >= 1000) || (Min >= 4)){
+      *pString++ = Value / 1000 + '0';
+      Value %= 1000;
+	  Min = 10;
+    }
+  //#endif
+
+  if((Value >= 100) || (Min >= 3)){
+    *pString++ = Value / 100 + '0';
+    Value %= 100;
+	Min = 10;
+  }
+  if((Value >= 10) || (Min >= 2)){
+    *pString++ = Value / 10 + '0';
+    Value %= 10;
+	Min = 10;
+  }
+  if((Min >= 1) || (Value > 0)){
+    *pString++ = Value + '0';
+  }
+  
+  *pString = '\0'; //强制填充结束字符
+  return pString;
+}
+
+static const unsigned short _Ov[] = {
+  0, 9, 99, 999, 9999,
+};
+
+//-----------------------转换为字符串-固定位显示函数----------------------
+//<0填充0, 超限固定显示显示位数个9, 返回结束位置
+char *Value2StringFix(unsigned short Value,
+                      char *pString,//接收缓冲
+                      unsigned char Len)//显示长度
+{
+  //超限显示
+ if(Value > _Ov[Len]) Value = _Ov[Len];
+ 
+  pString += Len; //结束位置
+  for(unsigned char Pos = 1; Pos <= Len; Pos++){
+    *(pString - Pos) = '0' + (Value % 10);
+    Value /= 10;
+   }
+   *pString = '\0'; //强制填充结束字符
+   return pString;
+}
+
+//-----------------带标志数转换为字符串函数------------------
+//返回填充后最末未用缓冲区位置
+char *pNum2StringFlag(signed short Value,   //当前数值
+                      char *pBuf,    //接收缓冲区
+                      unsigned char Len,    //数值显示最短长度
+                      //标志,定义为：低3bit:小数点位置,0x80:显示正负号
+                      unsigned char Flag)
+{
+  unsigned char FullLen;
+
+  if(Flag & 0x80){//带符号时
+    if(Value < 0) *pBuf = '-';
+    else *pBuf = '+';
+    pBuf++;
+  }
+  if(Value < 0) Value = 0 - Value;  //正值显示
+      
+  //带小数点时,先检查数值是否<1,若是,则检查前面补了多少个0.或0.0
+  Flag &= 0x07;
+  if(Flag >= Len){ //<0了,0.
+    FullLen = Flag - Len;
+    *pBuf++ = '0';
+    *pBuf++ = '.'; 
+    while(FullLen--) *pBuf++ = '0';//填充无效的0
+    pBuf = Value2StringMin(Value,pBuf,Len);
+  }
+  else{
+    //>1了,检查小数点位置,当前位置在小数点左还是右边
+    pBuf = Value2StringMin(Value,pBuf,Len);//先填充数据
+    if(Flag){ //有小数点时填充小数点位置
+      FullLen = Flag;//暂存
+      for(; Flag > 0; Flag--) {*pBuf = *(pBuf - 1); pBuf--;}
+      *pBuf= '.';
+      pBuf += FullLen + 1;//含小数点
+    }
+  }
+  *pBuf = '\0'; //强制填充结束字符
+  return pBuf;
+}
+
+//-------------------------------字符复制函数-------------------------------
+//此函数替换strcpy(),用于返回的是字符结束位置的指针
+char *strcpyL(char *pStr, const char *pSub)
+{
+  strcpy(pStr, pSub); //直接用
+  return pStr + strlen(pStr);
+}
+
+//-------------------------------内存复制函数-------------------------------
+//此函数替换memcpy(),用于返回的是结束位置的指针
+char *memcpyL(char *pStr, const char *pSub, unsigned short Len)
+{
+  memcpy(pStr, pSub, Len); //直接用
+  return pStr + Len;  
+}
+
+//-----------------------字符转小写函数-------------------------------
+char CharToLower(char Str)
+{
+  if((Str >= 'A') && (Str <= 'Z'))
+    return Str - 'A' + 'a';
+  return Str;
+}
+
+//-------------------------------字符查找函数-------------------------------
+//此函数忽略大小写替换strstr(),用于返回的是查找字符结束位置的指针,没找到时为NULL
+char *StrFind(char *pStr, const char *pSub)
+{
+  const char *pOrgSub = pSub;
+  char *pOrgStr;
+  do{
+    //先查找首字母
+    char Firt = CharToLower(*pSub);
+    do{
+      char Str = CharToLower(*pStr++);
+      if(Str == '\0') return NULL; //找完了，没找到
+      if(Str == Firt) break; //找到首个了
+    }while(1);
+    
+    //一个一个比较后续字母(为提高效率，未调用strcmp)
+    pOrgStr = pStr; //需从此位置重新开始找
+    pSub++;
+    do{
+      char Next = CharToLower(*pSub++);
+      if(Next == '\0') return pStr; //全部匹配,查找结束
+      char Str = CharToLower(*pStr++);
+      if(Str == '\0') return NULL; //找完了，没找到
+      if(Str != Next){//不匹配, 没找到，继续重头开始找
+        pSub = pOrgSub;
+        pStr = pOrgStr;
+        break; 
+      }
+    }while(1);
+  }while(1);
+}  
+
+//-------------------------------字符替换函数-------------------------------
+//此函数忽略大小写,替换成功返回非0，否则返回0。
+signed char StringReplace(char *pStr, const char *pFrom, const char *pTo) 
+{
+  //先查找字符串
+  char *pReplacePos = StrFind(pStr, pFrom);
+  if(pReplacePos == NULL) return -1; //未找到
+  //将要被替换的字符串后拷走
+  strcpy(StringEx_pcbGetReplaceBuf(), pReplacePos);  
+  pReplacePos -= strlen(pFrom);//被替换位置了
+  strcpy(pReplacePos, pTo);  //替换为新的字符串
+  pReplacePos += strlen(pTo);//被替换后位置
+  strcpy(pReplacePos, StringEx_pcbGetReplaceBuf());  //再移进来
+  
+  return 0; //替换成功
+}
+
+/*/---------------将字符串里所有":"前大写字母转换为小写字母函数--------------------
+void StrToSmallEndColon(char *pStr)
+{
+  do{
+    char Str = *pStr;
+    if(Str == '\0') break;
+    else if(Str == ':') break; 
+    *pStr = CharToLower(Str);
+    pStr++;
+  }while(1);
+}*/
+
+//------------------去掉字符串前的空格字符------------------------
+//返回有效的字符，此函数未检查字符串结束
+char *StrRemoveSpace(char *pStr)
+{
+  while(*pStr == ' ') pStr++;
+  return pStr;
+}
+
+//-------------------------------得到数字字符长度函数---------------------------
+unsigned char StrGetAscNumLen(const char *pStr)
+{
+  unsigned char Len = 0;
+  char Num = *pStr++;
+  while((Num >= '0') && (Num <= '9')){
+    Len++;
+    Num = *pStr++;
+  }
+  return Len;
+}
+
+//-----------------------------得到指定字符长度函数---------------------------
+unsigned char StrGetCharLen(const char *pStr, char c)
+{
+  unsigned char Len = 0;
+  do{
+    char Cur = *pStr++;
+    if(Cur == '\0') break;
+    if(Cur == c) Len++;
+  }while(1);
+  return Len;
+}
+
+//----------------------------ASC数字转换为Bcd数字函数--------------------------
+//从最高位开始，若长度若为奇数，则首位Bcd码填充0
+//调用此函数需确保长度范围内为asc数字
+void AscNumToBcd(const char *pStr, 
+                 unsigned char Len,                
+                 unsigned char *pBcd)
+{
+  //首个奇数位单独填充
+  if(Len & 0x01){
+    *pBcd++ = *pStr++ - '0'; //高位自动为0
+    Len--;
+  }
+  //一次填充两
+  for(; Len > 0; Len-= 2){
+    unsigned char Bcd = *pStr++ - '0';
+    *pBcd++ = (Bcd << 4) + (*pStr++ - '0'); //高位在前，低位在后
+  }
+}
+
+//----------------------------Bcd数字转换为ASC数字函数--------------------------
+//返回字符结束位置
+char *BcdNumToAsc(const unsigned char *pBcd,
+                 unsigned char Len,                
+                 char *pStr)
+{
+  for(; Len > 0; Len--){
+    unsigned char Bcd = *pBcd++;
+    *pStr++ = '0' + (Bcd >> 4);
+    *pStr++ = '0' + (Bcd & 0x0f);
+  }
+  *pStr = '\0'; //强制填充结束字符
+  return pStr;
+}
+                      
+//--------------------------字符串是否为ASC函数--------------------------
+//返回非0是，否则返回0
+signed char StrIsAsc(const char *pStr)
+{
+  do{
+    char Str = *pStr;
+    if(Str == '\0') break;
+    else if(Str >= 0x80) return 0; //不是了
+    pStr++;
+  }while(1);
+  
+  return 1; //是了
+}
+
+//---------------------------扩展字符串cpy函数---------------------------
+//给出最高长度值，cpy返回不能超过此值,自动填充结束字符,返回结束字符
+char *strcpyEx(char *pNewStr, const char *pOrgStr,
+               unsigned char MaxLen)
+{
+  for(; MaxLen > 0; MaxLen--, pNewStr++, pOrgStr++){
+    if(*pOrgStr == '\0') break;//提前结束
+    *pNewStr = *pOrgStr;
+  }
+  //找完了
+  *pNewStr = '\0';
+  return pNewStr;
+}
+
+//给出最高长度值，cpy返回不能超过此值,不填充结束字符,返回下个字符串位置
+const char *strcpyEx2(char *pNewStr, const char *pOrgStr,
+                       unsigned char MaxLen)
+{
+  char c;
+  for(; MaxLen > 0; MaxLen--, pNewStr++, pOrgStr++){
+    c = *pOrgStr;
+    *pNewStr = c; //结束字符一起
+    if(c == '\0'){//提前结束
+      return pOrgStr + 1; //返回下个起始位置
+    }
+  }
+  //超限或达到最大长度了
+  //*pNewStr = '\0'; //copy时的结束字符->为防止内存溢出不填充结束字符
+  //找到结束位置，下个即为起点
+  for(MaxLen = 10; MaxLen > 0; MaxLen--, pOrgStr++){
+    if(*pOrgStr == '\0'){//找到了
+      break;
+    }
+  }
+  return pOrgStr + 1; //返回下个起始位置
+}
+
+//---------------------------扩展长度检查函数---------------------------
+//给出最高值，返回不能超过此值
+unsigned char strlenEx(const char *pString,unsigned char MaxLen)
+{
+  for(unsigned char Len = 0; Len < MaxLen; Len++,pString++){
+    if(*pString == '\0') return Len;//提前结束
+  }
+  //找完了
+  return MaxLen;
+}
+
+//-------------------------标准以对齐填充字符串函数-------------------------
+//输入最大长度!=输出长度时调用， 多出的填充空格,返回前部填充空格数量
+unsigned char strFullMax(char *pDest, const char *pSource,
+                         unsigned char SourceMaxLen,//源字符最大长度
+                         unsigned char DestLen, //目标字符长度
+                         unsigned char Align)//0:左对齐,1局中对齐，2右对齐
+{
+  unsigned char Len = strlenEx(pSource, SourceMaxLen);
+  if(DestLen <= Len){//异常截断处理
+    memcpy(pDest, pSource, Len);
+    return 0;
+  }
+  memset(pDest, ' ', DestLen); //先填充目标空格  
+  //Align复用作起始位置
+  if(Align == 1) Align = (DestLen - Len) >> 1;
+  else if(Align == 2) Align = (DestLen - Len);
+  memcpy(pDest + Align, pSource, Len);
+  return Align;
+}
+
+//-------------------------以对齐填充字符串函数---------------------------
+//多出的填充空格,返回前部填充空格数量
+unsigned char strFull(char *pDest, const char *pSource,
+                       unsigned char MaxLen, //目标字符长度,即源数据最大长度
+                       unsigned char Align)//0:左对齐,1局中对齐，2右对齐
+{
+  return strFullMax(pDest, pSource, MaxLen, MaxLen, Align);
+}
+
+
