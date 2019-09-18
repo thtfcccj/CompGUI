@@ -366,4 +366,42 @@ unsigned char strFull(char *pDest, const char *pSource,
   return strFullMax(pDest, pSource, MaxLen, MaxLen, Align);
 }
 
+//-----------------------字符串转换为IP4函数------------------------------------
+//pStr字样需为:192.168.88.152,填充时高位在前,返回负：没有填充位置
+signed char StrToIp4(const char *pStr, unsigned char *pIp4)
+{
+  unsigned char Pos = 0;
+  unsigned char Data = 0;  
+  do{
+    char Char = *pStr++;
+    if(Char == '.'){//下一组了
+      pIp4[Pos] = Data;
+      Data = 0;
+      Pos++;
+      if(Pos >= 4) return 0;//正常结束
+    }
+    else if((Char < '0') || (Char > '9')){//异常或结束了
+      pIp4[Pos] = Data;
+      if(Pos == 3) return 0;//正常结束
+      return -Pos; //异常
+    }
+    else{
+      Data *= 10;
+      Data += (Char - '0');
+    }
+  }while(1);
+}
+
+//-----------------------IP4转换为字符串函数------------------------------------
+//pStr字样返回为:192.168.88.152,高位在前
+void Ip4ToStr(const unsigned char *pIp4, char *pStr)
+{
+  for(unsigned char Pos = 0; Pos < 4; Pos++){
+    pStr = Value2StringMin(*pIp4++, pStr, 1);
+    *pStr++ = '.';
+  }
+  *(pStr - 1) = '\0'; //最后,替换为结束字符
+}
+
+
 
