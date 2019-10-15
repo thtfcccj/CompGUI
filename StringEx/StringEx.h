@@ -82,6 +82,19 @@ char *BcdNumToAsc(const unsigned char *pBcd,
                  unsigned char Len,                
                  char *pStr);
 
+//--------------------数据流转换为Hex字符串函数--------------------------------
+//如：数据流0x6d,0x4b转换为ASC为："6d4b",Len为源数据长度,返回字符串结束位置
+char *pData2HexStr(char *pDist, 
+                   const unsigned char *pSorce, 
+                   unsigned char Len) ;
+
+//-----------------------Hex字符串转换为数据流函数--------------------------------
+//如：字符串"6d4b"转换后数据流为：0x6d,0x4b,Len为源数据长度,返回数据流结束位置
+const unsigned char *pHexStr2Data(unsigned char *pDist, 
+                                    const char *pSorce,
+                                    unsigned char Len) ;
+
+
 //--------------------------字符串是否为ASC函数--------------------------
 //返回非0是，否则返回0
 signed char StrIsAsc(const char *pStr);

@@ -274,7 +274,45 @@ char *BcdNumToAsc(const unsigned char *pBcd,
   *pStr = '\0'; //强制填充结束字符
   return pStr;
 }
-                      
+
+//--------------------数据流转换为Hex字符串函数--------------------------------
+//如：数据流0x6d,0x4b转换为ASC为："6d4b",Len为源数据长度,返回字符串结束位置
+char *Data2HexStr(char *pDist, 
+                   const unsigned char *pSorce, 
+                   unsigned char Len)   
+{
+  for(; Len >= 1; Len--){
+    unsigned char Data = *pSorce++;
+    unsigned char Full = Data >> 4;
+    if(Full >= 10) Full += ('A' - 10);
+    else Full += '0';
+    *pDist++ = Full;
+    Full = Data & 0x0f;
+    if(Full >= 10) Full += ('A' - 10);
+    else Full += '0';
+    *pDist++ = Full;
+  }
+  return pDist;
+}
+
+//-----------------------Hex字符串转换为数据流函数--------------------------------
+//如：字符串"6d4b"转换后数据流为：0x6d,0x4b,Len为源数据长度,返回数据流结束位置
+const unsigned char *pHexStr2Data(unsigned char *pDist, 
+                                    const char *pSorce,
+                                    unsigned char Len)   
+{
+  for(; Len >= 1; Len--){
+    char Data = *pSorce++;
+    if(Data < 'A') Data -= '0';
+    else Data -= ('A' - 10);
+    char Data1 = *pSorce++;
+    if(Data1 < 'A') Data1 -= '0';
+    else Data1 -= ('A' - 10);
+    *pDist++ = (Data << 4) | Data1;
+  }
+  return pDist;
+}
+
 //--------------------------字符串是否为ASC函数--------------------------
 //返回非0是，否则返回0
 signed char StrIsAsc(const char *pStr)
