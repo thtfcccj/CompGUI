@@ -68,33 +68,6 @@ unsigned char StrGetAscNumLen(const char *pStr);
 //-----------------------------提指定字符长度函数---------------------------
 unsigned char StrGetCharLen(const char *pStr, char c);
 
-
-//----------------------------ASC数字转换为Bcd数字函数--------------------------
-//从最高位开始，若长度若为奇数，则首位Bcd码填充0
-//调用此函数需确保长度范围内为asc数字
-void AscNumToBcd(const char *pStr, 
-                 unsigned char Len,                
-                 unsigned char *pBcd);
-
-//----------------------------Bcd数字转换为ASC数字函数--------------------------
-//返回字符结束位置
-char *BcdNumToAsc(const unsigned char *pBcd,
-                 unsigned char Len,                
-                 char *pStr);
-
-//--------------------数据流转换为Hex字符串函数--------------------------------
-//如：数据流0x6d,0x4b转换为ASC为："6d4b",Len为源数据长度,返回字符串结束位置
-char *pData2HexStr(char *pDist, 
-                   const unsigned char *pSorce, 
-                   unsigned char Len) ;
-
-//-----------------------Hex字符串转换为数据流函数--------------------------------
-//如：字符串"6d4b"转换后数据流为：0x6d,0x4b,Len为源数据长度,返回数据流结束位置
-const unsigned char *pHexStr2Data(unsigned char *pDist, 
-                                    const char *pSorce,
-                                    unsigned char Len) ;
-
-
 //--------------------------字符串是否为ASC函数--------------------------
 //返回非0是，否则返回0
 signed char StrIsAsc(const char *pStr);
