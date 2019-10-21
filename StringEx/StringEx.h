@@ -49,7 +49,7 @@ char CharToLower(char Str);
 
 //-------------------------------字符查找函数-------------------------------
 //此函数忽略大小写替换strstr(),返回的是查找字符结束位置的指针,没找到时为NULL
-char *StrFind(char *pStr, const char *pSub);
+const char *StrFind(const char *pStr, const char *pSub);
 
 //-------------------------------字符替换函数-------------------------------
 //此函数忽略大小写,替换成功返回非0，否则返回0。
@@ -58,9 +58,9 @@ signed char StringReplace(char *pStr, const char *pFrom, const char *pTo);
 //---------------将字符串里所有":"前大写字母转换为小写字母函数--------------------
 //void StrToSmallEndColon(char *pStr);
 
-//----------------------------去掉字符串前的空格字符------------------------
+//----------------------------得到空格后的符串函数------------------------
 //返回有效的字符，此函数未检查字符串结束
-char *StrRemoveSpace(char *pStr);
+const char *pGetStrSpaceEnd(const char *pStr);
 
 //-------------------------------得到数字字符长度函数---------------------------
 unsigned char StrGetAscNumLen(const char *pStr);

@@ -150,10 +150,10 @@ char CharToLower(char Str)
 
 //-------------------------------字符查找函数-------------------------------
 //此函数忽略大小写替换strstr(),用于返回的是查找字符结束位置的指针,没找到时为NULL
-char *StrFind(char *pStr, const char *pSub)
+const char *StrFind(const char *pStr, const char *pSub)
 {
   const char *pOrgSub = pSub;
-  char *pOrgStr;
+  const char *pOrgStr;
   do{
     //先查找首字母
     char Firt = CharToLower(*pSub);
@@ -185,7 +185,7 @@ char *StrFind(char *pStr, const char *pSub)
 signed char StringReplace(char *pStr, const char *pFrom, const char *pTo) 
 {
   //先查找字符串
-  char *pReplacePos = StrFind(pStr, pFrom);
+  char *pReplacePos = (char*)StrFind(pStr, pFrom);
   if(pReplacePos == NULL) return -1; //未找到
   //将要被替换的字符串后拷走
   strcpy(StringEx_pcbGetReplaceBuf(), pReplacePos);  
@@ -209,9 +209,9 @@ void StrToSmallEndColon(char *pStr)
   }while(1);
 }*/
 
-//------------------去掉字符串前的空格字符------------------------
+//------------------得到空格后的符串函数------------------------
 //返回有效的字符，此函数未检查字符串结束
-char *StrRemoveSpace(char *pStr)
+const char *pGetStrSpaceEnd(const char *pStr)
 {
   while(*pStr == ' ') pStr++;
   return pStr;
