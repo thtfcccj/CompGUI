@@ -1,7 +1,7 @@
 /***********************************************************************
 
                   字符串处理扩展模块
-
+ * 注：strcpy在此函数内调用时,在xc8 1.37中编译器中会链接不过
 ***********************************************************************/
 
 #include "StringEx.h"
@@ -128,8 +128,26 @@ char *pNum2StringFlag(signed short Value,   //当前数值
 //此函数替换strcpy(),用于返回的是字符结束位置的指针
 char *strcpyL(char *pStr, const char *pSub)
 {
-  strcpy(pStr, pSub); //直接用
-  return pStr + strlen(pStr);
+  do{
+    *pStr = *pSub;
+    if(*pSub == '\0') break;//结束.注意结束字符一起copy
+    pStr++; pSub++;
+  }while(1);
+  return pStr;
+}
+
+//--------------------------字符复制函数,从右往左copy--------------------------
+//此函数替换strcpy(),返回pStr
+char *strcpyR(char *pStr, const char *pSub)
+{
+  unsigned short Len = strlen(pSub) + 1; //含结束字符
+  const char *pEndSub = pSub + Len;
+  pStr += Len;
+  do{
+    *pStr = *pEndSub;
+    pStr--; pEndSub--;
+  }while(pEndSub >= pSub);
+  return pStr;
 }
 
 //-------------------------------内存复制函数-------------------------------
@@ -188,13 +206,14 @@ signed char StringReplace(char *pStr, const char *pFrom, const char *pTo)
   //先查找字符串
   char *pReplacePos = (char*)StrFind(pStr, pFrom);
   if(pReplacePos == NULL) return -1; //未找到
-  //将要被替换的字符串后拷走
-  strcpy(StringEx_pcbGetReplaceBuf(), pReplacePos);  
-  pReplacePos -= strlen(pFrom);//被替换位置了
-  strcpy(pReplacePos, pTo);  //替换为新的字符串
-  pReplacePos += strlen(pTo);//被替换后位置
-  strcpy(pReplacePos, StringEx_pcbGetReplaceBuf());  //再移进来
+  unsigned short FromLen = strlen(pFrom);
+  unsigned short ToLen = strlen(pTo);
+  if(FromLen >= ToLen)//替换后的值往前移动
+    strcpyL(pReplacePos + ToLen, pReplacePos + FromLen);
+  else //替换后的值往后移动(注意应从右向左复制防止覆盖)
+    strcpyR(pReplacePos + ToLen, pReplacePos + FromLen); 
   
+  memcpy(pReplacePos, pTo, ToLen); //替换字符串
   return 0; //替换成功
 }
 
