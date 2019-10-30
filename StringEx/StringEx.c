@@ -178,6 +178,7 @@ const char *StrFind(const char *pStr, const char *pSub)
       }
     }while(1);
   }while(1);
+  return NULL;
 }  
 
 //-------------------------------×Ö·ûÌæ»»º¯Êý-------------------------------
@@ -356,6 +357,7 @@ signed char StrToIp4(const char *pStr, unsigned char *pIp4)
       Data += (Char - '0');
     }
   }while(1);
+  return -1;
 }
 
 //-----------------------IP4×ª»»Îª×Ö·û´®º¯Êý------------------------------------
