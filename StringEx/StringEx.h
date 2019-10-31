@@ -36,6 +36,9 @@ char *pNum2StringFlag(signed short Value,   //当前数值
                       //标志,定义为：低3bit:小数点位置,0x80:显示正负号
                       unsigned char Flag);
 
+//-----------------------十进制无符号整数字符转换为整数------------------------
+unsigned short DecStr2Us(const char *pDecStr);
+
 //-------------------------------字符复制函数-------------------------------
 //此函数替换strcpy(),用于返回的是字符结束位置的指针
 char *strcpyL(char *pStr, const char *pSub);
@@ -107,8 +110,8 @@ unsigned char strFull(char *pDest, const char *pSource,
 signed char StrToIp4(const char *pStr, unsigned char *pIp4);
 
 //-----------------------IP4转换为字符串函数------------------------------------
-//pStr字样返回为:192.168.88.152,高位在前
-void Ip4ToStr(const unsigned char *pIp4, char *pStr);
+//pStr字样返回为:192.168.88.2,高位在前,返回字符结束位置
+char *Ip4ToStr(const unsigned char *pIp4, char *pStr);
 
 #endif
 

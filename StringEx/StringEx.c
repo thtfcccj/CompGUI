@@ -124,6 +124,19 @@ char *pNum2StringFlag(signed short Value,   //当前数值
   return pBuf;
 }
 
+//-----------------------十进制无符号整数字符转换为整数------------------------
+unsigned short DecStr2Us(const char *pDecStr)
+{
+  unsigned short Us = 0;
+  for(unsigned char Pos = 0; Pos < 5; Pos++){
+    char Dec = *pDecStr++;
+    if((Dec <  '0') || (Dec >  '9')) break;
+    Us += Dec - '0';
+    Us *= 10;
+  }
+  return Us;
+}
+
 //-------------------------------字符复制函数-------------------------------
 //此函数替换strcpy(),用于返回的是字符结束位置的指针
 char *strcpyL(char *pStr, const char *pSub)
@@ -380,14 +393,17 @@ signed char StrToIp4(const char *pStr, unsigned char *pIp4)
 }
 
 //-----------------------IP4转换为字符串函数------------------------------------
-//pStr字样返回为:192.168.88.152,高位在前
-void Ip4ToStr(const unsigned char *pIp4, char *pStr)
+//pStr字样返回为:192.168.88.2,高位在前,返回字符结束位置
+char *Ip4ToStr(const unsigned char *pIp4, char *pStr)
 {
-  for(unsigned char Pos = 0; Pos < 4; Pos++){
+  unsigned char Pos = 0;
+  do{
     pStr = Value2StringMin(*pIp4++, pStr, 1);
+    if(Pos >= 3) break;
     *pStr++ = '.';
-  }
-  *(pStr - 1) = '\0'; //最后,替换为结束字符
+    Pos++;
+  }while(1);
+  return pStr;
 }
 
 
