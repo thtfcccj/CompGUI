@@ -359,14 +359,17 @@ signed char StrToIp4(const char *pStr, unsigned char *pIp4)
 }
 
 //-----------------------IP4转换为字符串函数------------------------------------
-//pStr字样返回为:192.168.88.152,高位在前
-void Ip4ToStr(const unsigned char *pIp4, char *pStr)
+//pStr字样返回为:192.168.88.2,高位在前,返回字符结束位置
+char *Ip4ToStr(const unsigned char *pIp4, char *pStr)
 {
-  for(unsigned char Pos = 0; Pos < 4; Pos++){
-    pStr = Value2StringMin(*pIp4++, pStr, 1);
+  unsigned char Pos = 0;
+  do{
+    pStr = Value2StringMin(*pIp4++, pStr, 3);
+    if(Pos >= 3) break;
     *pStr++ = '.';
-  }
-  *(pStr - 1) = '\0'; //最后,替换为结束字符
+    Pos++;
+  }while(1);
+  return pStr;
 }
 
 

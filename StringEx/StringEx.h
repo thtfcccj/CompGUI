@@ -103,8 +103,8 @@ unsigned char strFull(char *pDest, const char *pSource,
 signed char StrToIp4(const char *pStr, unsigned char *pIp4);
 
 //-----------------------IP4转换为字符串函数------------------------------------
-//pStr字样返回为:192.168.88.152,高位在前
-void Ip4ToStr(const unsigned char *pIp4, char *pStr);
+//pStr字样返回为:192.168.88.2,高位在前,返回字符结束位置
+char *Ip4ToStr(const unsigned char *pIp4, char *pStr);
 
 /******************************************************************************
 		                            相关回调函数
