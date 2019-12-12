@@ -35,26 +35,26 @@ char *Value2StringMin(signed short Value,
     if((Value >= 10000) || (Min >= 5)){
       *pString++ = Value / 10000 + '0';
       Value %= 10000;
-	  Min = 10;
+	    Min = 10;
     }
     if((Value >= 1000) || (Min >= 4)){
       *pString++ = Value / 1000 + '0';
       Value %= 1000;
-	  Min = 10;
+	    Min = 10;
     }
   //#endif
 
   if((Value >= 100) || (Min >= 3)){
     *pString++ = Value / 100 + '0';
     Value %= 100;
-	Min = 10;
+	  Min = 10;
   }
   if((Value >= 10) || (Min >= 2)){
     *pString++ = Value / 10 + '0';
     Value %= 10;
-	Min = 10;
+	  Min = 10;
   }
-  if((Min >= 1) || (Value > 0)){
+  if((Value > 0) || (Min >= 1)){
     *pString++ = Value + '0';
   }
   
@@ -142,8 +142,9 @@ unsigned short DecStr2Us(const char *pDecStr)
 char *strcpyL(char *pStr, const char *pSub)
 {
   do{
-    *pStr = *pSub;
-    if(*pSub == '\0') break;//结束.注意结束字符一起copy
+    char c = *pSub;
+    *pStr = c;
+    if(c == 0) break;//结束'\0'.注意结束字符一起copy
     pStr++; pSub++;
   }while(1);
   return pStr;
@@ -167,8 +168,12 @@ char *strcpyR(char *pStr, const char *pSub)
 //此函数替换memcpy(),用于返回的是结束位置的指针
 char *memcpyL(char *pStr, const char *pSub, unsigned short Len)
 {
-  memcpy(pStr, pSub, Len); //直接用
-  return pStr + Len;  
+  //memcpy(pStr, pSub, Len); //直接用
+  //return pStr + Len;  
+  
+  //直接实现用于替换MPLABX 中 memcpy()部分出错问题
+  for(; Len > 0; Len--){  *pStr++ = *pSub++;}
+  return pStr;
 }
 
 //-----------------------字符转小写函数-------------------------------
