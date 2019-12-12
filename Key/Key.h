@@ -22,16 +22,10 @@
 /*******************************************************************************
 					                  内部配置区
 ********************************************************************************/
-//相关应用支持按键时需加入
 #ifdef SUPPORT_QGUI   //使用QGUI时专用实现
   #include "Key_QGUI.h"
-#endif
-
-#ifdef SUPPORT_DAP2324
-  #include "Key_2324.h"
-#endif
-#ifdef SUPPORT_DAP2324UI
-  #include "Key_2324.h"
+#else
+  #include "KeyDef.h"        //用户的私有实现
 #endif
 
 #ifdef SUPPORT_KEY_ID 

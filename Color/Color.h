@@ -28,13 +28,8 @@
 #endif
 
 //-----------------------由产品配色式决定的自定义颜色----------------------------
-#ifdef SUPPORT_DAP2324
-  #include "Color_2324.h"
-#endif
+#include "Color_User.h"   //用户需同时实现Color_User.c
 
-#ifdef SUPPORT_DAP2324UI
-  #include "Color_2324.h"  //复用
-#endif
 
 #endif //_COLOR_H
 
