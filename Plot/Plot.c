@@ -145,8 +145,9 @@ void Plot_Asc_Scale2(u16 x,u16 y,u8 code)
 }
 
 //------------------------绘制字符串->支持GB2312--------------------------
-void Plot_String(u16 x,u16 y, cc8* ptr,u8 length)
+void Plot_String(u16 x,u16 y, cc8* ptr,u8 length)//长度为0时为用strlen代替
 {
+  if(length == 0) length = strlen(ptr);
   cc8 *end = ptr + length;
   for( ;ptr < end; ptr++){
     u8 c = *ptr;
@@ -163,8 +164,9 @@ void Plot_String(u16 x,u16 y, cc8* ptr,u8 length)
 }
 
 //---------------------------绘制asc8*8字符串------------------------------
-void Plot_StrAsc8(u16 x,u16 y,cc8* ptr,u8 length)
+void Plot_StrAsc8(u16 x,u16 y,cc8* ptr,u8 length)//长度为0时为用strlen代替
 {
+  if(length == 0) length = strlen(ptr);
   cc8 *end = ptr + length;
   for( ;ptr < end; ptr++){
     u8 c = *ptr;
@@ -177,8 +179,9 @@ void Plot_StrAsc8(u16 x,u16 y,cc8* ptr,u8 length)
 }
 
 //----------------------绘制字符串->->双倍大小，支持GB2312-----------------------
-void Plot_String_Scale2(u16 x,u16 y, cc8* ptr,u8 length)
+void Plot_String_Scale2(u16 x,u16 y, cc8* ptr,u8 length)//长度为0时为用strlen代替
 {
+  if(length == 0) length = strlen(ptr);
   cc8 *end = ptr + length;
   for( ;ptr < end; ptr++){
     u8 c = *ptr;
