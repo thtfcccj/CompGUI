@@ -37,15 +37,6 @@ void PlotPB_GB2312(unsigned short x,
                    Color_t Pen,            //前景色
                    Color_t Brush);         //背景色
 
-//-------------------带独立前景单背景色绘制一组GB2312字符------------------------
-//不支持背景色透明
-void PlotPB_StrColorP(unsigned short x,
-                      unsigned short y,
-                      const char *pCode,     //字符
-                      const Color_t *pPen,   //前景色
-                      Color_t Brush,         //背景色
-                      unsigned char Len);    //长度
-
 //--------------------------------填充固定长度字符------------------------------
 //不支持背景色透明
 void PlotPB_FullC(unsigned short x,
@@ -54,6 +45,49 @@ void PlotPB_FullC(unsigned short x,
                   const Color_t Pen,   //前景色
                   Color_t Brush,         //背景色
                   unsigned char Len);    //长度
+
+//-------------------带独立前景背景色绘制一组GB2312字符------------------------
+//不支持背景色透明
+void PlotPB_StrColor(unsigned short x,
+                      unsigned short y,
+                      const char *pCode,     //字符
+                      const Color_t *pPen,   //前景色
+                      const Color_t *pBrush, //背景色
+                      unsigned char Len);    //长度
+
+//-------------------带独立前景单背景色绘制一组GB2312字符-----------------------
+//不支持背景色透明
+void PlotPB_StrColorP(unsigned short x,
+                      unsigned short y,
+                      const char *pCode,     //字符
+                      const Color_t *pPen,   //前景色
+                      Color_t Brush,         //背景色
+                      unsigned char Len);    //长度
+
+//-------------------带单前景单背景色绘制一组GB2312字符-------------------------
+//不支持背景色透明
+void PlotPB_StrColorPB(unsigned short x,
+                      unsigned short y,
+                      const char *pCode,     //字符
+                      Color_t Pen,            //前景色
+                      Color_t Brush,         //背景色
+                      unsigned char Len);   //长度
+
+//--------------------------------带样式字推荐结构定义--------------------------
+struct _StyleStr{
+  const char *pCode;     //字符
+  const Color_t *pPen;   //前景色,为NULL时定义为固定前景与背景色
+  const Color_t *pBrush; //背景色,为NULL时定义为固定背景色
+};
+
+//---------------------------一组GB2312样式字绘制------------------------------
+//不支持背景色透明,返回已填充字符长度
+unsigned char PlotPB_StyleStr(unsigned short x,
+                               unsigned short y,
+                               Color_t Pen,          //固定前景色
+                               Color_t Brush,         //固定背景色
+                               const struct _StyleStr *pStyleStr,
+                               unsigned char Len);    //指定填充长度,0自动
 
 
 #endif //_PLOT_H

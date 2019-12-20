@@ -5,7 +5,9 @@
 
 #include "PlotPB.h"
 #include "TftDrv.h"  //显示缓冲区
-#include    "GB2312ZM.h"  //取字模依赖
+#include "GB2312ZM.h"  //取字模依赖
+
+#include <string.h> 
 
 /****************************************************************************
 							               内部函数实现	
@@ -59,6 +61,53 @@ void PlotPB_GB2312(unsigned short x,
   } 
 }
 
+
+
+//--------------------------------填充固定长度字符------------------------------
+//不支持背景色透明
+void PlotPB_FullC(unsigned short x,
+                  unsigned short y,
+                  const char Code,     //字符
+                  const Color_t Pen,   //前景色
+                  Color_t Brush,         //背景色
+                  unsigned char Len)    //长度
+{          
+  for(; Len > 0; Len--, x += 8){
+    PlotPB_Asc(x, y, Code, Pen, Brush);
+  }
+}
+
+//-------------------带独立前景与背景色绘制一组GB2312字符------------------------
+//不支持背景色透明
+void PlotPB_StrColor(unsigned short x,
+                      unsigned short y,
+                      const char *pCode,     //字符
+                      const Color_t *pPen,   //前景色
+                      const Color_t *pBrush, //背景色
+                      unsigned char Len)    //长度
+{
+  if(!Len) Len = strlen(pCode);
+  for(; Len > 0; Len--){
+    char c = *pCode++;
+    //ASCII直接转换
+    if(c < 0x80){
+      PlotPB_Asc(x, y, c, *pPen, *pBrush);
+    }
+    //未检查GB2312正确性！！！！
+    else{//取下半个字
+      PlotPB_GB2312(x, y,((unsigned char)c << 8) | *pCode++, *pPen, *pBrush); //高位在前
+      //后半字增加
+      x += 8;
+      pPen++;
+      pBrush++;      
+    }
+    //半字统一增加
+    x += 8;
+    pPen++;
+    pBrush++;
+  }
+}
+
 //-------------------带独立前景单背景色绘制一组GB2312字符---------------------------
 //不支持背景色透明
 void PlotPB_StrColorP(unsigned short x,
@@ -92,17 +141,63 @@ void PlotPB_StrColorP(unsigned short x,
   }
 }
 
-//--------------------------------填充固定长度字符------------------------------
+//-------------------带单前景单背景色绘制一组GB2312字符-------------------------
 //不支持背景色透明
-void PlotPB_FullC(unsigned short x,
-                  unsigned short y,
-                  const char Code,     //字符
-                  const Color_t Pen,   //前景色
-                  Color_t Brush,         //背景色
-                  unsigned char Len)    //长度
-{          
-  for(; Len > 0; Len--, x += 8){
-    PlotPB_Asc(x, y, Code, Pen, Brush);
+void PlotPB_StrColorPB(unsigned short x,
+                      unsigned short y,
+                      const char *pCode,     //字符
+                      Color_t Pen,            //前景色
+                      Color_t Brush,         //背景色
+                      unsigned char Len)    //长度
+{
+  for(; Len > 0; Len--){
+    char c = *pCode;
+    //ASCII直接转换
+    if(c < 0x80){
+      PlotPB_Asc(x, y, c, Pen, Brush);
+    }
+    //未检查GB2312正确性！！！！
+    else{
+      if(Len == 1) break;//半个汉字结束了，异常 
+      pCode++; //取下半个字
+      PlotPB_GB2312(x, y,
+                    ((unsigned short)c << 8) | *pCode, //高位在前
+                    Pen, Brush); 
+      //后半增加
+      x += 8;
+    }
+    //各变量这里统一增加
+    x += 8;
+    pCode++;
   }
-} 
+}
+
+//---------------------------一组GB2312样式字绘制------------------------------
+//不支持背景色透明,返回已填充字符长度
+unsigned char PlotPB_StyleStr(unsigned short x,
+                               unsigned short y,
+                               Color_t Pen,          //固定前景色
+                               Color_t Brush,         //固定背景色
+                               const struct _StyleStr *pStyleStr,
+                               unsigned char Len)    //指定填充长度,0自动
+{
+  const char *pStr = pStyleStr->pCode;
+  unsigned char StrLen = strlen(pStr);
+  if(Len && (StrLen > Len)) StrLen = Len; //超长了
+  if(pStyleStr->pPen != NULL){//固定前景与背景色
+    PlotPB_StrColorPB(x, y, pStr, Pen, Brush, StrLen);
+  }
+  else if(pStyleStr->pBrush != NULL){//固定背景色
+    PlotPB_StrColorP(x, y, pStr, pStyleStr->pPen, Brush, StrLen);
+  }
+  else if(pStyleStr->pBrush != NULL){//可变前景与背景色
+    PlotPB_StrColor(x, y, pStr, pStyleStr->pPen, pStyleStr->pBrush, StrLen);
+  }
+  return StrLen;
+}
+
+
+
+
+
 
