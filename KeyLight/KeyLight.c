@@ -21,30 +21,44 @@ void KeyLight_Init(void)
   KeyLight_cbInitIo();
 }
 
-//-----------------------------任务函数------------------------------------
-//1ms调用一次,返回负：准备状态，正：下次扫描按键位置
-signed char KeyLight_Task(void)
+//-------------------------中断任务函数------------------------------------
+//放在1ms中断里实现
+void KeyLight_IntTask(void)
 {
-  if(KeyLight.KeyPos & 0x80){//读取周期时
-    //首先读取键值
+  if(KeyLight.KeyPos & 0x80){//读取周期时,读后立即置指示灯
     unsigned char KeyPos = KeyLight.KeyPos & 0x7f;
-    KeyLight.Key[KeyPos] = KeyLight_cbGetKeyVol();
-    //然后置指示灯
-    KeyLight_cbSetKeyScan(-1); //关闭按描扫描
-    KeyLight_cbSetLightScan(KeyLight.LightPos++);
-    if(KeyLight.LightPos >= KEY_LIGHT_L_SCAN_COUNT) KeyLight.LightPos = 0;
-    //最后预置下一键值扫描状态
-    KeyPos++;
-    if(KeyPos >= KEY_LIGHT_L_SCAN_COUNT) KeyPos = 0;
+    //可读取键值时，读键值(否则扫灯)
+    if(KeyPos < KEY_LIGHT_K_SCAN_COUNT){
+      KeyLight.Key[KeyPos] = KeyLight_cbGetKeyVol();
+      KeyLight_cbSetKeyScan(-1); //关闭按描扫描
+      //最后预置下一键值扫描状态
+      KeyPos++;
+    }
     KeyLight.KeyPos = KeyPos;
-    return KeyPos; //有键值了
+    
+    //扫下一灯
+    KeyLight_cbSetLightVol(KeyLight.Light[KeyLight.LightPos]);//先置灯状态
+    KeyLight_cbSetLightScan(KeyLight.LightPos++);//置灯位
+    if(KeyLight.LightPos >= KEY_LIGHT_L_SCAN_COUNT) KeyLight.LightPos = 0;
   }
   else{//准备读周期时
     KeyLight_cbSetLightScan(-1);            //关闭指示灯扫描
     KeyLight_cbSetKeyScan(KeyLight.KeyPos); //开启按键扫描
     KeyLight.KeyPos |= 0x80;                //置下一周期为扫描周期标志
-    return -1;// - KeyLight.LightPos;
   }
 }
+
+//-----------------------------任务函数------------------------------------
+//1ms调用一次,返回0,按键未扫描完，其它扫描完
+signed char KeyLight_Task(void)
+{
+  //扫描完了
+  if((KeyLight.KeyPos & 0x7f) >= KEY_LIGHT_K_SCAN_COUNT){
+    KeyLight.KeyPos = 0;//到准备周期开始扫第一个键值
+    return 1; 
+  }
+  return 0;
+}
+
 
 

@@ -15,10 +15,7 @@
 void KeyLight_cbSetKeyScan(signed char Pos)
 {
   //先关闭扫描所有
-  SetKeySo0();
-  SetKeySo1();
-  SetKeySo2();
-  SetKeySo3();
+  SetKeySo();
   if(Pos < 0) return; ////关闭扫描
   //扫描对应位置
   switch(Pos){

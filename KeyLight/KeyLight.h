@@ -54,6 +54,10 @@ extern struct _KeyLight KeyLight; //直接单例化
 //-------------------------初始化函数---------------------------------------
 void KeyLight_Init(void);
 
+//-------------------------中断任务函数------------------------------------
+//放在1ms中断里实现
+void KeyLight_IntTask(void);
+
 //-----------------------------任务函数------------------------------------
 //1ms调用一次,返回负：准备状态，正：下次扫描按键位置
 signed char KeyLight_Task(void);
@@ -65,7 +69,7 @@ signed char KeyLight_Task(void);
 
 //---------------------------IO初始化-------------------------------
 //void KeyLight_cbInitIo(signed char Pos);
-#define KeyLight_cbInitIo() CfgKlIo()
+#define KeyLight_cbInitIo() CfgKL()
 
 //-----------------------------置按键扫描位置-------------------------------
 //< 0表示关闭扫描，否则还需同时将读按键IO置为输入

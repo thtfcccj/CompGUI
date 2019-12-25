@@ -34,7 +34,7 @@ void Key_Task(void)
   //=======================获得原始键值======================================
   #ifdef SUPPORT_KEY_ID//获得键值ID
     KeySize_t KeyId = Key_cbGetOrgKeyId();
-    if(KeyId != _INVALID_KEY) KeyId = _KeyId2Key[KeyId]; //直接获得键值
+    if(KeyId != _INVALID_KEY) KeyId = Key_cbKeyId2Key(KeyId); //直接获得键值
   #endif
     
   #ifdef SUPPORT_KEY_MASK //获得键值掩码
