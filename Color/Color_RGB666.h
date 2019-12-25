@@ -58,7 +58,7 @@ typedef unsigned char Color_t; //定义颜色类型占位
 #define RGB3300FF    (36 + 06)
 #define RGB333300    (36 + 07) //-----
 #define RGB333333    44//(36 + 08)        
-#define RGB333366    (36 + 09)
+#define RGB333366    45//(36 + 09)
 #define RGB333399    (36 + 10)        
 #define RGB3333CC    (36 + 11) 
 #define RGB3333FF    (36 + 12)//-----
