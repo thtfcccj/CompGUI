@@ -20,7 +20,7 @@ typedef unsigned char Color_t; //定义颜色类型占位
 #define RGB0000CC    (0 + 05)        
 #define RGB0000FF    (0 + 06)
 #define RGB003300    (0 + 07) //-----
-#define RGB003333    (0 + 08)        
+#define RGB003333    (0 + 8)        
 #define RGB003366    (0 + 09)
 #define RGB003399    (0 + 10)        
 #define RGB0033CC    (0 + 11) 
@@ -57,8 +57,8 @@ typedef unsigned char Color_t; //定义颜色类型占位
 #define RGB3300CC    (36 + 05)        
 #define RGB3300FF    (36 + 06)
 #define RGB333300    (36 + 07) //-----
-#define RGB333333    44//(36 + 08)        
-#define RGB333366    45//(36 + 09)
+#define RGB333333    (36 + 8)        
+#define RGB333366    (36 + 09)
 #define RGB333399    (36 + 10)        
 #define RGB3333CC    (36 + 11) 
 #define RGB3333FF    (36 + 12)//-----
@@ -94,7 +94,7 @@ typedef unsigned char Color_t; //定义颜色类型占位
 #define RGB6600CC    (72 + 05)        
 #define RGB6600FF    (72 + 06)
 #define RGB663300    (72 + 07) //-----
-#define RGB663333    (72 + 08)        
+#define RGB663333    (72 + 8)        
 #define RGB663366    (72 + 09)
 #define RGB663399    (72 + 10)        
 #define RGB6633CC    (72 + 11) 
@@ -131,7 +131,7 @@ typedef unsigned char Color_t; //定义颜色类型占位
 #define RGB9900CC    (108 + 05)        
 #define RGB9900FF    (108 + 06)
 #define RGB993300    (108 + 07) //-----
-#define RGB993333    (108 + 08)        
+#define RGB993333    (108 + 8)        
 #define RGB993366    (108 + 09)
 #define RGB993399    (108 + 10)        
 #define RGB9933CC    (108 + 11) 
@@ -168,7 +168,7 @@ typedef unsigned char Color_t; //定义颜色类型占位
 #define RGBCC00CC    (144 + 05)        
 #define RGBCC00FF    (144 + 06)
 #define RGBCC3300    (144 + 07) //-----
-#define RGBCC3333    (144 + 08)        
+#define RGBCC3333    (144 + 8)        
 #define RGBCC3366    (144 + 09)
 #define RGBCC3399    (144 + 10)        
 #define RGBCC33CC    (144 + 11) 
@@ -205,7 +205,7 @@ typedef unsigned char Color_t; //定义颜色类型占位
 #define RGBFF00CC    (180 + 05)        
 #define RGBFF00FF    (180 + 06)
 #define RGBFF3300    (180 + 07) //-----
-#define RGBFF3333    188//(180 + 08)        
+#define RGBFF3333    (180 + 8)        
 #define RGBFF3366    (180 + 09)
 #define RGBFF3399    (180 + 10)        
 #define RGBFF33CC    (180 + 11) 
