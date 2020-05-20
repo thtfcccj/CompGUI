@@ -1,11 +1,11 @@
 /*****************************************************************************
 
-		              KeyLight回调函数-在(IO实现)4键扫1灯扫中的实现
+		              KeyLight回调函数-在(IO实现)4键扫2灯扫中的实现
 
 ******************************************************************************/
 
 #include "KeyLight.h"
-#if KEY_LIGHT_L_SCAN_COUNT == 1
+#if KEY_LIGHT_L_SCAN_COUNT == 2
 
 /*****************************************************************************
                             回调函数接口实现
@@ -32,12 +32,15 @@ void KeyLight_cbSetKeyScan(signed char Pos)
 //< 0表示关闭扫描，需同时将写指示灯IO置为输出
 void KeyLight_cbSetLightScan(signed char Pos)
 {
-  if(Pos < 0){ //关闭扫描
-    SetLightEn();
-    return;
-  }
+  //先关闭扫描所有
+  SetLightEn0();
+  SetLightEn1();
+  if(Pos < 0) return; //关闭扫描
   //扫描对应位置
-  ClrLightEn();
+  switch(Pos){
+    case 0: ClrLightEn0(); break;
+    case 1: ClrLightEn1(); break;
+  }
   OutKlIo(); //置复用IO为输出
 }
 
