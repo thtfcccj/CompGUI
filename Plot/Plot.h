@@ -144,8 +144,8 @@ void Plot_Bmp1(u16 x,u16 y,u16 w,u16 h, uc8 *data, u8 para);
 void Plot_Bmp1Alpha(u16 x,u16 y,u16 w,u16 h, uc8 *data);
 
 //--------------------将对应区域的前景色替换为指定色----------------------------
+//此函数只支持内置显存
 void Plot_ReplacePenColor(u16 x,u16 y,u16 w,u16 h, Color_t newColor);
-
 
 #endif //_PLOT_H
 

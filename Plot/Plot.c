@@ -4,7 +4,7 @@
 ********************************************************************************/
 
 #include "Plot.h"
-#include "TftDrv.h"  //显示缓冲区
+#include "Plot_cbHw.h"//底层操作函数
 #include <string.h>
 
 /*******************************************************************************
@@ -30,7 +30,7 @@ void Plot_CfgPalette(Color_t penColor, Color_t brushColor, u8 brushStyle)
 //横向取模16*16点位
 void Plot_GB2312(u16 x, u16 y, u16 code)
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x];  
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 16, 16);  
   uc8 *mask = GB2312ZM_pGetHZ(code);
   uc8 *endmask = mask + 32; //字模结束位置
   Color_t color = PlotPalette.penColor; //缓冲至寄存器，以加速度
@@ -40,11 +40,13 @@ void Plot_GB2312(u16 x, u16 y, u16 code)
     ZM <<= 8;
     ZM |= *mask++;   //横向右->指向下行横向左
     //填充本行16点颜色
-    for(u16 Mask = 0x8000; Mask > 0; Mask >>= 1, pBuf++){
-      if(ZM & Mask) *pBuf = color;
-      else if(PlotPalette.brushStyle) *pBuf = PlotPalette.brushColor;
-    }  
-    pBuf += (TFT_DRV_H_PIXEl - 16); //下一行填充位置起始
+    for(u16 Mask = 0x8000; Mask > 0; Mask >>= 1){
+      if(ZM & Mask) Plot_cbSetCurColor(pBuf, color);
+      else if(PlotPalette.brushStyle) 
+        Plot_cbSetCurColor(pBuf, PlotPalette.brushColor);
+      else Plot_cbUpdateNext(pBuf);//透明时不更新颜色
+    }
+    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - 16);//下一行填充位置起始
   }  
 }
   
@@ -52,7 +54,7 @@ void Plot_GB2312(u16 x, u16 y, u16 code)
 //横向取模32*32点位
 void Plot_GB2312_Scale2(u16 x,u16 y,u16 code)
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x];  
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 32, 32);  
   uc8 *mask = GB2312ZM_pGetHZ(code);
   uc8 *endmask = mask + 32; //字模结束位置
   Color_t color = PlotPalette.penColor; //缓冲至寄存器，以加速度
@@ -61,19 +63,24 @@ void Plot_GB2312_Scale2(u16 x,u16 y,u16 code)
     u16 ZM = *mask++; //横向左->指向横向右
     ZM <<= 8;
     ZM |= *mask++;   //横向右->指向下行横向左
-    //填充本行16点颜色
-    for(u16 Mask = 0x8000; Mask > 0; Mask >>= 1, pBuf += 2){
-      Color_t fullColor;
-      if(ZM & Mask) fullColor = color;
-      else if(PlotPalette.brushStyle) fullColor = PlotPalette.brushColor;
-      else continue;
-      //x轴,y轴连续填充两次
-      *pBuf = fullColor;
-      *(pBuf + 1) = fullColor;       
-      *(pBuf + TFT_DRV_H_PIXEl) = fullColor; 
-      *(pBuf + (TFT_DRV_H_PIXEl + 1)) = fullColor; 
+    
+    //填充两行32点颜色
+    for(u8 dLine = 0; dLine < 2; dLine++){//行数
+      for(u16 Mask = 0x8000; Mask > 0; Mask >>= 1){
+        Color_t fullColor;
+        if(ZM & Mask) fullColor = color;
+        else if(PlotPalette.brushStyle) fullColor = PlotPalette.brushColor;
+        else{//透明时不更新颜色
+          Plot_cbUpdateNext(pBuf);
+          Plot_cbUpdateNext(pBuf);
+          continue;
+        }
+        //x轴连续填充两次
+        Plot_cbSetCurColor(pBuf, fullColor);
+        Plot_cbSetCurColor(pBuf, fullColor);
+      }
+      pBuf = Plot_cbRlyLocal(pBuf, (TFT_DRV_H_PIXEl - 32));//到下行32点
     }
-    pBuf += (TFT_DRV_H_PIXEl - 32) + TFT_DRV_H_PIXEl;//下下新行填充位置起始
   }
 }
 
@@ -81,7 +88,7 @@ void Plot_GB2312_Scale2(u16 x,u16 y,u16 code)
 //横向取模8*16点位
 void Plot_Asc(u16 x,u16 y, u8 code)
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x];  
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 8, 16);  
   uc8 *mask = GB2312ZM_pGetAsc(code);
   uc8 *endmask = mask + 16; //字模结束位置
   Color_t color = PlotPalette.penColor; //缓冲至寄存器，以加速度
@@ -89,11 +96,13 @@ void Plot_Asc(u16 x,u16 y, u8 code)
   for( ;mask < endmask; ){  
     u8 ZM = *mask++; //本行点阵->指向下行
     //填充本行8点颜色
-    for(u8 Mask = 0x80; Mask > 0; Mask >>= 1, pBuf++){
-      if(ZM & Mask) *pBuf = color;
-      else if(PlotPalette.brushStyle) *pBuf = PlotPalette.brushColor;
+    for(u8 Mask = 0x80; Mask > 0; Mask >>= 1){
+      if(ZM & Mask) Plot_cbSetCurColor(pBuf, color);
+      else if(PlotPalette.brushStyle) 
+        Plot_cbSetCurColor(pBuf, PlotPalette.brushColor);
+      else Plot_cbUpdateNext(pBuf);//透明时不更新颜色
     }  
-    pBuf += (TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
+    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
   }
 }
 
@@ -101,7 +110,7 @@ void Plot_Asc(u16 x,u16 y, u8 code)
 //横向取模8*8点位
 void Plot_Asc8(u16 x,u16 y,u8 code)
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x];  
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 8, 8);  
   uc8 *mask = GB2312ZM_pGetAsc8(code);
   uc8 *endmask = mask + 8; //字模结束位置
   Color_t color = PlotPalette.penColor; //缓冲至寄存器，以加速度
@@ -109,11 +118,13 @@ void Plot_Asc8(u16 x,u16 y,u8 code)
   for( ;mask < endmask; ){  
     u8 ZM = *mask++; //本行点阵->指向下行
     //填充本行8点颜色
-    for(u8 Mask = 0x80; Mask > 0; Mask >>= 1, pBuf++){
-      if(ZM & Mask) *pBuf = color;
-      else if(PlotPalette.brushStyle) *pBuf = PlotPalette.brushColor;
+    for(u8 Mask = 0x80; Mask > 0; Mask >>= 1){
+      if(ZM & Mask) Plot_cbSetCurColor(pBuf, color);
+      else if(PlotPalette.brushStyle) 
+        Plot_cbSetCurColor(pBuf, PlotPalette.brushColor);
+      else Plot_cbUpdateNext(pBuf);//透明时不更新颜色
     }  
-    pBuf += (TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
+    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
   }
 }
 
@@ -121,26 +132,30 @@ void Plot_Asc8(u16 x,u16 y,u8 code)
 //横向取模16*32点位
 void Plot_Asc_Scale2(u16 x,u16 y,u8 code)
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x];  
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 16, 32);  
   uc8 *mask = GB2312ZM_pGetAsc(code);
   uc8 *endmask = mask + 16; //字模结束位置
   Color_t color = PlotPalette.penColor; //缓冲至寄存器，以加速度
   
   for( ;mask < endmask; ){  
     u8 ZM = *mask++; //本行点阵->指向下行
-    //填充本行16点颜色
-    for(u8 Mask = 0x80; Mask > 0; Mask >>= 1, pBuf += 2){
-      Color_t fullColor;
-      if(ZM & Mask) fullColor = color;
-      else if(PlotPalette.brushStyle) fullColor = PlotPalette.brushColor;
-      else continue;
-      //x轴,y轴连续填充两次
-      *pBuf = fullColor;
-      *(pBuf + 1) = fullColor;       
-      *(pBuf + TFT_DRV_H_PIXEl) = fullColor; 
-      *(pBuf + (TFT_DRV_H_PIXEl + 1)) = fullColor; 
+    //填充两行16点颜色
+    for(u8 dLine = 0; dLine < 2; dLine++){//行数
+      for(u8 Mask = 0x80; Mask > 0; Mask >>= 1){
+        Color_t fullColor;
+        if(ZM & Mask) fullColor = color;
+        else if(PlotPalette.brushStyle) fullColor = PlotPalette.brushColor;
+        else{//透明时不更新颜色
+          Plot_cbUpdateNext(pBuf);
+          Plot_cbUpdateNext(pBuf);
+          continue;
+        }
+        //x轴连续填充两次
+        Plot_cbSetCurColor(pBuf, fullColor);
+        Plot_cbSetCurColor(pBuf, fullColor); 
+      }
+      pBuf = Plot_cbRlyLocal(pBuf, (TFT_DRV_H_PIXEl - 16));//到下行16点
     }
-    pBuf += (TFT_DRV_H_PIXEl - 16) + TFT_DRV_H_PIXEl;//下下新行填充位置起始
   }
 }
 
@@ -210,21 +225,24 @@ void Plot_Clear(void)
 //----------------------------绘制单像素水平直线---------------------------------
 void Plot_LineH(u16 x,u16 y,u16 length)
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x]; 
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, length, 1); 
   Color_t *pEndBuf = pBuf + length; 
   Color_t color = PlotPalette.penColor; //缓冲至寄存器，以加速度
   
-  for(; pBuf < pEndBuf; pBuf++) *pBuf = color;  
+  for(; pBuf < pEndBuf;) Plot_cbSetCurColor(pBuf, color);
 }
 
 //----------------------------绘制单像素垂直直线---------------------------------
 void Plot_LineV(u16 x,u16 y,u16 high)
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x]; 
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 1, high); 
   Color_t *pEndBuf = pBuf + high * TFT_DRV_H_PIXEl;  
   Color_t color = PlotPalette.penColor; //缓冲至寄存器，以加速度
   
-  for(; pBuf < pEndBuf; pBuf+= TFT_DRV_H_PIXEl) *pBuf = color;  
+  for(; pBuf < pEndBuf;){
+    Plot_cbSetCurColor(pBuf, color);
+    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - 1); //下一行
+  }
 }
 
 //----------------------------绘制单像素直线---------------------------------
@@ -240,13 +258,14 @@ void Plot_Line(u16 x,u16 y,u16 length,
 //画刷颜色，即背景色
 void Plot_FullRect(u16 x,u16 y,u16 w,u16 h)
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x]; 
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, w, h); 
   Color_t color = PlotPalette.brushColor; //缓冲至寄存器，以加速度
   
   for(; h > 0; h--){
     Color_t *pEndBuf = pBuf + w; 
-    for(; pBuf < pEndBuf; pBuf++) *pBuf = color;
-    pBuf += (TFT_DRV_H_PIXEl - w);
+    for(; pBuf < pEndBuf;) Plot_cbSetCurColor(pBuf, color);
+
+    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - w); //下一行
   }
 }
 
@@ -284,7 +303,7 @@ void Plot_IndexBmp(u16 x,u16 y,u16 w,u16 h,
                    u8 mapSize,     //调色板大小
                    Color_t *map)  //调色板查找表,查找表结果为0时表示透明
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x];     //显示缓冲行起始
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, w, h);     //显示缓冲行起始
   
   u8 bitSize = _GetBitSize(mapSize);     //占位
   u32 dataBitSize = w * h * bitSize;     //以位计算的数据矩阵大小  
@@ -315,13 +334,13 @@ void Plot_IndexBmp(u16 x,u16 y,u16 w,u16 h,
     
     //2. 填充色
     Color_t color = *(map + indexColor);
-    if(color) *pBuf = color; //非透明时填充
+    if(color) Plot_cbSetCurColor(pBuf, color); //非透明时填充并移至下一点
+    else Plot_cbUpdateNext(pBuf);
     
-    //3. 移至下个填充，并进行行判断
-    pBuf++;
+    //3. 下一点判断
     if(pBuf >= pLineEndBuf){//一行结束了
+      pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - w); //下一行
       pLineEndBuf += TFT_DRV_H_PIXEl; //下行结束
-      pBuf = pLineEndBuf - w;  //下行起始
     }
   }
 }
@@ -350,17 +369,18 @@ void Plot_Bmp1(u16 x,u16 y,u16 w,u16 h, uc8 *data, u8 para)
 }
 
 //--------------------将对应区域的前景色替换为指定色----------------------------
+//此函数只支持内置显存
 void Plot_ReplacePenColor(u16 x,u16 y,u16 w,u16 h, Color_t newColor)
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x]; 
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, w, h); 
   Color_t color = PlotPalette.brushColor; //缓冲至寄存器，以加速度
   
   for(; h > 0; h--){
     Color_t *pEndBuf = pBuf + w; 
-    for(; pBuf < pEndBuf; pBuf++){
-      if(*pBuf != color) *pBuf = newColor;
+    for(; pBuf < pEndBuf;){
+      if(*pBuf != color) Plot_cbSetCurColor(pBuf, color);
     }
-    pBuf += (TFT_DRV_H_PIXEl - w);
+    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - w); //下一行
   }
 }
 
