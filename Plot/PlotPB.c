@@ -4,7 +4,7 @@
 ********************************************************************************/
 
 #include "PlotPB.h"
-#include "TftDrv.h"  //显示缓冲区
+#include "Plot_cbHw.h"//底层操作函数
 #include "GB2312ZM.h"  //取字模依赖
 
 #include <string.h> 
@@ -21,18 +21,18 @@ void PlotPB_Asc(unsigned short x,
                 Color_t Pen,           //前景色
                 Color_t Brush)         //背景色
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x]; 
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 8, 16);  
   const unsigned char *mask = GB2312ZM_pGetAsc(Code);
   const unsigned char *endmask = mask + 16; //字模结束位置
   
   for( ;mask < endmask; ){  
     unsigned char ZM = *mask++; //本行点阵->指向下行
     //填充本行8点颜色
-    for(unsigned char Mask = 0x80; Mask > 0; Mask >>= 1, pBuf++){
-      if(ZM & Mask) *pBuf = Pen;
-      else  *pBuf = Brush;
+    for(unsigned char Mask = 0x80; Mask > 0; Mask >>= 1){
+      if(ZM & Mask) Plot_cbSetCurColor(pBuf, Pen);
+      else Plot_cbSetCurColor(pBuf, Brush);
     }  
-    pBuf += (TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
+    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
   }
 }
 
@@ -44,7 +44,7 @@ void PlotPB_GB2312(unsigned short x,
                    Color_t Pen,            //前景色
                    Color_t Brush)           //背景色
 {
-  Color_t *pBuf = &TftDrv_Buf[y][x];  
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 16, 16);  
   const unsigned char *mask = GB2312ZM_pGetHZ(Code);
   const unsigned char *endmask = mask + 32; //字模结束位置
 
@@ -53,15 +53,13 @@ void PlotPB_GB2312(unsigned short x,
     ZM <<= 8;
     ZM |= *mask++;   //横向右->指向下行横向左
     //填充本行16点颜色
-    for(unsigned short Mask = 0x8000; Mask > 0; Mask >>= 1, pBuf++){
-      if(ZM & Mask) *pBuf = Pen;
-      else  *pBuf = Brush;
+    for(unsigned short Mask = 0x8000; Mask > 0; Mask >>= 1){
+      if(ZM & Mask) Plot_cbSetCurColor(pBuf, Pen);
+      else Plot_cbSetCurColor(pBuf, Brush);
     }
-    pBuf += (TFT_DRV_H_PIXEl - 16); //下一行填充位置起始
+    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 16);//下一行填充位置起始
   } 
 }
-
-
 
 //--------------------------------填充固定长度字符------------------------------
 //不支持背景色透明

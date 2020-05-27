@@ -18,7 +18,7 @@
 
 //指示灯扫描总数, >= 1; <= 127
 #ifndef KEY_LIGHT_L_SCAN_COUNT     
-  #define KEY_LIGHT_L_SCAN_COUNT   2   
+  #define KEY_LIGHT_L_SCAN_COUNT   1   
 #endif
 
 //按键扫描总数, >= 1; ,获取键值是多键模式时，应<=4;否则 <= 127

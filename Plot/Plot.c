@@ -1,6 +1,7 @@
 /*******************************************************************************
                          绘图库标准接口
 此接口依赖于TftDrv提供的帧缓冲
+为适用不同显示屏，定义显示屏左上角为0点，各函数遵循从左到右(写完)，从上到下写原则。
 ********************************************************************************/
 
 #include "Plot.h"
@@ -46,7 +47,7 @@ void Plot_GB2312(u16 x, u16 y, u16 code)
         Plot_cbSetCurColor(pBuf, PlotPalette.brushColor);
       else Plot_cbUpdateNext(pBuf);//透明时不更新颜色
     }
-    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - 16);//下一行填充位置起始
+    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 16);//下一行填充位置起始
   }  
 }
   
@@ -79,7 +80,7 @@ void Plot_GB2312_Scale2(u16 x,u16 y,u16 code)
         Plot_cbSetCurColor(pBuf, fullColor);
         Plot_cbSetCurColor(pBuf, fullColor);
       }
-      pBuf = Plot_cbRlyLocal(pBuf, (TFT_DRV_H_PIXEl - 32));//到下行32点
+      pBuf = Plot_cbToNextRowStart(pBuf, (TFT_DRV_H_PIXEl - 32));//到下行32点
     }
   }
 }
@@ -102,7 +103,7 @@ void Plot_Asc(u16 x,u16 y, u8 code)
         Plot_cbSetCurColor(pBuf, PlotPalette.brushColor);
       else Plot_cbUpdateNext(pBuf);//透明时不更新颜色
     }  
-    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
+    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
   }
 }
 
@@ -124,7 +125,7 @@ void Plot_Asc8(u16 x,u16 y,u8 code)
         Plot_cbSetCurColor(pBuf, PlotPalette.brushColor);
       else Plot_cbUpdateNext(pBuf);//透明时不更新颜色
     }  
-    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
+    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
   }
 }
 
@@ -154,7 +155,7 @@ void Plot_Asc_Scale2(u16 x,u16 y,u8 code)
         Plot_cbSetCurColor(pBuf, fullColor);
         Plot_cbSetCurColor(pBuf, fullColor); 
       }
-      pBuf = Plot_cbRlyLocal(pBuf, (TFT_DRV_H_PIXEl - 16));//到下行16点
+      pBuf = Plot_cbToNextRowStart(pBuf, (TFT_DRV_H_PIXEl - 16));//到下行16点
     }
   }
 }
@@ -241,7 +242,7 @@ void Plot_LineV(u16 x,u16 y,u16 high)
   
   for(; pBuf < pEndBuf;){
     Plot_cbSetCurColor(pBuf, color);
-    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - 1); //下一行
+    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 1); //下一行
   }
 }
 
@@ -265,7 +266,7 @@ void Plot_FullRect(u16 x,u16 y,u16 w,u16 h)
     Color_t *pEndBuf = pBuf + w; 
     for(; pBuf < pEndBuf;) Plot_cbSetCurColor(pBuf, color);
 
-    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - w); //下一行
+    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
   }
 }
 
@@ -339,7 +340,7 @@ void Plot_IndexBmp(u16 x,u16 y,u16 w,u16 h,
     
     //3. 下一点判断
     if(pBuf >= pLineEndBuf){//一行结束了
-      pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - w); //下一行
+      pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
       pLineEndBuf += TFT_DRV_H_PIXEl; //下行结束
     }
   }
@@ -378,9 +379,9 @@ void Plot_ReplacePenColor(u16 x,u16 y,u16 w,u16 h, Color_t newColor)
   for(; h > 0; h--){
     Color_t *pEndBuf = pBuf + w; 
     for(; pBuf < pEndBuf;){
-      if(*pBuf != color) Plot_cbSetCurColor(pBuf, color);
+      if(*pBuf != color) Plot_cbSetCurColor(pBuf, color);//*pBuf只能操作内置显存！！
     }
-    pBuf = Plot_cbRlyLocal(pBuf, TFT_DRV_H_PIXEl - w); //下一行
+    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
   }
 }
 
