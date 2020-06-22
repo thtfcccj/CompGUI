@@ -6,8 +6,7 @@
 #include <string.h>
 #include "Plot_cbHw.h"
 #include "TFTDbi.h"
-#include "TFTCmd_043.h"
-
+#include "TFTCmd_035.h"
 
 /*******************************************************************************
                               外部显存实现

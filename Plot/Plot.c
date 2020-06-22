@@ -379,11 +379,14 @@ void Plot_ReplacePenColor(u16 x,u16 y,u16 w,u16 h, Color_t newColor)
   for(; h > 0; h--){
     Color_t *pEndBuf = pBuf + w; 
     for(; pBuf < pEndBuf;){
-      if(*pBuf != color) Plot_cbSetCurColor(pBuf, color);//*pBuf只能操作内置显存！！
+      if(*pBuf != color) Plot_cbSetCurColor(pBuf, newColor);//*pBuf只能操作内置显存！！
+      else Plot_cbUpdateNext(pBuf);
     }
     pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
   }
 }
+
+
 
 
 
