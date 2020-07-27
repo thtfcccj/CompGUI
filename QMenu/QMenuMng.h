@@ -110,11 +110,11 @@ unsigned char QMenuMng_GetId(struct _QMenuMng *pMng);
 
 //-------------------------得到调整前蝗值-----------------------
 //signed short QMenuMng_GetOrgAdj(struct _QMenuMng *pMng);
-#define QMenuMng_GetOrgAdj() (QMenuMng.OrgAdj)
+#define QMenuMng_GetOrgAdj(mng) ((mng)->OrgAdj)
 
 //-------------------------得到当前调整位------------------------
 //unsigned char QMenuMng_GetWrIndex(struct _QMenuMng *pMng);
-#define QMenuMng_GetWrIndex() (QMenuMng.WrIndex)
+#define QMenuMng_GetWrIndex(mng) ((mng)->WrIndex)
 
 //------------------判断是否在实时显示状态------------------------
 signed char QMenuMng_IsRealDisp(struct _QMenuMng *pMng);
