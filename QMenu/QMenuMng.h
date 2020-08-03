@@ -89,15 +89,20 @@ void QMenuMng_Exit(struct _QMenuMng *pMng);
 
 //----------------------接键处理函数--------------------------
 //形参Key按位定义为:
-#define QMENU_MNG_KEY_MASK   0x0f  //键值定义掩码
+#define QMENU_MNG_KEY_MASK   0x0f  //键值定义掩码:
 #define QMENU_MNG_KEY_MODE   0x70  //按键方式掩码
 #define QMENU_MNG_KEY_UP     0x01  //上键
 #define QMENU_MNG_KEY_DOWN   0x02  //下键
 #define QMENU_MNG_KEY_ENTER  0x04  //进入键
 #define QMENU_MNG_KEY_EXIT   0x08  //退出键
+
+#define QMENU_MNG_KEY_TYPE_MASK 0x70//按键类型：
 #define QMENU_MNG_KEY_SHORT  0x10  //短按键
 #define QMENU_MNG_KEY_LONG   0x20  //长按键
 #define QMENU_MNG_KEY_KEEP   0x40  //保持按键(按住不放)
+
+#define QMENU_MNG_KEY_USER   0x80  //用户保留功能(内部不使用)
+
 //void QMenuMng_Key(unsigned char Key);
 #define QMenuMng_Key(pmng, key) do{(pmng)->Key = key;}while(0)
 
