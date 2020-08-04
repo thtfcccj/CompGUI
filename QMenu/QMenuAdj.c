@@ -42,7 +42,7 @@ void QMenuAdj_SetValue(struct _QMenuMng *pMng, signed short Value)
 
 //----------------------显示数值函数---------------------------
 //仅更新数值显示,不负责小数点,闪动位驱动
-#include "LedNum4.h" //LedNum4_Disp();
+
 void QMenuAdj_DispVol(struct _QMenuMng *pMng)
 {
   unsigned char Flag = pMng->WrMaxPos; //小数点
@@ -53,7 +53,8 @@ void QMenuAdj_DispVol(struct _QMenuMng *pMng)
     if((pMng->Layer == QMENU_LAYER_WR) && !(pMng->Para.Cfg & QMENU_CFG_REAL_REFRESH))
       Flag |= 0x08;      
   }
-  
-  LedNum4_Disp(pMng->Para.Adj, Flag);  //调用辅助函数
+  //专用送显
+  QMenuMng_cbDispNum4(pMng->Flag & QMENU_MNG_ID_MASK,
+                      pMng->Para.Adj, Flag);
 }
 

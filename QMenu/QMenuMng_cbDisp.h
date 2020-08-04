@@ -29,6 +29,19 @@ MngId可进行区分
   #include "LedSign.h"
 #endif
 
+//---------------------------4位数送显---------------------------------
+#ifndef SUPPORT_QMENU_MNG_SINGLETON //多例化时
+  //靠右显示,为负时显示负号,指定小数点
+  void QMenuMng_cbDispNum4(unsigned char MngId,
+                           signed short Data,//要送显的数
+                           //0~1bit最少显示位数-1(不含符号位)-1 2bit:是否带符号显示,
+                           //3bit:带符号时,正时是否填充0    4~7bit小数点显示掩码
+                           unsigned char Flag);
+#else //单例化时
+  #include "LedNum4.h" //LedNum4_Disp();
+  #define QMenuMng_cbDispNum4(mngId, vol, flag)  LedNum4_Disp(vol, flag)
+#endif
+
 //---------------------由调整位置得到显示位置掩码----------------------
 //QMenuMng归定最右侧位置为Pos0,通过此转换为对应数码管或小数点位置
 //unsigned char QMenuMng_cbPos2Mask(unsigned char Pos);
