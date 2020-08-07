@@ -61,6 +61,23 @@ void QMenuAdjLogic_Key(struct _QMenuMng *pMng, unsigned char Key);
 //----------------------显示更新函数---------------------------
 void QMenuAdjLogic_Disp(struct _QMenuMng *pMng);
 
+/***********************************************************************
+		                    子模块-十六进制调节模式
+***********************************************************************/
+#ifdef SUPPORT_QMENU_ADJ_HEX //可选子模式
+
+//-----------------------初始化函数---------------------------
+void QMenuAdjHex_Init(struct _QMenuMng *pMng);
+
+//-------------------------按键处理函数---------------------------
+void QMenuAdjHex_Key(struct _QMenuMng *pMng, unsigned char Key);
+
+//----------------------显示更新函数---------------------------
+void QMenuAdjHex_Disp(struct _QMenuMng *pMng);
+
+#endif
+
+
 #endif
 
 

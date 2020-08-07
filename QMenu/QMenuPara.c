@@ -15,3 +15,10 @@ void QMenuPara_Init(struct _QMenuPara *pPara)
   pPara->Cfg = 0;     //主配置字,每菜单项均需配置,见定义
   pPara->Cfg2 = 0;    //附加配置字,不需要时为0,见定义
 }
+
+//-------------------QMenuPara->SetData空函数----------------------
+//菜单项为只读或无事件需要处理时可调用
+void QMenuPara_SetNULL(struct _QMenuPara *pPara, unsigned char Type)
+{
+
+}

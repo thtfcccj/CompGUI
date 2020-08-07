@@ -9,6 +9,8 @@
 
 #include <string.h>
 
+//struct _QMenuMng Mng;  //占位测试
+
 /***********************************************************************
                     相关函数实现
 ***********************************************************************/
@@ -87,6 +89,11 @@ void QMenuMng_UpdateDisp(struct _QMenuMng *pMng)
       QMenuAdjAll_Disp(pMng); 
       QMenuMng_cbSetDotDisp(MngId, pMng->Para.Cfg2 & QMENU_CFG2_DOT_MASK);//手动打上小数点
       break;
+    #ifdef SUPPORT_QMENU_ADJ_HEX
+      case QMENU_CFG_ADJ_HEX: QMenuAdjHex_Disp(pMng); 
+      QMenuMng_cbSetDotDisp(MngId, pMng->Para.Cfg2 & QMENU_CFG2_DOT_MASK);//手动打上小数点
+      break;
+    #endif
     //case QMENU_CFG_ADJ_LOGIC:
     default:QMenuAdjLogic_Disp(pMng); break;
     }
@@ -115,6 +122,9 @@ void _EnterRdWr(struct _QMenuMng *pMng, unsigned char IsWr)
     case QMENU_CFG_ADJ_BIT: QMenuAdjBit_Init(pMng); break;
     case QMENU_CFG_ADJ_CMD: pMng->OrgAdj++;//让命令模式可写
     case QMENU_CFG_ADJ_ALL: QMenuAdjAll_Init(pMng); break;
+    #ifdef SUPPORT_QMENU_ADJ_HEX
+      case QMENU_CFG_ADJ_HEX: QMenuAdjHex_Init(pMng); break;
+    #endif
     //case QMENU_CFG_ADJ_LOGIC:
     default:QMenuAdjLogic_Init(pMng); break;
   }
@@ -210,7 +220,7 @@ void _RdKey(struct _QMenuMng *pMng, unsigned char Key)
   }
   else{ //上下键
     //将逻辑时的上下键解释为翻页显示
-    if((pMng->Para.Cfg & QMENU_CFG_ADJ_MASK) >= QMENU_CFG_ADJ_LOGIC){
+    if((pMng->Para.Cfg & QMENU_CFG_ADJ_MASK) == QMENU_CFG_ADJ_LOGIC){
       QMenuAdjLogic_RdPageKey(pMng);
     }
   }
@@ -237,6 +247,10 @@ void _WrKey(struct _QMenuMng *pMng, unsigned char Key)
     case QMENU_CFG_ADJ_BIT: QMenuAdjBit_Key(pMng, Key); break;
     case QMENU_CFG_ADJ_ALL: QMenuAdjAll_Key(pMng, Key); break;
     case QMENU_CFG_ADJ_LOGIC: QMenuAdjLogic_Key(pMng, Key); break;
+    #ifdef SUPPORT_QMENU_ADJ_HEX
+      case QMENU_CFG_ADJ_HEX: QMenuAdjHex_Key(pMng, Key); break;
+    #endif
+    
     //case QMENU_CFG_ADJ_CMD:      //左右按键无效
     default: break;
   }

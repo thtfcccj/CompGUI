@@ -7,6 +7,13 @@
 #define	_QMENU_PARA_H
 
 /***********************************************************************
+		                           可选配置
+***********************************************************************/
+
+//是否支持十六位调整模式,全局里定义
+//#define SUPPORT_QMENU_ADJ_HEX 
+
+/***********************************************************************
 		             与用户交互的参数接口
 ***********************************************************************/
 struct _QMenuPara{
@@ -25,11 +32,15 @@ struct _QMenuPara{
 #define QMENU_CFG_REAL_REFRESH 0x08    //菜单在显示或调整时，均实时刷新(显负允许时不显正号)
 //注:只读时允许SetData函数为空.若不为空,在用户长按确认键后将调用此函数后退出
 
-#define QMENU_CFG_ADJ_MASK   0x03  //菜单项的调整方式:
+#define QMENU_CFG_ADJ_MASK   0x07  //菜单项的调整方式:
 #define QMENU_CFG_ADJ_BIT    0x00  //按位调节模式
 #define QMENU_CFG_ADJ_ALL    0x01  //整体调节模式(最大最小值与当前值相同时不调整数值)
 #define QMENU_CFG_ADJ_LOGIC  0x02  //逻辑数调节模式
 #define QMENU_CFG_ADJ_CMD    0x03  //命令模式,仅允许按确认键
+
+#ifdef SUPPORT_QMENU_ADJ_HEX
+  #define QMENU_CFG_ADJ_HEX    0x04  //十六进制, 调节模式,即每位范围0~F
+#endif
 
 //附加配置字定义为:
 #define QMENU_CFG2_QUIT       0x80    //调整完成后退出菜单标志
@@ -69,8 +80,12 @@ struct _QMenuFun{
 /***********************************************************************
 		                       相关函数接口
 ***********************************************************************/
-//-------------------QMenuPara初始化函数--------------------------
+//----------------------QMenuPara初始化函数--------------------------
 void QMenuPara_Init(struct _QMenuPara *pPara);
+
+//----------------------QMenuPara->SetData空函数----------------------
+//菜单项为只读或无事件需要处理时可调用
+void QMenuPara_SetNULL(struct _QMenuPara *pPara, unsigned char Type);
 
 
 #endif

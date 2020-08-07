@@ -48,6 +48,7 @@ MngId可进行区分
 #define QMenuMng_cbPos2Mask(mngId, pos) (1 << pos)
 
 //---------------------由十进制数值得到段码显示----------------------
+//SUPPORT_QMENU_ADJ_HEX 被定义时，需实现到15
 #ifndef SUPPORT_QMENU_MNG_SINGLETON //多例化时
 unsigned char QMenuMng_cbVol2Seg(unsigned char MngId, unsigned char Vol);
 #else //单例化时
