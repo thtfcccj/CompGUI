@@ -1,7 +1,8 @@
 /***********************************************************************
 
 		             菜单系统之4位数码管时-与用户的交互接口
-/由参数与函数接口共同组成:
+//由参数与函数接口共同组成
+//用户仅能通过此接口，与菜单管理器联系
 ***********************************************************************/
 #ifndef _QMENU_PARA_H
 #define	_QMENU_PARA_H
@@ -30,16 +31,18 @@ struct _QMenuPara{
 #define QMENU_CFG_REAL_RD   0x20    //菜单显示时需实时读数刷新
 #define QMENU_CFG_REAL_WR   0x10    //菜单调整时需实时写刷新,在数值改变时即更新]
 #define QMENU_CFG_REAL_REFRESH 0x08    //菜单在显示或调整时，均实时刷新(显负允许时不显正号)
-//注:只读时允许SetData函数为空.若不为空,在用户长按确认键后将调用此函数后退出
 
 #define QMENU_CFG_ADJ_MASK   0x07  //菜单项的调整方式:
 #define QMENU_CFG_ADJ_BIT    0x00  //按位调节模式
 #define QMENU_CFG_ADJ_ALL    0x01  //整体调节模式(最大最小值与当前值相同时不调整数值)
 #define QMENU_CFG_ADJ_LOGIC  0x02  //逻辑数调节模式
 #define QMENU_CFG_ADJ_CMD    0x03  //命令模式,仅允许按确认键
+#define QMENU_CFG_ADJ_PASS   0x04  //密码输入模式，同按位调节，但
+                                   //最后一位切换时会调用一次WrData(QMENU_CFG_WR)
+                                   //写函数实现中比较密码对了可退出菜单并进行相应处理
 
 #ifdef SUPPORT_QMENU_ADJ_HEX
-  #define QMENU_CFG_ADJ_HEX    0x04  //十六进制, 调节模式,即每位范围0~F
+  #define QMENU_CFG_ADJ_HEX    0x05  //十六进制, 调节模式,即每位范围0~F
 #endif
 
 //附加配置字定义为:
@@ -87,5 +90,14 @@ void QMenuPara_Init(struct _QMenuPara *pPara);
 //菜单项为只读或无事件需要处理时可调用
 void QMenuPara_SetNULL(struct _QMenuPara *pPara, unsigned char Type);
 
+/***********************************************************************
+		                       相关回调函数
+***********************************************************************/
+
+//---------------------DataSet实现中置退出菜单函数-----------------------
+//仅可用于应用层在实现SetData函数的内部调用
+void QMenuPara_cbQuitMenuInSet(struct _QMenuPara *pPara);
 
 #endif
+
+

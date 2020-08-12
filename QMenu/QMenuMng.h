@@ -45,7 +45,7 @@ struct _QMenuMng{
    //用户挂接的菜单查找表,首位为查找表大小. 可使用此机制实现权限访问
   const unsigned char *pLUT;  
   //用户交互接口阵列
-  const struct _QMenuFun *pFunAry;
+  const struct _QMenuFun *const *pFunAry;
   //正在调整的参数
   struct _QMenuPara Para;  
 };
@@ -72,10 +72,11 @@ void QMenuMng_UpdateDisp(struct _QMenuMng *pMng);
 
 //----------------------进入菜单初始化函数--------------------------
 //由主界面准备进入菜单时调用挂接的菜单查找表并完成内部初始化
-//若pLUT != NULL 则还需调用QMenuMng_Key(QMENU_MNG_KEY_ENTER)正式进入
+//pLUT: pFunAry的查找表项，首位为个数，后跟对应项ID
+//还需调用QMenuMng_Key(QMENU_MNG_KEY_ENTER)才能正式进入菜单
 void QMenuMng_EnterInit(struct _QMenuMng *pMng,
-                        const struct _QMenuFun *pFunAry,//不能为NULL
-                        const unsigned char *pLUT);
+                        const struct _QMenuFun *const *pFunAry,//不能为NULL
+                        const unsigned char *pLUT);//不能为NULL
 
 //----------------------退出菜单函数--------------------------
 //在菜单状态,外部强制退出菜单时调用此函数
@@ -123,6 +124,11 @@ unsigned char QMenuMng_GetId(struct _QMenuMng *pMng);
 
 //------------------判断是否在实时显示状态------------------------
 signed char QMenuMng_IsRealDisp(struct _QMenuMng *pMng);
+
+//---------------------------得到在调整值------------------------
+//正在调整值在菜单未切换时不会改变
+//unsigned short QMenuMng_GetAdj(struct _QMenuMng *pMng);
+#define QMenuMng_GetAdj(mng) ((mng)->Para.Adj)
 
 /***********************************************************************
                     回调函数
