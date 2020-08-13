@@ -20,41 +20,41 @@
 //        d->4
 
 //------------------------------段码定义-----------------------------
-#define LED_SIGN_0     0x3F
-#define LED_SIGN_1     0x06
-#define LED_SIGN_2     0x5B
-#define LED_SIGN_3     0x4F
+#define LED_SIGN_0     0xFC
+#define LED_SIGN_1     0x60
+#define LED_SIGN_2     0xDA
+#define LED_SIGN_3     0xF2
 #define LED_SIGN_4     0x66
-#define LED_SIGN_5     0x6D
-#define LED_SIGN_6     0x7D
-#define LED_SIGN_7     0x07
-#define LED_SIGN_8     0x7F
-#define LED_SIGN_9     0x6F
-#define LED_SIGN__     0x40
+#define LED_SIGN_5     0xB6
+#define LED_SIGN_6     0xBE
+#define LED_SIGN_7     0xE0
+#define LED_SIGN_8     0xFE
+#define LED_SIGN_9     0xF6
+#define LED_SIGN__     0x10
 
-#define LED_SIGN_A     0x77
-#define LED_SIGN_B     0x7C
-#define LED_SIGN_C     0x39
-#define LED_SIGN_D     0x5E
-#define LED_SIGN_E     0x79
-#define LED_SIGN_F     0x71
-#define LED_SIGN_G     0x3D
-#define LED_SIGN_H     0x76
-#define LED_SIGN_h     0x74  //小写h
-#define LED_SIGN_I     0x30
-#define LED_SIGN_J     0x0E
-#define LED_SIGN_L     0x38
-#define LED_SIGN_N     0x54
-#define LED_SIGN_n     0x37  //小写n
-#define LED_SIGN_O     0x5C
-#define LED_SIGN_P     0x73
-#define LED_SIGN_Q     0x67
-#define LED_SIGN_R     0x31
-#define LED_SIGN_S     0x6D
-#define LED_SIGN_T     0x78
-#define LED_SIGN_U     0x3E
-#define LED_SIGN_Y     0x6E
-#define LED_SIGN_Z     0x5B
+#define LED_SIGN_A     0xEE
+#define LED_SIGN_B     0x3E
+#define LED_SIGN_C     0x9C
+#define LED_SIGN_D     0x7A
+#define LED_SIGN_E     0x9E
+#define LED_SIGN_F     0x8E
+#define LED_SIGN_G     0xBC
+#define LED_SIGN_H     0x6E
+#define LED_SIGN_h     0x2E  //小写h
+#define LED_SIGN_I     0x0C
+#define LED_SIGN_J     0x70
+#define LED_SIGN_L     0x1C
+#define LED_SIGN_N     0xEC
+#define LED_SIGN_n     0x2A  //小写n
+#define LED_SIGN_O     0x3A
+#define LED_SIGN_P     0xCE
+#define LED_SIGN_Q     0xE6
+#define LED_SIGN_R     0x0A
+#define LED_SIGN_S     0xB6
+#define LED_SIGN_T     0x1E
+#define LED_SIGN_U     0x7C
+#define LED_SIGN_Y     0x76
+#define LED_SIGN_Z     0xDA
 
 #define LED_SIGN_DOT   0x80    //段码上的小数点位置
 
