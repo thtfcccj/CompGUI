@@ -30,7 +30,7 @@
 #define LED_SIGN_7     0xE0
 #define LED_SIGN_8     0xFE
 #define LED_SIGN_9     0xF6
-#define LED_SIGN__     0x10
+#define LED_SIGN__     0x02
 
 #define LED_SIGN_A     0xEE
 #define LED_SIGN_B     0x3E
