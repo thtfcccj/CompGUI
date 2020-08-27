@@ -15,6 +15,16 @@ void TftDbi_WrDataS(unsigned short Data)
   TftDbi_WrData(Data & 0xff);
 }
 
+//-------------------------------读首个带命令数据-------------------------------
+//丢弃首个数据，返回Byte
+unsigned char TftDbi_RdDataCmd(unsigned char Cmd)
+{
+  TftDbi_CsDis();
+  TftDbi_WrCmd(Cmd);
+  TftDbi_RdData(); //首个无效
+  return TftDbi_RdData();
+}
+
 //----------------------------------读U16数据函数-------------------------------
 //先高后低顺序
 unsigned short TftDbi_RdDataS(void)
