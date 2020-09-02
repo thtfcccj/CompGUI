@@ -95,7 +95,7 @@ void QMenuPara_SetNULL(struct _QMenuPara *pPara, unsigned char Type);
 ***********************************************************************/
 
 //---------------------DataSet实现中置退出菜单函数-----------------------
-//仅可用于应用层在实现SetData函数的内部调用
+//仅可用于应用层在实现SetData函数的内部调用(内部不调用退出回调函数以防止嵌套)
 void QMenuPara_cbQuitMenuInSet(struct _QMenuPara *pPara);
 
 #endif
