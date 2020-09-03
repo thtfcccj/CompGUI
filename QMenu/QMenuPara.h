@@ -46,8 +46,8 @@ struct _QMenuPara{
 #endif
 
 //附加配置字定义为:
-#define QMENU_CFG2_QUIT       0x80    //调整完成后退出菜单标志
-#define QMENU_CFG2_QUIT_SAVE  0x40    //响应退出时保存,可于不重要参数的保存,或恢复现场
+#define QMENU_CFG2_QUIT_SAVE  0x80    //响应退出时保存,可于不重要参数的保存,或恢复现场
+#define QMENU_CFG2_QUIT       0x40    //调整完成后退出菜单标志
 #define	QMENU_CFG2_NEGATIVE   0x20    //调整项为负数显示或调整,即可显示负值
 
 #define	QMENU_CFG2_DOT_MASK   0x0f    //最低4位用于控制显示及调整时的小数点位显示
