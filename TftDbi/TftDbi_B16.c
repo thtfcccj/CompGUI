@@ -6,7 +6,7 @@
 
 #include "TftDbi.h"
 #include "TftDbi_B16.h"
-#include "Delay.h"
+#include "Color.h"
 
 //--------------------------------硬件初始化函数------------------------------
 void TftDbi_HwInit(void)
@@ -14,9 +14,9 @@ void TftDbi_HwInit(void)
   TftDbi_cbIoCfg();
   //硬件复位
   TftDbi_cbStartRst();
-  Delay_Us(TftDbi_cbGetUs_HwRst());
+  TftDbi_cbDelayHwRst();
   TftDbi_cbEndRst();
-  Delay_Ms(TftDbi_cbGetMs_HwRstWait());  //等待复位完成
+  TftDbi_cbDelayHwRstFinal();  //等待复位完成
   //初始化寄存器不在此
 }
 
@@ -67,7 +67,7 @@ unsigned char TftDbi_RdData(void)
   TftDbi_cbRdClkL();  //低电平时准备数据 
   TftDbi_cbDelayTrdl();//等待数据及输出稳定
   unsigned char Data = TftDbi_cbDbRd(); //上升沿之前读出数据  
-  TftDbi_cbWrClkH();  //上升告知读回来了
+  TftDbi_cbRdClkH();  //上升告知读回来了
   
   TftDbi_cbDelayTrdh(); //为下个数据准备
   //注：不恢复以支持连续读回，在写指令时会将DB转为输出状态。
@@ -75,11 +75,38 @@ unsigned char TftDbi_RdData(void)
   return Data;
 }
 
+extern unsigned long  Color_RGB666_2RGB[];
+
+
+//-----------------------------直接写16位颜色-----------------------------------
+//底层实现相关
+void TftDbi_B16_WrColor(unsigned short ColorB16)
+{
+  TftDbi_cbWrClkL();  //低电平时入数据
+  TftDbi_cbDbWr(ColorB16);  
+  TftDbi_cbDelayTwrl();//等待数据稳定
+  TftDbi_cbWrClkH();  //上升沿锁存
+  TftDbi_cbDelayTwrh();  //等待锁存 
+}
+
 //-----------------------------------写颜色函数--------------------------------
 void TftDbi_WrColor(Color_t Color)
 {
   TftDbi_cbWrClkL();  //低电平时入数据
-  TftDbi_cbDbWr(Color);  
+  //索引色转换
+  #ifdef SUPPORT_COLOR_RGB666
+    unsigned long RGB24;
+    if(Color < COLOR_COUNT) RGB24 = Color_RGB666_2RGB[Color];
+    else RGB24 = *(TftDrv_pcbGetUserCLut() + (Color - COLOR_COUNT));
+    //转换为565模式
+    unsigned short Data = ((RGB24 >> 3) & 0x001f) |            /*B*/
+                            ((RGB24 >> (8 + 2 - 5)) & 0x07E0) |  /*G*/
+                            ((RGB24 >> (16 + 3 - 11)) & 0xF800); /*R*/
+  #else 
+    unsigned short Data = Color;
+  #endif
+  
+  TftDbi_cbDbWr(Data);  
   TftDbi_cbDelayTwrl();//等待数据稳定
   TftDbi_cbWrClkH();  //上升沿锁存
   TftDbi_cbDelayTwrh();  //等待锁存  

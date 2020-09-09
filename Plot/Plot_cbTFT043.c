@@ -18,15 +18,15 @@
 Color_t * Plot_cbAbsLocalArea(unsigned short x, unsigned short y, 
                               unsigned short w, unsigned short h)
 {
-  //设置y轴范围
+  //设置x轴范围
   TftDbi_WrCmd(TFT_CMD_WR_CASET);
-  TftDbi_WrDataS(y);
-  TftDbi_WrDataS(h); 
-  TftDbi_CsDis();  
-  //设置x辆范围
-  TftDbi_WrCmd(TFT_CMD_WR_PASET);
   TftDbi_WrDataS(x);
-  TftDbi_WrDataS(w); 
+  TftDbi_WrDataS(x+w-1); 
+  TftDbi_CsDis();  
+  //设置y轴范围
+  TftDbi_WrCmd(TFT_CMD_WR_PASET);
+  TftDbi_WrDataS(y);
+  TftDbi_WrDataS(y+h-1); 
   //预置为连续写状态准备写入数据   
   TftDbi_WrCmd(TFT_CMD_WR_RAM);  
   return (Color_t *)NULL;
