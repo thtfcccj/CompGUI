@@ -30,7 +30,7 @@
 #define LED_SIGN_7     0xE0
 #define LED_SIGN_8     0xFE
 #define LED_SIGN_9     0xF6
-#define LED_SIGN__     0x10
+#define LED_SIGN__     0x02
 
 #define LED_SIGN_A     0xEE
 #define LED_SIGN_B     0x3E
@@ -56,6 +56,6 @@
 #define LED_SIGN_Y     0x76
 #define LED_SIGN_Z     0xDA
 
-#define LED_SIGN_DOT   0x80    //段码上的小数点位置
+#define LED_SIGN_DOT   0x01    //段码上的小数点位置
 
 #endif //__LED_SIGN_76543210_H

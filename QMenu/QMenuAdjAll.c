@@ -27,7 +27,7 @@ void QMenuAdjAll_Disp(struct _QMenuMng *pMng)
 {
   QMenuAdj_DispVol(pMng); //先更新值显示
   if(pMng->Layer == QMENU_LAYER_WR){//写状态置全部调整位闪动
-    QMenuMng_cbSetSegFlash(pMng->Flag & QMENU_MNG_ID_MASK, 0xff);
+    QMenuMng_cbSetSegFlash(pMng->Flag & QMENU_MNG_ID_MASK, 0x0f);
     QMenuMng_cbSetDotFlash(pMng->Flag & QMENU_MNG_ID_MASK,
                            pMng->Para.Cfg2 & 0x0f);//将小数点一起置为闪动
   }

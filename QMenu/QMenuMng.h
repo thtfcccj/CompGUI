@@ -67,7 +67,7 @@ struct _QMenuMng{
 void QMenuMng_Task(struct _QMenuMng *pMng);
 
 //----------------------更新菜单显示函数--------------------------
-//调用此函数主动更新界面显示
+//调用此函数主动更新界面显示(点动，不可周期调用)
 void QMenuMng_UpdateDisp(struct _QMenuMng *pMng);
 
 //----------------------进入菜单初始化函数--------------------------
@@ -78,15 +78,14 @@ void QMenuMng_EnterInit(struct _QMenuMng *pMng,
                         const struct _QMenuFun *const *pFunAry,//不能为NULL
                         const unsigned char *pLUT);//不能为NULL
 
-//----------------------退出菜单函数--------------------------
+//----------------------------退出菜单函数--------------------------
 //在菜单状态,外部强制退出菜单时调用此函数
 void QMenuMng_Exit(struct _QMenuMng *pMng);
                   
-//---------------------初始化函数----------------------------
+//----------------------------初始化函数----------------------------
 //开机时调用
-//void QMenuMng_Init(struct _QMenuMng *pMng,
-//                     const struct _QMenuFun *pFunAry,//不能为NULL
-#define QMenuMng_Init(mng) do{QMenuMng_EnterInit(mng,funAry,NULL);}while(0)
+void QMenuMng_Init(struct _QMenuMng *pMng,
+                    unsigned char Id); //分配的ID号
 
 //----------------------接键处理函数--------------------------
 //形参Key按位定义为:

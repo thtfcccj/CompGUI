@@ -41,9 +41,11 @@ void QMenuMng_Task(struct _QMenuMng *pMng)
 //由主界面准备进入菜单时调用挂接的菜单查找表并完成内部初始化
 void QMenuMng_EnterInit(struct _QMenuMng *pMng, 
                         const struct _QMenuFun * const *pFunAry,//不能为NULL
-                        const unsigned char *pLUT)
+                        const unsigned char *pLUT)//不能为NULL
 {
+  unsigned char Id = pMng->Flag & QMENU_MNG_ID_MASK;
   memset(pMng, 0, sizeof(struct _QMenuMng));
+  pMng->Flag = Id;
   pMng->pFunAry = pFunAry;
   pMng->pLUT = pLUT;
 }
@@ -286,7 +288,7 @@ void QMenuMng_FastTask(struct _QMenuMng *pMng)
   case QMENU_LAYER_NULL: //不在菜单系统
     if(Key != QMENU_MNG_KEY_ENTER) break; //
     pMng->Layer++; //进入
-    Key = 0;//继续往下处理
+    Key = 0;//继续往下初始化处理,但非按键
   case QMENU_LAYER_SEL: //菜单系统选择:不响应长按键
     _SelKey(pMng, Key);
     break;
@@ -319,6 +321,14 @@ void QMenuMng_Exit(struct _QMenuMng *pMng)
   }
   QMenuMng_cbExitNotify(pMng->Flag & QMENU_MNG_ID_MASK); //最后退出菜单系统通报
 }  
+//----------------------------初始化函数----------------------------
+//开机时调用
+void QMenuMng_Init(struct _QMenuMng *pMng,
+                    unsigned char Id) //分配的ID号
+{
+  memset(pMng, 0, sizeof(struct _QMenuMng));
+  pMng->Flag = Id;
+}
 
 /***********************************************************************
 		                       QMenuPara相关回调函数实现
@@ -326,7 +336,7 @@ void QMenuMng_Exit(struct _QMenuMng *pMng)
 #include "struct.h" //struct_get()
 
 //---------------------DataSet实现中置退出菜单函数-----------------------
-//仅可用于应用层在实现SetData函数的内部调用
+//仅可用于应用层在实现SetData函数的内部调用(内部不调用退出回调函数以防止嵌套)
 void QMenuPara_cbQuitMenuInSet(struct _QMenuPara *pPara)
 {
   struct _QMenuMng *pMng = struct_get(pPara, struct _QMenuMng, Para);
