@@ -92,8 +92,9 @@ static void _HwCfg_ST7796S(void)
   TftDbi_WrCmd(0xf0);
   TftDbi_WrData(0x69);
 
-  TftDbi_WrCmd(0X3A);//TFT_DCOL_PIXEL_16BIT
+  TftDbi_WrCmd(0x3A);//TFT_DCOL_PIXEL_16BIT
   TftDbi_WrData(0x55);//‘101’ = 16bit/pixel
+  TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
 }
 
 //----------------------------HX8357硬件配置----------------------------------
@@ -119,7 +120,7 @@ signed char TftDbi_Init(void)
 
   //根据读取的设备ID配置显示屏
   if(Id == 0x6B)_HwCfg_ST7796S();
-  else _HwCfg_HX8357();
+  else _HwCfg_ST7796S();
   
   //最后IC无关初始化
   TftDbi_WrCmd(TFT_CMD_WR_SLPOUT);
@@ -128,8 +129,8 @@ signed char TftDbi_Init(void)
   TftDbi_WrCmd(TFT_CMD_WR_DISPON); //Display ON
   //先清屏为黑色
   TftDbi_WrCmd(TFT_CMD_WR_RAM); 
-  for(unsigned long Ram = 0; Ram < (320 * 480); Ram++){
-    TftDbi_B16_WrColor(0xffff);
+  for(unsigned long Ram = 0; Ram < (TFT_DRV_H_PIXEl * TFT_DRV_V_PIXEl); Ram++){
+    TftDbi_B16_WrColor(0);
   }
   
   return 0;

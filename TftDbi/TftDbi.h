@@ -114,7 +114,7 @@ void TftDbi_cbHwInit(void);
 
 //----------------------得到用户颜色查找表----------------------------------
 #if defined(SUPPORT_COLOR_RGB666) || defined(SUPPORT_COLOR_INDEX)
-  const unsigned long *TftDrv_pcbGetUserCLut(void); //表
+  const RgbHwType *TftDrv_pcbGetUserCLut(void); //表
   unsigned char TftDrv_cbGetUserCLutSize(void); //表大小,< (255 - COLOR_COUNT)
 #endif
 

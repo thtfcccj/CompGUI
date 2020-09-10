@@ -55,11 +55,11 @@ void TftDbi_B16_WrColor(unsigned short ColorB16);
 #define TftDbi_cbDelayHwRst()      (DelayMs(1))            //硬件复位时间 ILI9488>=10us
 #define TftDbi_cbDelayHwRstFinal() (DelayMs(50))           //硬件复位后等待 ILI9488>=5ms
 
-#define TftDbi_cbDelayTchw()   do{}while(0)     //片选取消时间,ILI9488>=0ns 
-#define TftDbi_cbDelayTcs()   do{DelayUs(1); }while(0)     //片选建立时间,ILI9488>=15,读id45,读FM355
+#define TftDbi_cbDelayTchw()   do{}while(0)                 //片选取消时间,ILI9488>=0ns 
+#define TftDbi_cbDelayTcs()   do{DelayUs(0); }while(0)     //片选建立时间,ILI9488>=15,读id45,读FM355
 
-#define TftDbi_cbDelayTwrl()   do{DelayUs(1); }while(0)     //写低电平保持时间,ILI9488>=15ns 
-#define TftDbi_cbDelayTwrh()   do{DelayUs(1); }while(0)      //写高电平保持时间,ILI9488>=15ns
+#define TftDbi_cbDelayTwrl()   do{DelayUs(0); }while(0)     //写低电平保持时间,ILI9488>=15ns 
+#define TftDbi_cbDelayTwrh()   do{DelayUs(0); }while(0)      //写高电平保持时间,ILI9488>=15ns
 
 #define TftDbi_cbDelayTrdl()   do{DelayUs(5); }while(0)     //读低电平保持时间,ILI9488>=45~160ns 
 #define TftDbi_cbDelayTrdh()   do{DelayUs(10); }while(0)     //读高电平保持时间,ILI9488>=90~450ns

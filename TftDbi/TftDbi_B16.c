@@ -75,7 +75,7 @@ unsigned char TftDbi_RdData(void)
   return Data;
 }
 
-extern unsigned long  Color_RGB666_2RGB[];
+extern unsigned short  Color_RGB666_2RGB[];
 
 
 //-----------------------------直接写16位颜色-----------------------------------
@@ -93,17 +93,12 @@ void TftDbi_B16_WrColor(unsigned short ColorB16)
 void TftDbi_WrColor(Color_t Color)
 {
   TftDbi_cbWrClkL();  //低电平时入数据
-  //索引色转换
-  #ifdef SUPPORT_COLOR_RGB666
-    unsigned long RGB24;
-    if(Color < COLOR_COUNT) RGB24 = Color_RGB666_2RGB[Color];
-    else RGB24 = *(TftDrv_pcbGetUserCLut() + (Color - COLOR_COUNT));
-    //转换为565模式
-    unsigned short Data = ((RGB24 >> 3) & 0x001f) |            /*B*/
-                            ((RGB24 >> (8 + 2 - 5)) & 0x07E0) |  /*G*/
-                            ((RGB24 >> (16 + 3 - 11)) & 0xF800); /*R*/
+  unsigned short Data;
+  #ifdef SUPPORT_COLOR_RGB666//索引色转换
+    if(Color < COLOR_COUNT) Data = Color_RGB666_2RGB[Color];
+    else Data = *(TftDrv_pcbGetUserCLut() + (Color - COLOR_COUNT));
   #else 
-    unsigned short Data = Color;
+    Data = Color; //默认为是RGB565
   #endif
   
   TftDbi_cbDbWr(Data);  
@@ -119,12 +114,18 @@ Color_t TftDbi_RdColor(void)
   TftDbi_cbDbIn();   //默放为输出状态需转换为输入
   TftDbi_cbRdClkL();  //低电平时准备数据 
   TftDbi_cbDelayTrdl();//等待数据及输出稳定
-  Color_t Data = TftDbi_cbDbRd(); //上升沿之前读出数据  
+  unsigned short Data = TftDbi_cbDbRd(); //上升沿之前读出数据  
   TftDbi_cbWrClkH();  //上升告知读回来了
   
   //TftDbi_cbDelayTrdh(); //为下个数据准备
   //注：不恢复以支持连续读回，在写指令时会将DB转为输出状态。
-
+  
+  //索引色转换
+  #ifdef SUPPORT_COLOR_RGB666
+    Color_t Color = Data; //略
+  #else
+    Color_t Color = Data; //默认为是RGB565
+  #endif
   return Data;
 }
 

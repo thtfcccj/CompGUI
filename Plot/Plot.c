@@ -335,7 +335,7 @@ void Plot_IndexBmp(u16 x,u16 y,u16 w,u16 h,
     
     //2. 填充色
     Color_t color = *(map + indexColor);
-    if(color) Plot_cbSetCurColor(pBuf, color); //非透明时填充并移至下一点
+    if(color < (Color_t)-1) Plot_cbSetCurColor(pBuf, color); //非透明时填充并移至下一点
     else Plot_cbUpdateNext(pBuf);
     
     //3. 下一点判断
@@ -353,7 +353,7 @@ void Plot_Bmp1(u16 x,u16 y,u16 w,u16 h, uc8 *data, u8 para)
 {
   Color_t map[2];//调色板查找表  
   if(para & 0x01){//透明时
-    map[0] = 0;//背景色设为0时表示透明
+    map[0] = (Color_t)-1;//背景色为极值时表示透明
     map[1] = PlotPalette.penColor;  //用前景色
   }
   else{//不透明时

@@ -30,6 +30,20 @@
 //-----------------------由产品配色式决定的自定义颜色----------------------------
 #include "Color_User.h"   //用户需同时实现Color_User.c
 
+//--------------------------RGB全色域与硬件支持色域相关--------------------------
+#ifdef SUPPORT_RGB_HW_565  //565模式(全局里定义)
+  //硬件颜色类型定义
+  #define RgbHwType  unsigned short 
+  //RGB全色域转换为硬件支持类型
+  #define RGB2Hw(RGB24) ((((unsigned long)RGB24 >> 3) & 0x001f) |\
+                         (((unsigned long)RGB24 >> (8 + 2 - 5)) & 0x07E0) |\
+                         (((unsigned long)RGB24 >> (16 + 3 - 11)) & 0xF800))
+#else  //全色域模式
+  //硬件颜色类型定义
+  #define RgbHwType  unsigned long
+  //RGB全色域转换为硬件支持类型
+  #define RGB2Hw(RGB24)  (RGB24)
+#endif
 
 #endif //_COLOR_H
 

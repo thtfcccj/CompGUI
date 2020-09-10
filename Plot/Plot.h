@@ -35,7 +35,7 @@ struct _PlotPalette{
 };
 
 //画刷样式定义为:
-#define PLOT_BRUSH_STYLE_NULL     0  //无画刷,即不需要背景填充,可获得透明效果
+#define PLOT_BRUSH_STYLE_NULL     0  //无画刷,即不需要背景填充,可获得透明效果(依赖硬件支持)
 #define PLOT_BRUSH_STYLE_FULL     1  //以全部背景色填充
 //#define PLOT_BRUSH_STYLE_DOT    2  //以点状背景色填充
 
