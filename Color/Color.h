@@ -35,9 +35,9 @@
   //硬件颜色类型定义
   #define RgbHwType  unsigned short 
   //RGB全色域转换为硬件支持类型
-  #define RGB2Hw(RGB24) ((((unsigned long)RGB24 >> 3) & 0x001f) |\
-                         (((unsigned long)RGB24 >> (8 + 2 - 5)) & 0x07E0) |\
-                         (((unsigned long)RGB24 >> (16 + 3 - 11)) & 0xF800))
+  #define RGB2Hw(RGB24) ((((unsigned long)(RGB24) >> 3) & 0x001f) |\
+                         (((unsigned long)(RGB24) >> (8 + 2 - 5)) & 0x07E0) |\
+                         (((unsigned long)(RGB24) >> (16 + 3 - 11)) & 0xF800))
 #else  //全色域模式
   //硬件颜色类型定义
   #define RgbHwType  unsigned long
