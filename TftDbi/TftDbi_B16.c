@@ -75,14 +75,18 @@ unsigned char TftDbi_RdData(void)
   return Data;
 }
 
-extern unsigned short  Color_RGB666_2RGB[];
+//------------------------------色系转换外部声明--------------------------------
+//RGB666索引色转换为显示屏用色系表
+extern unsigned short  Color_RGB666_2RGB[]; 
 
 //-----------------------------------写颜色函数--------------------------------
 void TftDbi_WrColor(Color_t Color)
 {
   TftDbi_cbWrClkL();  //低电平时入数据
   unsigned short Data;
-  #ifdef SUPPORT_COLOR_RGB666//索引色转换
+  
+  //系统用色系转换为显示屏用色系
+  #ifdef SUPPORT_COLOR_RGB666//索引色
     if(Color < COLOR_COUNT) Data = Color_RGB666_2RGB[Color];
     else Data = *(TftDrv_pcbGetUserCLut() + (Color - COLOR_COUNT));
   #else 
@@ -108,13 +112,13 @@ Color_t TftDbi_RdColor(void)
   //TftDbi_cbDelayTrdh(); //为下个数据准备
   //注：不恢复以支持连续读回，在写指令时会将DB转为输出状态。
   
-  //索引色转换
+  //显示屏用色系转换为系统用色系
   #ifdef SUPPORT_COLOR_RGB666
     Color_t Color = Data; //略
   #else
     Color_t Color = Data; //默认与定义一一对应
   #endif
-  return Data;
+  return Color;
 }
 
 
