@@ -7,13 +7,13 @@
 #include "TftCmd_035.h"
 #include "Delay.h"
 
-#include "TftDbi_B16.h" //暂实现相关：初始为16位总线时实现
+#include "TftDbi.h" //驱动与硬件无关
 
 /*******************************************************************************
                            硬件相关函数
 ********************************************************************************/
 
-//----------------------------ST7796S硬件配置----------------------------------
+//----------------------------ST7796S启动代码----------------------------------
 static void _HwCfg_ST7796S(void)
 {
   //参考：https://wenku.baidu.com/view/e3d53f4c4a73f242336c1eb91a37f111f0850d5d.html
@@ -97,12 +97,210 @@ static void _HwCfg_ST7796S(void)
   TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
 }
 
-//----------------------------HX8357硬件配置----------------------------------
+//----------------------------HX8357 启动代码----------------------------------
 static void _HwCfg_HX8357(void)
 {
   //参考: https://wenku.baidu.com/view/dd4f6885f46527d3250ce091.html  
+  //      https://bbs.csdn.net/topics/380164559
+  DelayMs(10);
+  TftDbi_WrCmd(0x11);//Sleep Out 
+  DelayMs(120); 
 
+  TftDbi_WrCmd(0xEE);//Set EQ 
+  TftDbi_WrData(0x02); 
+  TftDbi_WrData(0x01); 
+  TftDbi_WrData(0x02); 
+  TftDbi_WrData(0x01); 
+
+  TftDbi_WrCmd(0xED);//Set DIR TIM 
+  TftDbi_WrData(0x00); 
+  TftDbi_WrData(0x00); 
+  TftDbi_WrData(0x9A); 
+  TftDbi_WrData(0x9A); 
+  TftDbi_WrData(0x9B); 
+  TftDbi_WrData(0x9B); 
+  TftDbi_WrData(0x00); 
+  TftDbi_WrData(0x00); 
+  TftDbi_WrData(0x00); 
+  TftDbi_WrData(0x00); 
+  TftDbi_WrData(0xAE); 
+  TftDbi_WrData(0xAE); 
+  TftDbi_WrData(0x01); 
+  TftDbi_WrData(0xA2); 
+  TftDbi_WrData(0x00); 
+
+  TftDbi_WrCmd(0xB4);//Set RM, DM 
+  TftDbi_WrData(0x00);// 
+
+  TftDbi_WrCmd(0xC0);  //Set Panel Driving
+  TftDbi_WrData(0x10); //REV SM GS
+  TftDbi_WrData(0x3B); // NL[5:0] 
+  TftDbi_WrData(0x00); //SCN[6:0] 
+  TftDbi_WrData(0x02); //NDL 0 PTS[2:0]
+  TftDbi_WrData(0x11); //PTG ISC[3:0] 
+
+  TftDbi_WrCmd(0xC1);//
+  TftDbi_WrData(0x10);//line inversion
+
+  TftDbi_WrCmd(0xC8);//Set Gamma 
+  TftDbi_WrData(0x00);  //KP1,KP0
+  TftDbi_WrData(0x46);  //KP3,KP2
+  TftDbi_WrData(0x12);  //KP5,KP4
+  TftDbi_WrData(0x20);  //RP1,RP0
+  TftDbi_WrData(0x0c);  //VRP0  01
+  TftDbi_WrData(0x00);  //VRP1
+  TftDbi_WrData(0x56);  //KN1,KN0
+  TftDbi_WrData(0x12);  //KN3,KN2
+  TftDbi_WrData(0x67);  //KN5,KN4
+  TftDbi_WrData(0x02);  //RN1,RN0
+  TftDbi_WrData(0x00);  //VRN0
+  TftDbi_WrData(0x0c);  //VRN1  01
+
+  TftDbi_WrCmd(0xD0);//Set Power 
+  TftDbi_WrData(0x44);//DDVDH :5.28
+  TftDbi_WrData(0x42); // BT VGH:15.84    VGL:-7.92
+  TftDbi_WrData(0x06);//VREG1  4.625V
+
+  TftDbi_WrCmd(0xD1);//Set VCOM 
+  TftDbi_WrData(0x43); //VCOMH
+  TftDbi_WrData(0x16);
+
+  TftDbi_WrCmd(0xD2); 
+  TftDbi_WrData(0x04); 
+  TftDbi_WrData(0x22); //12
+
+  TftDbi_WrCmd(0xD3); 
+  TftDbi_WrData(0x04); 
+  TftDbi_WrData(0x12); 
+
+  TftDbi_WrCmd(0xD4); 
+  TftDbi_WrData(0x07); 
+  TftDbi_WrData(0x12); 
+
+  TftDbi_WrCmd(0xE9); //Set Panel
+  TftDbi_WrData(0x00);
+
+  TftDbi_WrCmd(0xC5); //Set Frame rate
+  TftDbi_WrData(0x08);  //61.51Hz
+
+  TftDbi_WrCmd(0X0036);
+  TftDbi_WrData(0X000a);
+
+  TftDbi_WrCmd(0X003A);
+  TftDbi_WrData(0X0005);
+
+  TftDbi_WrCmd(0X002A);
+  TftDbi_WrData(0X0000);
+  TftDbi_WrData(0X0000);
+  TftDbi_WrData(0X0001);
+  TftDbi_WrData(0X003F);
+
+  TftDbi_WrCmd(0X002B);
+  TftDbi_WrData(0X0000);
+  TftDbi_WrData(0X0000);
+  TftDbi_WrData(0X0001);
+  TftDbi_WrData(0X00E0);
+  DelayMs(120);
+
+
+  TftDbi_WrCmd(0x35);
+  TftDbi_WrData(0x00);//TE ON
+
+  //TftDbi_WrCmd(0x29); //Display On
+  //DelayMs(5);
 }
+
+//----------------------------ILI9488 启动代码----------------------------------
+static void _HwCfg_ILI9488(void)
+{
+  //参考：https://bbs.elecfans.com/jishu_476163_1_1.html
+  TftDbi_WrCmd(0xE0); 
+  TftDbi_WrData(0x00); 
+  TftDbi_WrData(0x0E); 
+  TftDbi_WrData(0x15); 
+  TftDbi_WrData(0x06); 
+  TftDbi_WrData(0x13); 
+  TftDbi_WrData(0x09); 
+  TftDbi_WrData(0x3A); 
+  TftDbi_WrData(0xAC); 
+  TftDbi_WrData(0x4F); 
+  TftDbi_WrData(0x05); 
+  TftDbi_WrData(0x0D); 
+  TftDbi_WrData(0x0B); 
+  TftDbi_WrData(0x33); 
+  TftDbi_WrData(0x3B); 
+  TftDbi_WrData(0x0F);  
+   
+  TftDbi_WrCmd(0xE1); 
+  TftDbi_WrData(0x00); 
+  TftDbi_WrData(0x0E); 
+  TftDbi_WrData(0x16); 
+  TftDbi_WrData(0x05); 
+  TftDbi_WrData(0x13); 
+  TftDbi_WrData(0x08); 
+  TftDbi_WrData(0x3B); 
+  TftDbi_WrData(0x9A); 
+  TftDbi_WrData(0x50); 
+  TftDbi_WrData(0x0A); 
+  TftDbi_WrData(0x13); 
+  TftDbi_WrData(0x0F); 
+  TftDbi_WrData(0x31); 
+  TftDbi_WrData(0x36); 
+  TftDbi_WrData(0x0F); 
+
+  TftDbi_WrCmd(0xC0); 
+  TftDbi_WrData(0x10); 
+  TftDbi_WrData(0x10); 
+   
+  TftDbi_WrCmd(0xC1); 
+  TftDbi_WrData(0x44); 
+
+  TftDbi_WrCmd(0xC5); 
+  TftDbi_WrData(0x00); 
+  TftDbi_WrData(0x10); 
+  TftDbi_WrData(0x80); 
+
+  TftDbi_WrCmd(0x36); 
+  TftDbi_WrData(0x08); 
+
+  TftDbi_WrCmd(0x3A);//Interface Mode Control
+  TftDbi_WrData(0x55);
+
+  TftDbi_WrCmd(0x21); 
+
+  TftDbi_WrCmd(0XB0);  //Interface Mode Control  
+  TftDbi_WrData(0x00); 
+  TftDbi_WrCmd(0xB1);   //Frame rate 70HZ  
+  TftDbi_WrData(0xB0); 
+
+  TftDbi_WrCmd(0xB4); 
+  TftDbi_WrData(0x02);   
+  TftDbi_WrCmd(0xB6); //RGB/MCU Interface Control
+  TftDbi_WrData(0x02); 
+  TftDbi_WrData(0x22); 
+
+  TftDbi_WrCmd(0xB7); 
+  TftDbi_WrData(0xC6); 
+
+  TftDbi_WrCmd(0XBE);
+  TftDbi_WrData(0x00);
+  TftDbi_WrData(0x04);
+
+  TftDbi_WrCmd(0xE9); 
+  TftDbi_WrData(0x00);
+   
+  TftDbi_WrCmd(0XF7);    
+  TftDbi_WrData(0xA9); 
+  TftDbi_WrData(0x51); 
+  TftDbi_WrData(0x2C); 
+  TftDbi_WrData(0x82);
+
+  TftDbi_WrCmd(0x11);
+
+  DelayMs(5);
+  TftDbi_WrCmd(0x21);  //开启反显示
+}
+
 /*******************************************************************************
                            相关函数-普通函数实现
 ********************************************************************************/
@@ -115,12 +313,14 @@ signed char TftDbi_Init(void)
   TftDbi_HwInit();
   
   //读软件识别信息,回4个参数: 1无效 2工厂ID 3驱动版本 4驱动ID
-  unsigned char Id = TftDbi_RdDataCmd(TFT_CMD_RD_DIDIF);
+  unsigned char ManufacturerID = TftDbi_RdDataCmd(TFT_CMD_RD_DIDIF);
   //unsigned short Info = TftDbi_RdDataS();
 
   //根据读取的设备ID配置显示屏
-  if(Id == 0x6B)_HwCfg_ST7796S();
-  else _HwCfg_ST7796S();
+  if(ManufacturerID == 0x6B)_HwCfg_ST7796S();     //0x6b:实测
+  else if(ManufacturerID == 0x11)_HwCfg_HX8357();//0x11随手写
+  else if(ManufacturerID == 0x22)_HwCfg_ILI9488();//0x22随手写  
+  else _HwCfg_ST7796S(); //默认驱动
   
   //最后IC无关初始化
   TftDbi_WrCmd(TFT_CMD_WR_SLPOUT);
@@ -130,7 +330,7 @@ signed char TftDbi_Init(void)
   //先清屏为黑色
   TftDbi_WrCmd(TFT_CMD_WR_RAM); 
   for(unsigned long Ram = 0; Ram < (TFT_DRV_H_PIXEl * TFT_DRV_V_PIXEl); Ram++){
-    TftDbi_B16_WrColor(0);
+    TftDbi_WrColor(0);
   }
   
   return 0;

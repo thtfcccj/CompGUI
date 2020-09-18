@@ -77,18 +77,6 @@ unsigned char TftDbi_RdData(void)
 
 extern unsigned short  Color_RGB666_2RGB[];
 
-
-//-----------------------------直接写16位颜色-----------------------------------
-//底层实现相关
-void TftDbi_B16_WrColor(unsigned short ColorB16)
-{
-  TftDbi_cbWrClkL();  //低电平时入数据
-  TftDbi_cbDbWr(ColorB16);  
-  TftDbi_cbDelayTwrl();//等待数据稳定
-  TftDbi_cbWrClkH();  //上升沿锁存
-  TftDbi_cbDelayTwrh();  //等待锁存 
-}
-
 //-----------------------------------写颜色函数--------------------------------
 void TftDbi_WrColor(Color_t Color)
 {
@@ -98,7 +86,7 @@ void TftDbi_WrColor(Color_t Color)
     if(Color < COLOR_COUNT) Data = Color_RGB666_2RGB[Color];
     else Data = *(TftDrv_pcbGetUserCLut() + (Color - COLOR_COUNT));
   #else 
-    Data = Color; //默认为是RGB565
+    Data = Color; //默认与定义一一对应
   #endif
   
   TftDbi_cbDbWr(Data);  
@@ -124,7 +112,7 @@ Color_t TftDbi_RdColor(void)
   #ifdef SUPPORT_COLOR_RGB666
     Color_t Color = Data; //略
   #else
-    Color_t Color = Data; //默认为是RGB565
+    Color_t Color = Data; //默认与定义一一对应
   #endif
   return Data;
 }
