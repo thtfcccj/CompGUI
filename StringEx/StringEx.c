@@ -214,7 +214,7 @@ const char *StrFind(const char *pStr, const char *pSub)
       }
     }while(1);
   }while(1);
-  return NULL;
+  return NULL; //防止部分编译器出错(有的加上反全警告)
 }  
 
 //-------------------------------字符替换函数-------------------------------
@@ -222,16 +222,16 @@ const char *StrFind(const char *pStr, const char *pSub)
 signed char StringReplace(char *pStr, const char *pFrom, const char *pTo) 
 {
   //先查找字符串
-  char *pReplacePos = (char*)StrFind(pStr, pFrom);
-  if(pReplacePos == NULL) return -1; //未找到
+  char *pReplaceEndPos = (char*)StrFind(pStr, pFrom); //此为结束位置
+  if(pReplaceEndPos == NULL) return -1; //未找到
   unsigned short FromLen = strlen(pFrom);
   unsigned short ToLen = strlen(pTo);
-  if(FromLen >= ToLen)//替换后的值往前移动
-    strcpyL(pReplacePos + ToLen, pReplacePos + FromLen);
-  else //替换后的值往后移动(注意应从右向左复制防止覆盖)
-    strcpyR(pReplacePos + ToLen, pReplacePos + FromLen); 
-  
-  memcpy(pReplacePos, pTo, ToLen); //替换字符串
+  if(FromLen > ToLen)//替换后的值往前移动至结束位置
+    strcpyL(pReplaceEndPos - (FromLen - ToLen), pReplaceEndPos);
+  else if(FromLen < ToLen) //替换后的值往后移动至结束位置(注意应从右向左复制防止覆盖)
+    strcpyR(pReplaceEndPos + (ToLen - FromLen), pReplaceEndPos); 
+  //else 相等，不用移动
+  memcpy(pReplaceEndPos - FromLen, pTo, ToLen); //替换字符串
   return 0; //替换成功
 }
 

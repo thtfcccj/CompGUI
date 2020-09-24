@@ -55,7 +55,8 @@ char *memcpyL(char *pStr, const char *pSub, unsigned short Len);
 char CharToLower(char Str);
 
 //-------------------------------字符查找函数-------------------------------
-//此函数忽略大小写替换strstr(),返回的是查找字符结束位置的指针,没找到时为NULL
+//此函数忽略大小写替换strstr(),
+//返回的是查找字符  "结束位置指针",没找到时为NULL
 const char *StrFind(const char *pStr, const char *pSub);
 
 //-------------------------------字符替换函数-------------------------------
