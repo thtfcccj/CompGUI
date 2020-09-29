@@ -33,8 +33,7 @@ void KeyLight_cbSetKeyScan(signed char Pos)
 void KeyLight_cbSetLightScan(signed char Pos)
 {
   //先关闭扫描所有
-  SetLightEn0();
-  SetLightEn1();
+  SetLightEn();
   if(Pos < 0) return; //关闭扫描
   //扫描对应位置
   switch(Pos){
