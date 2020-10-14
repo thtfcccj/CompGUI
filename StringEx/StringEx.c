@@ -25,7 +25,7 @@ char *Value4StringMin(unsigned long Value,
 }
 
 //-----------------------转换为字符串-显示为最简函数----------------------
-//返回结束位置
+//返回结束位置(此位置强制填充结束字符)
 char *Value2StringMin(signed short Value,
                       char *pString,//接收缓冲
                       unsigned char Min)//保证的最小位数
@@ -67,25 +67,28 @@ static const unsigned short _Ov[] = {
 };
 
 //-----------------------转换为字符串-固定位显示函数----------------------
-//<0填充0, 超限固定显示显示位数个9, 返回结束位置
-char *Value2StringFix(unsigned short Value,
+//返回结束位置
+char *Value2StringFix(unsigned short Value,//<0填充0, 超限固定显示显示位数个9,
                       char *pString,//接收缓冲
-                      unsigned char Len)//显示长度
+                      signed char Len)//显示长度, <0时末尾不强制填充结束字符
 {
+  unsigned short ValidLen = 0 ;
+  if(Len < 0) ValidLen = 0 - Len;
+  else ValidLen = Len;
   //超限显示
- if(Value > _Ov[Len]) Value = _Ov[Len];
+ if(Value > _Ov[ValidLen]) Value = _Ov[ValidLen];
  
-  pString += Len; //结束位置
-  for(unsigned char Pos = 1; Pos <= Len; Pos++){
+  pString += ValidLen; //结束位置
+  for(unsigned char Pos = 1; Pos <= ValidLen; Pos++){
     *(pString - Pos) = '0' + (Value % 10);
     Value /= 10;
    }
-   *pString = '\0'; //强制填充结束字符
+  if(Len >= 0) *pString = '\0'; //强制填充结束字符
    return pString;
 }
 
 //-----------------带标志数转换为字符串函数------------------
-//返回填充后最末未用缓冲区位置
+//返回填充后最末未用缓冲区位置(此位置强制填充结束字符)
 char *pNum2StringFlag(signed short Value,   //当前数值
                       char *pBuf,    //接收缓冲区
                       unsigned char Len,    //数值显示最短长度
