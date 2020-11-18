@@ -73,6 +73,13 @@ const char *pGetStrSpaceEnd(const char *pStr);
 //-------------------------------得到数字字符长度函数---------------------------
 unsigned char StrGetAscNumLen(const char *pStr);
 
+//----------------------------由字符串得到数值函数---------------------------
+//此函数与模块无关，可供外部独立使用
+//返回:0:首字不为数字，-1: 数值无效,-2: 数值超限,其它：解了多少字符串
+signed char String2Num(const char *pString,
+                        unsigned short Max,  //最大值
+                        unsigned short *pData); //返回正确时接收的数
+
 //-----------------------------提指定字符长度函数---------------------------
 unsigned char StrGetCharLen(const char *pStr, char c);
 

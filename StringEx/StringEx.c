@@ -217,7 +217,7 @@ const char *StrFind(const char *pStr, const char *pSub)
       }
     }while(1);
   }while(1);
-  return NULL; //防止部分编译器出错(有的加上反全警告)
+  return NULL; //防止部分编译器出错(有的加上全警告)
 }  
 
 //-------------------------------字符替换函数-------------------------------
@@ -269,6 +269,49 @@ unsigned char StrGetAscNumLen(const char *pStr)
   }
   return Len;
 }
+
+//----------------------------由字符串得到数值函数---------------------------
+//此函数与模块无关，可供外部独立使用
+//返回:0:首字不为数字，-1: 数值无效,-2: 数值超限,其它：解了多少字符串
+signed char String2Num(const char *pString,
+                        unsigned short Max,  //最大值
+                        unsigned short *pData) //返回正确时接收的数
+{
+  const char *pOrgPos = pString;
+  unsigned int ID = 0;
+  int Valid = 0;  //数值有效标志
+  do{
+    unsigned char Num = *pString;
+    if(Num < '0') break;
+    if(Num > '9') break;
+    Num -= '0';
+    if(!Valid){//找到数,数值有效了
+      if(Num == 0) Valid = -1; //忽略前面的0,倍率无效
+      else{
+        Valid = 1;
+        ID = Num;
+      }
+    }
+    else if(Valid == -1){//前面全是0时
+      if(Num != 0){
+        ID = Num;
+        Valid = 1;
+      }
+    }
+    else{
+      ID *= 10;  //加倍了
+      ID += Num;
+    }
+    pString++;//下个字符
+  }while(ID <= Max);
+  
+  if(!Valid) return -1;    //数值无效
+  if(ID > Max) return -2;    //数值超限
+  *pData = ID;
+  return pString - pOrgPos;
+}
+
+
 
 //-----------------------------得到指定字符长度函数---------------------------
 unsigned char StrGetCharLen(const char *pStr, char c)
