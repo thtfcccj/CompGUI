@@ -29,7 +29,7 @@ void PlotIcon_Bat(unsigned char Level,  //电量级别:0-4,0
   else{//电量不满
     Plot_Rect(x + 2, y + 1, 24, 14);//绘制电池外框
     if(Level){//非空时,填充电量级
-      Plot_FullRect(x + 3, y + 2, (Level - 1) * 6, 13);
+      Plot_FullRect(x + 3, y + 2, Level * 6, 13);
     }
   }
   Plot_SetBrushColor(brushColor); //还原背景色  
