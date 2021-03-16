@@ -329,10 +329,10 @@ signed char TftDbi_Init(void)
   }
   else if(ManufacturerID == 0x54){//SX035SVGA40P-006实测
     _HwCfg_ILI9488();
-    TftDbi_WrCmd(TFT_CMD_WR_INVOFF);//开启正显
+    TftDbi_WrCmd(TFT_CMD_WR_INVOFF);//开启正显(无此局还是反显)
   }
-  else{
-    _HwCfg_ST7796S(); //默认驱动:JPY3553-4OP测
+  else{//默认驱动: 实测:JPY3553-4OP(id=0xff)
+    _HwCfg_ST7796S(); 
   }
   
   //最后IC无关初始化
