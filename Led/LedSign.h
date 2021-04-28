@@ -43,6 +43,10 @@
   #include "LedSign_76543210.h"
 #endif
 
+#ifdef SUPPORT_LED_SIGN_03457612
+  #include "LedSign_03457612.h"
+#endif
+
 //------------------------------指示灯定义------------------------------------
 #define LED_SIGN_DLIGHT_POS    4     //双色指示灯所在Buf位置,固定为4
 //绿灯与红灯在BIT上的位置选择如下定义之一:

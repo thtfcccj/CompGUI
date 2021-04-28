@@ -6,10 +6,6 @@
 
 #include "Key.h"
 
-#ifdef SUPPORT_KEY_ACCELERATE  //支持按键加速时
-  #include "KeyAccelerate.h"
-#endif
-
 struct _Key Key;
 
 /*******************************************************************************
@@ -22,9 +18,6 @@ void Key_Init(void)
   Key.Index = 0;
   Key.KeyId = 0xff;
   Key_cbCfgIO();
-  #ifdef SUPPORT_KEY_ACCELERATE  //支持按键加速时
-    KeyAccelerate_Init();
-  #endif 
 }
 
 //------------------------------------任务函数----------------------------------
@@ -58,16 +51,8 @@ void Key_Task(void)
         Key_cbLongNotify(KeyId);
       }      
       if(Key.Index == (KEY_TIMER_LONG + KEY_TIMER_HODE)){	//保持键通报
-        #ifdef SUPPORT_KEY_KEEP_TO_SHORT 
-          Key_cbShortNotify(KeyId);//处理为短按键
-        #else
-          Key_cbKeepNotify(KeyId);
-        #endif
+        Key_cbKeepNotify(KeyId);
         Key.Index = KEY_TIMER_LONG; //复位
-        #ifdef SUPPORT_KEY_ACCELERATE  //支持按键加速时
-          if(Key_cbIsAccelarateKey(Key.KeyId)//判断是否为需要的保持按键
-            KeyAccelerate_Start();
-        #endif
       }
 	  }  
 	}
@@ -79,9 +64,7 @@ void Key_Task(void)
     //最后复位
     Key.Index = 0;
     Key.KeyId = _INVALID_KEY;
-    #ifdef SUPPORT_KEY_ACCELERATE  //支持按键加速时
-      KeyAccelerate_Stop();
-    #endif    
+    Key_cbRlsNotify();//松开按键通报
   }
 }
 
