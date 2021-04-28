@@ -94,7 +94,6 @@ static void _HwCfg_ST7796S(void)
 
   TftDbi_WrCmd(0x3A);//TFT_DCOL_PIXEL_16BIT
   TftDbi_WrData(0x55);//‘101’ = 16bit/pixel
-  TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
 }
 
 //----------------------------HX8357 启动代码----------------------------------
@@ -298,7 +297,7 @@ static void _HwCfg_ILI9488(void)
   TftDbi_WrCmd(0x11);
 
   DelayMs(5);
-  TftDbi_WrCmd(0x21);  //开启反显示
+
 }
 
 /*******************************************************************************
@@ -317,10 +316,24 @@ signed char TftDbi_Init(void)
   //unsigned short Info = TftDbi_RdDataS();
 
   //根据读取的设备ID配置显示屏
-  if(ManufacturerID == 0x6B)_HwCfg_ST7796S();     //0x6b:实测
-  else if(ManufacturerID == 0x11)_HwCfg_HX8357();//0x11随手写
-  else if(ManufacturerID == 0x22)_HwCfg_ILI9488();//0x22随手写  
-  else _HwCfg_ST7796S(); //默认驱动
+  if(ManufacturerID == 0x6B){//0x6b: W350BE024Z实测
+    _HwCfg_ST7796S();     
+    TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
+  }
+  else if(ManufacturerID == 0x11){//0x11随手写(未验证)
+    _HwCfg_HX8357();
+  }
+  else if(ManufacturerID == 0x22){//0x22随手写(未验证)
+    _HwCfg_ILI9488();
+    TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
+  }
+  else if(ManufacturerID == 0x54){//SX035SVGA40P-006实测
+    _HwCfg_ILI9488();
+    TftDbi_WrCmd(TFT_CMD_WR_INVOFF);//开启正显(无此局还是反显)
+  }
+  else{//默认驱动: 实测:JPY3553-4OP(id=0xff)
+    _HwCfg_ST7796S(); 
+  }
   
   //最后IC无关初始化
   TftDbi_WrCmd(TFT_CMD_WR_SLPOUT);
