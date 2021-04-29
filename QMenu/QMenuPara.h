@@ -66,8 +66,14 @@ struct _QMenuPara{
 #define QMENU_LAYER_RD     2 //在查看(读)状态
 #define QMENU_LAYER_WR     3 //在修改(写)状态
 
+#include "QMenuPixel.h" //像素化支持结构
+
 struct _QMenuFun{
-  unsigned char Note[4];//菜单选择里的提示项(含小数点)
+  #ifdef SUPPORT_QMENU_PIXEL  //像素化支持时
+    const struct QMenuPixel_Desc Desc;//描述结构
+  #else //4位数码管时:
+    unsigned char Note[4];//菜单选择里的提示项(含小数点)
+  #endif
   //读取参数至QMenuPara,形参:
   //QMENU_CFG_REAL_RD: 为实时读取状态位置,实时读打开时调用
   //QMENU_CFG_REAL_WR: 为通讯层调用,写缓冲区数据

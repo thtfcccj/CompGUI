@@ -60,7 +60,6 @@ unsigned char QMenuMng_GetId(struct _QMenuMng *pMng)
 //调用此函数主动更新界面显示
 void QMenuMng_UpdateDisp(struct _QMenuMng *pMng)
 {
-  unsigned char Id, Data,Pos;
   unsigned char MngId = pMng->Flag & QMENU_MNG_ID_MASK;
   
   //统一初始化显示部分(不管数码管的显示)
@@ -69,15 +68,17 @@ void QMenuMng_UpdateDisp(struct _QMenuMng *pMng)
   QMenuMng_cbClrDotDisp(MngId);  
   
   if(pMng->Layer == QMENU_LAYER_SEL){//直接用菜单项符号更新显示(含小数点)
-    Id = QMenuMng_GetId(pMng);
-    //依次更新显示
-    const unsigned char *pNote = pMng->pFunAry[Id]->Note;
-    for(Pos = 0; Pos < 4; Pos++){
-      Data = *pNote++;
-      QMenuMng_cbSetSegDisp(MngId, Pos, Data); 
-      if(Data & QMenuMng_cbGetDotMask(MngId)) 
-        QMenuMng_cbSetDotDisp(MngId, QMenuMng_cbPos2Mask(MngId, Pos));
-    }
+    #ifdef SUPPORT_QMENU_PIXEL   //支持像素化时交给外部实现
+      QMenuMng_cbUpdateDispMenuSel(pMng);
+    #else //4位数码管时，依次更新菜单提示的显示
+      const unsigned char *pNote = pMng->pFunAry[QMenuMng_GetId(pMng)]->Note;
+      for(unsigned char Pos = 0; Pos < 4; Pos++){
+        unsigned char Data = *pNote++;
+        QMenuMng_cbSetSegDisp(MngId, Pos, Data); 
+        if(Data & QMenuMng_cbGetDotMask(MngId)) 
+          QMenuMng_cbSetDotDisp(MngId, QMenuMng_cbPos2Mask(MngId, Pos));
+      }
+    #endif
   }
   else{
     //根据调整方式调用相关模块显示

@@ -6,6 +6,8 @@
 
 #include "QMenuPara.h"
 
+//struct _QMenuPara _Para; //测试占位
+
 //-------------------QMenuPara初始化函数--------------------------
 void QMenuPara_Init(struct _QMenuPara *pPara)
 {
