@@ -118,10 +118,18 @@ void QMenuMng_Init(struct _QMenuMng *pMng,
 //将此函数放入系统快速进程中,用于处理键值
 void QMenuMng_FastTask(struct _QMenuMng *pMng);
 
-//-------------------------得到当前菜单ID号--------------------
-unsigned char QMenuMng_GetId(struct _QMenuMng *pMng);
+//------------------------获得正在调整项菜单指针阵列------------------------
+//可用于判断当前位置以显示对应图标提示等,菜单内才可调用
+#define QMenuMng_pGetCurFunAry(mng) ((mng)->pFunAry)
 
-//-------------------------得到调整前蝗值-----------------------
+//------------------------获得正在调整项菜单指针------------------------
+//可用于判断当前位置以显示对应图标提示等,菜单内才可调用
+#define QMenuMng_pGetCurFun(mng) ((mng)->pFunAry[QMenuMng_GetId(mng)])
+
+//-------------------------得到当前菜单ID号--------------------
+unsigned char QMenuMng_GetId(const struct _QMenuMng *pMng);
+
+//-------------------------得到调整前值-----------------------
 //signed short QMenuMng_GetOrgAdj(struct _QMenuMng *pMng);
 #define QMenuMng_GetOrgAdj(mng) ((mng)->OrgAdj)
 
@@ -136,6 +144,14 @@ signed char QMenuMng_IsRealDisp(struct _QMenuMng *pMng);
 //正在调整值在菜单未切换时不会改变
 //unsigned short QMenuMng_GetAdj(struct _QMenuMng *pMng);
 #define QMenuMng_GetAdj(mng) ((mng)->Para.Adj)
+
+//---------------------------得到菜单层次------------------------
+//正在调整值在菜单未切换时不会改变
+//unsigned char QMenuMng_GetLayer(struct _QMenuMng *pMng);
+#define QMenuMng_GetLayer(mng) ((mng)->Layer)
+
+//------------------------重新装载用户数据------------------------
+void QMenuMng_ReloadPara(struct _QMenuMng *pMng);
 
 /***********************************************************************
                               回调函数

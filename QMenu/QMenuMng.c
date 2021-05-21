@@ -26,6 +26,14 @@ signed char QMenuMng_IsRealDisp(struct _QMenuMng *pMng)
   return 0;
 }
 
+//------------------------重新装载用户数据------------------------
+void QMenuMng_ReloadPara(struct _QMenuMng *pMng)
+{
+  QMenuPara_Init(&pMng->Para); //重新初始化
+  pMng->pFunAry[QMenuMng_GetId(pMng)]->GetData(&pMng->Para,
+                                               pMng->Layer);//菜单层次
+}
+
 //--------------------------任务函数--------------------------
 //将此函数放入系统250mS进程中,用于更新实时值的显示
 void QMenuMng_Task(struct _QMenuMng *pMng)
@@ -51,7 +59,7 @@ void QMenuMng_EnterInit(struct _QMenuMng *pMng,
 }
 
 //-------------------------得到当前菜单ID号--------------------
-unsigned char QMenuMng_GetId(struct _QMenuMng *pMng)
+unsigned char QMenuMng_GetId(const struct _QMenuMng *pMng)
 {
   return  *(pMng->pLUT + pMng->Index + 1);
 }
