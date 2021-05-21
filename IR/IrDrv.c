@@ -4,6 +4,7 @@
 
 ***************************************************************************/
 #include "IrDrv.h"
+#include <string.h>
 
 struct _IrDrv  IrDrv;
 

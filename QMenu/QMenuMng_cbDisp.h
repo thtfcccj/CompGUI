@@ -66,7 +66,7 @@ unsigned char QMenuMng_cbVol2Seg(unsigned char MngId, unsigned char Vol);
   void QMenuMng_cbSetSegDisp(unsigned char MngId, 
                              unsigned char Pos, unsigned char Seg);
 #else //单例化时
-  #define QMenuMng_cbSetSegDisp(pos, seg) do{Led.SegDisp[pos] = seg;}while(0)
+  #define QMenuMng_cbSetSegDisp(mngId, pos, seg) do{Led.SegDisp[pos] = seg;}while(0)
 #endif
   
 //------------------------使掩码对应的数码管闪动------------------------
@@ -74,28 +74,28 @@ unsigned char QMenuMng_cbVol2Seg(unsigned char MngId, unsigned char Vol);
 void QMenuMng_cbSetSegFlash(unsigned char MngId, 
                             unsigned char Mask);
 #else //单例化时
-  #define QMenuMng_cbSetSegFlash(mask)  do{Led.SegFlash |= mask;}while(0)
+  #define QMenuMng_cbSetSegFlash(mngId, mask)  do{Led.SegFlash |= mask;}while(0)
 #endif
 
 //----------------------------使所有数码管停闪--------------------------
 #ifndef SUPPORT_QMENU_MNG_SINGLETON //多例化时
   void QMenuMng_cbClrSegFlash(unsigned char MngId);
 #else //单例化时
-  #define QMenuMng_cbClrSegFlash()  do{Led.SegFlash &= ~0x0f;}while(0)
+  #define QMenuMng_cbClrSegFlash(mngId)  do{Led.SegFlash &= ~0x0f;}while(0)
 #endif
   
 //------------------------使掩码对应的小数点显示------------------------
 #ifndef SUPPORT_QMENU_MNG_SINGLETON //多例化时
   void QMenuMng_cbSetDotDisp(unsigned char MngId, unsigned char Mask);
 #else //单例化时
-  #define QMenuMng_cbSetDotDisp(mask)  do{Led.DotDisp |= mask;}while(0)
+  #define QMenuMng_cbSetDotDisp(mngId, mask)  do{Led.DotDisp |= mask;}while(0)
 #endif
   
 //------------------------使所有小数点停显------------------------
 #ifndef SUPPORT_QMENU_MNG_SINGLETON //多例化时
   void QMenuMng_cbClrDotDisp(unsigned char MngId);
 #else //单例化时  
-  #define QMenuMng_cbClrDotDisp()  do{Led.DotDisp &= ~0x0f;}while(0)
+  #define QMenuMng_cbClrDotDisp(mngId)  do{Led.DotDisp &= ~0x0f;}while(0)
 #endif
   
 //------------------------使掩码对应的小数点闪动------------------------
@@ -103,14 +103,14 @@ void QMenuMng_cbSetSegFlash(unsigned char MngId,
   void QMenuMng_cbSetDotFlash(unsigned char MngId, 
                               unsigned char Mask);
 #else //单例化时
-  #define QMenuMng_cbSetDotFlash(mask)  do{Led.DotFlash |= mask;}while(0)
+  #define QMenuMng_cbSetDotFlash(mngId, mask)  do{Led.DotFlash |= mask;}while(0)
 #endif
   
 //----------------------------使所有小数点停闪----------------------------
 #ifndef SUPPORT_QMENU_MNG_SINGLETON //多例化时
   void QMenuMng_cbClrDotFlash(unsigned char MngId);
 #else //单例化时
-  #define QMenuMng_cbClrDotFlash()  do{Led.DotFlash &= ~0x0f;}while(0)
+  #define QMenuMng_cbClrDotFlash(mngId)  do{Led.DotFlash &= ~0x0f;}while(0)
 #endif
   
 //------------------------------强制更新以及更新闪动-----------------------
@@ -119,7 +119,7 @@ void QMenuMng_cbSetSegFlash(unsigned char MngId,
 #ifndef SUPPORT_QMENU_MNG_SINGLETON //多例化时
   void QMenuMng_cbForceFlash(unsigned char MngId, unsigned char IsForceHidden);
 #else //单例化时
-  #define QMenuMng_cbForceFlash(isforcehidden)\
+  #define QMenuMng_cbForceFlash(mngId, isforcehidden) \
     do{if(isforcehidden) Led.Flag |= (LED_FLASH_NOW | LED_FLASH_DIS);\
        else Led.Flag |= (LED_FLASH_NOW); Led_Task();}while(0)
 #endif
@@ -128,7 +128,7 @@ void QMenuMng_cbSetSegFlash(unsigned char MngId,
 #ifndef SUPPORT_QMENU_MNG_SINGLETON //多例化时
   unsigned char QMenuMng_cbGetDotMask(unsigned char MngId); 
 #else //单例化时
-  QMenuMng_cbGetDotMask(mngId)    LED_SIGN_DOT
+  #define QMenuMng_cbGetDotMask(mngId)    (LED_SIGN_DOT)
 #endif
     
 #endif //_QMENU_MNG_CB_DISP_H

@@ -24,6 +24,10 @@
 //支持像素化时定义，否则默认支持4位数码管, 需在全局里定义
 //#define SUPPORT_QMENU_PIXEL   //支持像素化时
 
+//支持其它显示映射方式时(含像素化)在QMenuMng_cbDispOther.h里，由用户自定义
+//#define SUPPORT_QMENU_MAP_DISP_OTHER 
+
+
 /***********************************************************************
                     相关结构-菜单管理器
 //与用户交互部见在QMenu.h里定义
@@ -134,9 +138,13 @@ signed char QMenuMng_IsRealDisp(struct _QMenuMng *pMng);
 #define QMenuMng_GetAdj(mng) ((mng)->Para.Adj)
 
 /***********************************************************************
-                    回调函数
+                              回调函数
 ***********************************************************************/
-#include "QMenuMng_cbDisp.h"
+#if defined(SUPPORT_QMENU_MAP_DISP_OTHER) || defined(SUPPORT_QMENU_PIXEL) 
+  #include "QMenuMng_cbDispOther.h"
+#else
+  #include "QMenuMng_cbDisp.h"
+#endif
 
 //---------------------------退出菜单系统通报-----------------------
 void QMenuMng_cbExitNotify(unsigned char MngId);
