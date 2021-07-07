@@ -32,7 +32,7 @@ void IrDrv_Task(void)
     //释放时检测短按键
     if(IrDrv.KeyHoldIndex < IR_DRV_KEY_LONG_COUNT) 
       IrDrv_cbKeyNotify((0 << 6) | IrDrv.PrvKey);
-    else IrDrv_cbKeyNotify(0xff); //无按键通报
+    IrDrv_cbKeyNotify(0xff); //无按键或取消按键通报
     if(IrDrv.PrvKey < IR_DRV_KEY_COUNT){//有效键时值时复位(识别无效键值切换时复位)
       IrDrv.PrvKey = 0xff;
     }
