@@ -52,7 +52,7 @@ void SLightDrv_Init(struct  _SLightDrv *pDrv,
 
 //--------------------------指示灯配置Id改变函数------------------------------
 void SLightDrv_CfgChange(struct  _SLightDrv *pDrv, 
-                         const struct  _SLightDrvCfg *pCfg);//NULL时强制灭灯
+                         const struct  _SLightDrvCfg *pCfg);//NULL或OnUnit=0时强制灭灯
 
 //---------------------------指示灯扫描任务函数------------------------------
 //建议放入128mS进程中
@@ -62,10 +62,10 @@ void SLightDrv_Task(struct  _SLightDrv *pDrv);
                            回调函数
 ******************************************************************************/
 
-//-----------------------------------置指示灯函数--------------------------------
+//-----------------------------------置指示灯函数-------------------------------
 void SLightDrv_cbSetOn(unsigned char SLightDrvId);
 
-//--------------------------------清指示灯函数-----------------------------------
+//--------------------------------清指示灯函数----------------------------------
 //SLightDrvId =SLIGHT_DRV_ID_MASK时，灭所有灯
 void SLightDrv_cbClrOn(unsigned char SLightDrvId);
 

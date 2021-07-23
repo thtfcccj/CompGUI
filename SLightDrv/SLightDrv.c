@@ -21,7 +21,7 @@ void SLightDrv_Task(struct  _SLightDrv *pDrv)
   //强制灭灯优先处理
   const struct  _SLightDrvCfg *pCfg = pDrv->pCfg;
   unsigned char SLightDrvId = pDrv->Flag & SLIGHT_DRV_ID_MASK;
-  if(pCfg == NULL){
+  if((pCfg == NULL) || (pCfg->OnUnit == 0)){//全灭时
     SLightDrv_cbClrOn(SLightDrvId);
     return;
   }
