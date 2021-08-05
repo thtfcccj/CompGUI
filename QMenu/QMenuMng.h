@@ -61,7 +61,9 @@ struct _QMenuMng{
 //其中,菜单层次见QMenu中的层次定义:
 
 //相关标志定义为:
-#define QMENU_MNG_ID_MASK   0x3F   //多组显示时,管理器ID号  
+#define QMENU_MNG_ID_MASK   0x3F     //多组显示时,管理器ID号
+
+#define QMENU_MNG_REFRESH_NOW 0x40   //立即刷新标志
 
 //闪动位强制消隐显示标志,否则按键将使闪动位强制显示,此标志在调用DISP后自动取消
 #define QMENU_MNG_FLASH_HIDDEN   0x80  
@@ -77,6 +79,9 @@ void QMenuMng_Task(struct _QMenuMng *pMng);
 //----------------------更新菜单显示函数--------------------------
 //调用此函数主动更新界面显示(点动，不可周期调用)
 void QMenuMng_UpdateDisp(struct _QMenuMng *pMng);
+
+//------------------------重新装载用户数据------------------------
+void QMenuMng_ReloadPara(struct _QMenuMng *pMng);
 
 //----------------------进入菜单初始化函数--------------------------
 //由主界面准备进入菜单时调用挂接的菜单查找表并完成内部初始化
@@ -149,9 +154,6 @@ signed char QMenuMng_IsRealDisp(struct _QMenuMng *pMng);
 //正在调整值在菜单未切换时不会改变
 //unsigned char QMenuMng_GetLayer(struct _QMenuMng *pMng);
 #define QMenuMng_GetLayer(mng) ((mng)->Layer)
-
-//------------------------重新装载用户数据------------------------
-void QMenuMng_ReloadPara(struct _QMenuMng *pMng);
 
 /***********************************************************************
                               回调函数

@@ -65,8 +65,10 @@ void IrDrv_FastTask(void)
   //键值检测
   unsigned char Key = 0;  
   for(; Key < IR_DRV_KEY_COUNT; Key++){
-    if(!memcmp(&IrDrv.Buf, &cbIrDrvInfo.Code[Key], sizeof(struct _IrDrvCode)))//相同了
+    if(!memcmp(&IrDrv.Buf, &cbIrDrvInfo.Code[Key], sizeof(struct _IrDrvCode))){//相同了
+      IrDrv_cbKeyNotify(0xc0); //按键启动通报
       break;
+    }
   }
   //按键计数
   if(Key != IrDrv.PrvKey){//两次按键不同,初始化

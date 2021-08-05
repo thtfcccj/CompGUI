@@ -22,7 +22,7 @@
 //------------------------------段码定义-----------------------------
 #define LED_SIGN_0     0xF6
 #define LED_SIGN_1     0x42
-#define LED_SIGN_2     0xA3
+#define LED_SIGN_2     0xAE
 #define LED_SIGN_3     0xCE
 #define LED_SIGN_4     0x5A
 #define LED_SIGN_5     0xDC
@@ -54,7 +54,7 @@
 #define LED_SIGN_T     0xB8
 #define LED_SIGN_U     0xF2
 #define LED_SIGN_Y     0xDA
-#define LED_SIGN_Z     0xA3
+#define LED_SIGN_Z     0xAE
 
 #define LED_SIGN_DOT   0x01    //段码上的小数点位置
 

@@ -32,6 +32,7 @@ void QMenuMng_ReloadPara(struct _QMenuMng *pMng)
   QMenuPara_Init(&pMng->Para); //重新初始化
   pMng->pFunAry[QMenuMng_GetId(pMng)]->GetData(&pMng->Para,
                                                pMng->Layer);//菜单层次
+  pMng->Flag |= QMENU_MNG_REFRESH_NOW;
 }
 
 //--------------------------任务函数--------------------------
@@ -41,6 +42,11 @@ void QMenuMng_Task(struct _QMenuMng *pMng)
   if(QMenuMng_IsRealDisp(pMng)){
     //开始实时更新
     pMng->pFunAry[QMenuMng_GetId(pMng)]->GetData(&pMng->Para, QMENU_CFG_REAL_RD); 
+    QMenuMng_UpdateDisp(pMng); //更新显示
+  }
+  //仅更新
+  else if(pMng->Flag & QMENU_MNG_REFRESH_NOW){
+    pMng->Flag &= ~QMENU_MNG_REFRESH_NOW;
     QMenuMng_UpdateDisp(pMng); //更新显示
   }
 }
