@@ -11,7 +11,6 @@
 //用于决定显示多少位
 void QMenuAdj_UpdateMaxPos(struct _QMenuMng *pMng)
 {
-  
   unsigned char Pos;
   //以绝对值作为条件
   unsigned short Max,Min; 

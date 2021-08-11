@@ -27,6 +27,7 @@ static unsigned char _GetNextWrIndex(struct _QMenuMng *pMng,
 void QMenuAdjHex_Init(struct _QMenuMng *pMng)
 {
   pMng->WrIndex = _GetNextWrIndex(pMng, 0);
+  //pMng->WrMaxPos = 3;//此变量此模式不需要
 }
 
 //-------------------------按键处理函数---------------------------

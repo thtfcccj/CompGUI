@@ -41,7 +41,8 @@ void QMenuMng_Task(struct _QMenuMng *pMng)
 {
   if(QMenuMng_IsRealDisp(pMng)){
     //开始实时更新
-    pMng->pFunAry[QMenuMng_GetId(pMng)]->GetData(&pMng->Para, QMENU_CFG_REAL_RD); 
+    pMng->pFunAry[QMenuMng_GetId(pMng)]->GetData(&pMng->Para, QMENU_CFG_REAL_RD);
+    QMenuAdj_UpdateMaxPos(pMng);//用户扩展功能时显示长度可能变化，需实时更新
     QMenuMng_UpdateDisp(pMng); //更新显示
   }
   //仅更新

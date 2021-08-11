@@ -27,7 +27,6 @@
 //支持其它显示映射方式时(含像素化)在QMenuMng_cbDispOther.h里，由用户自定义
 //#define SUPPORT_QMENU_MAP_DISP_OTHER 
 
-
 /***********************************************************************
                     相关结构-菜单管理器
 //与用户交互部见在QMenu.h里定义
@@ -133,6 +132,10 @@ void QMenuMng_FastTask(struct _QMenuMng *pMng);
 
 //-------------------------得到当前菜单ID号--------------------
 unsigned char QMenuMng_GetId(const struct _QMenuMng *pMng);
+
+//------------------------得到缓冲的键值--------------------
+//0时没有缓冲键值了
+#define QMenuMng_GetBufKey(mng)  ((mng)->Key)
 
 //-------------------------得到调整前值-----------------------
 //signed short QMenuMng_GetOrgAdj(struct _QMenuMng *pMng);
