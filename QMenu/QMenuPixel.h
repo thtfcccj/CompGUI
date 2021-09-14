@@ -5,6 +5,9 @@
 ***********************************************************************/
 #ifndef _QMENU_PIXEL_H
 #define	_QMENU_PIXEL_H
+#ifdef SUPPORT_EX_PREINCLUDE//不支持Preinlude時
+  #include "Preinclude.h"
+#endif
 #ifdef SUPPORT_QMENU_PIXEL  //像素化支持时
 
 /***********************************************************************

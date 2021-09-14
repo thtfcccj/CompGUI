@@ -7,6 +7,9 @@
 
 #ifndef __LED_H
 #define __LED_H
+#ifdef SUPPORT_EX_PREINCLUDE//不支持Preinlude時
+  #include "Preinclude.h"
+#endif
 
 /***************************************************************************
                               相关配置
@@ -90,6 +93,11 @@ void Led_Task(void);
       LedDrv1652.Buf[pos] = buf; LedDrv1652.UpdateMask |= 1 << (Pos); }while(0)
 #endif
 
+#ifdef SUPPORT_TM1628
+  #include "TM1628.h"
+  #define Led_cbSetBuf(pos, buf)  do{TM1628_UpdateDisp(pos, buf); }while(0)
+#endif
+
 //-----------------------得到显示缓冲函数-----------------------------
 #ifdef SUPPORT_LCD
   #define Led_cbGetBuf(pos)  (LcdDrv.Buf[(pos) + LCD_BUF_MD_START])
@@ -105,6 +113,10 @@ void Led_Task(void);
       
 #ifdef SUPPORT_LED_1652
   #define Led_cbGetBuf(pos)  (LedDrv1652.Buf[pos])
+#endif
+
+#ifdef SUPPORT_TM1628
+  #define Led_cbGetBuf(pos)  (TM1628_GetDisp(pos))
 #endif
 
 /***************************************************************************

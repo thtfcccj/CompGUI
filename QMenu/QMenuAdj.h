@@ -5,6 +5,7 @@
 
 #ifndef	_QMENU_ADJ_H
 #define	_QMENU_ADJ_H
+#include "QMenuMng.h"
 
 /***********************************************************************
 		                          公共部分

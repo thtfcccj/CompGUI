@@ -4,6 +4,9 @@
 
 #ifndef __LED_SIGN_H
 #define __LED_SIGN_H
+#ifdef SUPPORT_EX_PREINCLUDE//不支持Preinlude時
+  #include "Preinclude.h"
+#endif
 
 //------------------------------段码定义------------------------------------
 //段码定义 标准时

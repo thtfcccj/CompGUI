@@ -6,6 +6,9 @@
 ***********************************************************************/
 #ifndef _QMENU_MNG_H
 #define	_QMENU_MNG_H
+#ifdef SUPPORT_EX_PREINCLUDE//不支持Preinlude時
+  #include "Preinclude.h"
+#endif
 
 /***********************************************************************
                             说明
