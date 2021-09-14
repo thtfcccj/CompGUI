@@ -28,10 +28,6 @@ void LedNum4_Disp(signed short Data,
   unsigned char Pos = 0;  
   for(; Pos < 4; Pos++) Led.SegDisp[Pos] = 0;
   
-  //错误修正
-  if(Data > 9999) Data = 9999;
-  else if(Data < -9999) Data = -9999;
-    
   //填充正负号显示
   unsigned short Value;
   Pos = (Flag & 0x03) + 1; //最高位
@@ -44,8 +40,13 @@ void LedNum4_Disp(signed short Data,
     }
     else Value = 0;//不允许显示负时,显示0
   }
-  else{
+  else{//正值时
     Value = (unsigned short)Data;
+    //错误修正
+    if((Pos == 4) && (Value > 9999)) Value = 9999;//截取显示
+    else if((Pos == 3) && (Value > 999)) Pos = 4;//超量程显示
+    else if((Pos == 2) && (Value > 99)) Pos = 3;//超量程显示
+    
     if(((Flag & 0x0c) == 0x0c)) 
       Led.SegDisp[Pos] = LED_SIGN_0;//无负时填充0
     else if((Flag & 0x04)){//符号占一位时

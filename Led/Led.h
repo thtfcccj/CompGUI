@@ -14,7 +14,7 @@
 
 //定义LED个数, <= 8
 #ifndef LED_LED_COUNT               
-  #define LED_LED_COUNT               7  
+  #define LED_LED_COUNT            4  
 #endif
 
 //定义可独立控制段码闪动的段闪动控制数,可用于扩展指示灯,< LED_LED_COUNT
@@ -40,14 +40,10 @@ struct _Led{
   unsigned char Flag;   //相关标志,见定义
 };
 //相关标志定义为:(与应用层对应,不能改变下放置位置)
-#define LED_SYSTEM        0x07      //低3位为系统预留开机1s置0,以后置2
-#define LED_TEST          0x08      //处于测试状态,即数码管全亮,在底层实现
 #define LED_DISP          0x10      //在显示周期,否则在消隐周期
 #define LED_FLASH_NOW     0x20      //强制更新闪动标志
 #define LED_FLASH_DIS     0x40      //强制更新闪动标志置位时,处于消隐还是显示周期
 #define LED_UPDATE_NOW    0x80      //强制更新扫描标志,此位置位将强制更新扫描
-
-#define LED_COMM_MASK     0xe8       //可由SPI控制的位,均可内部复位
 
 extern struct _Led  Led;
 
@@ -61,13 +57,6 @@ void Led_Init(void);
 //-------------------------------任务函数-----------------------------
 //放入0.5s进程中扫描,以获得闪动效果,也可直接调用更新数据
 void Led_Task(void);
-
-//---------------------------测试状态判断与清除-----------------------------
-#define Led_IsTest()  (Led.Flag & LED_TEST)
-#define Led_ClrTest()  do{Led.Flag &= ~LED_TEST;}while(0)
-
-//-----------------------正常监测状态判断-----------------------------
-#define Led_IsNor()  (Led.Flag & LED_SYSTEM)
 
 /***************************************************************************
                     资源需求回调函数或所需定义声明
@@ -94,6 +83,12 @@ void Led_Task(void);
   #include "LedDrv_Spi.h"
   #define Led_cbSetBuf(pos, buf)  do{LedDrv_Spi_SetLed(pos, buf);}while(0)
 #endif
+      
+#ifdef SUPPORT_LED_1652
+  #include "LedDrv1652.h"
+  #define Led_cbSetBuf(pos, buf)  do{\
+      LedDrv1652.Buf[pos] = buf; LedDrv1652.UpdateMask |= 1 << (Pos); }while(0)
+#endif
 
 //-----------------------得到显示缓冲函数-----------------------------
 #ifdef SUPPORT_LCD
@@ -106,6 +101,10 @@ void Led_Task(void);
 
 #ifdef SUPPORT_LED_SPI
   #define Led_cbGetBuf(pos)  LedDrv_Spi_GetLed(pos)
+#endif
+      
+#ifdef SUPPORT_LED_1652
+  #define Led_cbGetBuf(pos)  (LedDrv1652.Buf[pos])
 #endif
 
 /***************************************************************************
@@ -126,6 +125,8 @@ void Led_Task(void);
 //形参为Flag位定义
 #ifdef SUPPORT_LCD
   void Led_cbAppendUpdate(unsigned char Flag);
+#elif defined(SUPPORT_LED_1652)//置全部更新标志
+  #define Led_cbAppendUpdate(Flag)  do{LedDrv1652.UpdateMask = 0xff;}while(0)
 #else
   #define Led_cbAppendUpdate(Flag)  do{}while(0)
 #endif
