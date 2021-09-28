@@ -12,8 +12,8 @@ struct _Spi3mIoCs Spi3mIo_CbCs[SPI3_MIO_CS_COUNT] = {
   {//TM1628片选信息
     SPI3_MIO_CPOL_H | SPI3_MIO_CPHA_END | SPI3_MIO_DORD_LSB, //上升沿锁存,低位在前，结束沿采数据
     8, //最后字节位长度为8
-    1, //位间电平保持时间, 这里为1us即500KHZ速率
-    2, //字节间电平保持时间
+    10, //位间电平保持时间, 这里为1us即500KHZ速率
+    20, //字节间电平保持时间
   }
 };
 

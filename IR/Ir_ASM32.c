@@ -75,7 +75,7 @@ void IrDrv_cbHwInit(void)
 void IR_TIM_IRQHandler(void)
 {
   //计数溢出中断部分
-  if(IR_TIM->SR & TIM_SR_UIF){ //上溢中断了
+  if((IR_TIM->DIER & TIM_DIER_UIE) && (IR_TIM->SR & TIM_SR_UIF)){ //上溢中断了
     IR_TIM->SR &= ~TIM_SR_UIF;
     IrDrv_IRQ(65535, 0);       //一周结束
     Ir_ASM32.IdieWidth = 0;     //切换为识别Idie模式
@@ -89,6 +89,8 @@ void IR_TIM_IRQHandler(void)
       _Ir_Debug.Pos = 0;
     #endif
   }
+  
+  
 
   //捕获中断部分
   if(IR_TIM->SR & (1 << (1 + IR_CH))){  

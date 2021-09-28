@@ -19,13 +19,11 @@ void TM1628_Init(unsigned char Gray)    //0~7越高越亮, 8关闭显示
   TM1628_cbHwInit();
   memset(&TM1628, 0, sizeof(struct _TM1628));
   
-  //非默认显示模式时,送出显示控制命令
-  #ifdef TM1628_DISP_MODE
-    TM1628.CommBuf[0] = TM1628_DISP_MODE;
-    TM1628_cbSendData(1);
-  #endif
+  //显示控制命令
+  TM1628.CommBuf[0] = TM1628_DISP_MODE;
+  TM1628_cbSendData(1);
   
-  TM1628.DirtyMask = 0xffff; //需更新数据
+  TM1628.DirtyMask = 0xffff; //更新数据
   TM1628_Task();  //更新一次显示
   
   TM1628_UpdateGray(Gray);//更新灰度并显示
@@ -75,6 +73,9 @@ void TM1628_Task(void)
 
   //暂采用一次性写完策略(代码少但通讯效率低)
   TM1628.CommBuf[0] = 0x40;//写数据到显示寄存器指令(b0:1),自动地址增加(b2)
+  TM1628_cbSendData(1);
+  //写显示存
+  TM1628.CommBuf[0] = 0xC0;//显示每次从头开始
   if(TM1628_cbIsTest()) 
     memset(&TM1628.CommBuf[1], 0xff, TM1628_LED_COUNT);
   else 
@@ -102,6 +103,7 @@ unsigned char TM1628_GetDisp(unsigned char UserPos)
 //---------------------------------更新灰度级别-------------------------
 void TM1628_UpdateGray(unsigned char Gray)    //0~7越高越亮, 8关闭显示
 {
-  TM1628.CommBuf[0] = Gray;
+  if(Gray > 7) TM1628.CommBuf[0] = 0x80;//关闭显示
+  else TM1628.CommBuf[0] = 0x88 | Gray;//指令0x80, 开显(B3) + 灰度
   TM1628_cbSendData(1);
 }
