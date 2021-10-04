@@ -120,4 +120,20 @@ void LedNum4_ErrX(unsigned char ErrX) //故障码
   Led.SegFlash |= 0x0f;  //闪动显示
 }
 
+//---------------------------压缩十进制数值显示-------------------------------
+//将Led.SegDisp中的数压缩显示，如000显示为0, 00.1显示为0.1
+//05.00显示为5.00，小数点位用于表示精度，故不压缩显示,为负值时，不压缩显示
+void LedNum4_NumDecZip(void) 
+{
+  //从高位SegDisp开始检查，若此项为0且无小数点则去掉不显示
+  for(unsigned char Pos = 3; Pos > 0; Pos--){//至少显示一位
+    if(Led.DotDisp & (1 << Pos)) break; //查找到小数点即结束了
+    unsigned char Disp = Led.SegDisp[Pos];
+    if(Disp == LED_SIGN_0) Led.SegDisp[Pos] = 0;//去除显示
+    else if(Disp == LED_SIGN__) break;//为负值时，结束了
+  }
+}
+
+
+
 

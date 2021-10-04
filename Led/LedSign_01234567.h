@@ -44,8 +44,8 @@
 #define LED_SIGN_I     0x30
 #define LED_SIGN_J     0x0E
 #define LED_SIGN_L     0x38
-#define LED_SIGN_N     0x54
-#define LED_SIGN_n     0x37  //Сдn
+#define LED_SIGN_N     0x37
+#define LED_SIGN_n     0x54  //Сдn
 #define LED_SIGN_O     0x5C
 #define LED_SIGN_P     0x73
 #define LED_SIGN_Q     0x67
