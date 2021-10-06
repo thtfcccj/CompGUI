@@ -16,17 +16,10 @@ static const unsigned char _ToHwLut[] = TM1628_TO_HW;
 //-----------------------------初始化函数-----------------------------
 void TM1628_Init(unsigned char Gray)    //0~7越高越亮, 8关闭显示
 {
-  TM1628_cbHwInit();
   memset(&TM1628, 0, sizeof(struct _TM1628));
-  
-  //显示控制命令
-  TM1628.CommBuf[0] = TM1628_DISP_MODE;
-  TM1628_cbSendData(1);
-  
-  TM1628.DirtyMask = 0xffff; //更新数据
-  TM1628_Task();  //更新一次显示
-  
-  TM1628_UpdateGray(Gray);//更新灰度并显示
+  TM1628.Gray = Gray;
+  TM1628_cbHwInit();
+  TM1628_Task();  //开机初始化并更新一次显示
 }
 
 //-------------------------按键字节转换为按键ID号----------------------
@@ -55,6 +48,20 @@ static unsigned char _ByteKey2KeyId(void)
 //约10ms调用一次
 void TM1628_Task(void)
 {
+  //周期强制更新与开机/周期初始化以支持热插入
+  if(!TM1628.PeriodInitTimer){
+    TM1628.PeriodInitTimer = TM1628_LED_PERIOD_INIT_OV;
+    //显示控制命令
+    TM1628.CommBuf[0] = TM1628_DISP_MODE;
+    TM1628_cbSendData(1);    
+    //更新灰度并显示
+    if(TM1628.Gray > 7) TM1628.CommBuf[0] = 0x80;//关闭显示
+    else TM1628.CommBuf[0] = 0x88 | TM1628.Gray;//指令0x80, 开显(B3) + 灰度
+    TM1628_cbSendData(1);
+    TM1628.DirtyMask = 0xffff; //强制更新显示
+  }
+  else TM1628.PeriodInitTimer--;
+  
   //按键扫描
   #ifdef SUPPORT_TM1628_KEY //支持按键时
     if(TM1628.Flag & TM1628_KEY_PERIOD){//按键扫描周期实时读取数据
@@ -67,14 +74,14 @@ void TM1628_Task(void)
     }
     TM1628.Flag |= TM1628_KEY_PERIOD;//下次为按键周期
   #endif
-  //数码管扫描: 策略为：若
+  //数码管扫描: 策略为：变化时写入
   unsigned short DirtyMask = TM1628.DirtyMask;
   if(!DirtyMask) return; //没有数据更新
 
   //暂采用一次性写完策略(代码少但通讯效率低)
   TM1628.CommBuf[0] = 0x40;//写数据到显示寄存器指令(b0:1),自动地址增加(b2)
   TM1628_cbSendData(1);
-  //写显示存
+  //写显存
   TM1628.CommBuf[0] = 0xC0;//显示每次从头开始
   if(TM1628_cbIsTest()) 
     memset(&TM1628.CommBuf[1], 0xff, TM1628_LED_COUNT);
@@ -103,7 +110,6 @@ unsigned char TM1628_GetDisp(unsigned char UserPos)
 //---------------------------------更新灰度级别-------------------------
 void TM1628_UpdateGray(unsigned char Gray)    //0~7越高越亮, 8关闭显示
 {
-  if(Gray > 7) TM1628.CommBuf[0] = 0x80;//关闭显示
-  else TM1628.CommBuf[0] = 0x88 | Gray;//指令0x80, 开显(B3) + 灰度
-  TM1628_cbSendData(1);
+  TM1628.Gray = Gray;
+  TM1628.PeriodInitTimer = 0;//下次立即生效
 }

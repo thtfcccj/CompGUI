@@ -33,13 +33,20 @@
   #define TM1628_COM_BUF   4
 #endif
 
+//定义周期初始化时间, 以用于断开或中途插入时恢复，16ms为单位, <=255
+#ifndef TM1628_LED_PERIOD_INIT_OV 
+  #define TM1628_LED_PERIOD_INIT_OV    255
+#endif
+
 /***************************************************************************
                               相关结构
 ***************************************************************************/
 struct _TM1628{
+  unsigned short DirtyMask;             //LED对应段脏，即需立即更新
   unsigned char DispBuf[TM1628_LED_COUNT];  //显示缓冲区,与硬件排列用查找表实现映射
   unsigned char CommBuf[TM1628_COM_BUF];//通讯缓冲区
-  unsigned short DirtyMask;             //LED对应段脏，即需立即更新
+  unsigned char Gray;//缓存的灰度值， 0~7越高越亮, 8关闭显示
+  unsigned char PeriodInitTimer;        //周期初始化定时器,以响应实时插入
   #ifdef SUPPORT_TM1628_KEY //支持按键时
     unsigned char Flag;                 //相关标志，见定义
   #endif  
