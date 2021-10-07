@@ -130,7 +130,7 @@ void LedNum4_NumDecZip(void)
     if(Led.DotDisp & (1 << Pos)) break; //查找到小数点即结束了
     unsigned char Disp = Led.SegDisp[Pos];
     if(Disp == LED_SIGN_0) Led.SegDisp[Pos] = 0;//去除显示
-    else if(Disp == LED_SIGN__) break;//为负值时，结束了
+    else if(Disp != 0) break;//有显示时(如负/数值/符号)，结束了
   }
 }
 
