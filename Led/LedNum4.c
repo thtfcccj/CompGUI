@@ -30,27 +30,28 @@ void LedNum4_Disp(signed short Data,
   
   //填充正负号显示
   unsigned short Value;
-  Pos = (Flag & 0x03) + 1; //最高位
+  Pos = (Flag & 0x03) + 1; //最高位,最大==4
   
   if(Data < 0){//负值时
     if(Flag & 0x04){//允许显示负值时
+      if(Pos == 4) Pos = 3;//截取显示
       Led.SegDisp[Pos] = LED_SIGN__;//负号  
-      if(Data < -999) Data = -999; //负超限了          
+      if(Data < -999) Data = -999; //负超限了(暂未支持截取显示)          
       Value = (unsigned short)(0 - Data); //置为正
     }
     else Value = 0;//不允许显示负时,显示0
   }
   else{//正值时
     Value = (unsigned short)Data;
-    //错误修正
-    if((Pos == 4) && (Value > 9999)) Value = 9999;//截取显示
-    else if((Pos == 3) && (Value > 999)) Pos = 4;//超量程显示
-    else if((Pos == 2) && (Value > 99)) Pos = 3;//超量程显示
-    
-    if(((Flag & 0x0c) == 0x0c)) 
-      Led.SegDisp[Pos] = LED_SIGN_0;//无负时填充0
-    else if((Flag & 0x04)){//符号占一位时
-      if(Data > 999) Pos++; //超限了,符号位允许显示最高位值
+    //错误修正:
+    if(Pos == 4){//4位显示时
+      if(Value > 9999) Value = 9999;//超量程截取显示
+    }
+    else{//3位及以下时
+      if((Pos == 3) && (Value > 999)) Value = 999;//3位显示时，超量程截取显示
+      else if((Pos == 2) && (Value > 99)) Value = 99;//2位显示时，超量程截取显示
+      if((Flag & 0x0c) == 0x0c) //允许显示正时
+        Led.SegDisp[Pos] = LED_SIGN_0;//上一位填充0表示正
     }
   }
   
