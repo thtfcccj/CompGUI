@@ -58,6 +58,14 @@
   #include "LedSign_02476135.h"
 #endif
 
+#ifdef SUPPORT_LED_SIGN_71234650
+  #include "LedSign_71234650.h"
+#endif
+
+#ifdef SUPPORT_LED_SIGN_51432067
+  #include "LedSign_51432067.h"
+#endif
+
 //---------------------------4位共阳数码管显示0-9字模---------------------------
 extern __flash const unsigned char LED_SIGN_NumLut[];
 
