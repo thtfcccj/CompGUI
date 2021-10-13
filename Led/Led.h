@@ -21,10 +21,14 @@
 #endif
 
 //定义可独立控制段码闪动的段闪动控制数,可用于扩展指示灯,< LED_LED_COUNT
-#define LED_SEG_FLASH_COUNT        3
+#ifndef LED_SEG_FLASH_COUNT  
+  #define LED_SEG_FLASH_COUNT        3
+#endif
 
 //定义定时器,决定闪动频率
-#define LED_FLASH_TIMER_COUNT      32
+#ifndef LED_FLASH_TIMER_COUNT
+  #define LED_FLASH_TIMER_COUNT      32
+#endif
 
 /***************************************************************************
                               相关结构
@@ -98,6 +102,12 @@ void Led_Task(void);
   #define Led_cbSetBuf(pos, buf)  do{TM1628_UpdateDisp(pos, buf); }while(0)
 #endif
 
+#ifdef SUPPORT_TM1628M
+  #include "TM1628.h" //注意路径为TM1628M
+  extern struct _TM1628 TM1628[]; //注意实例化时，固定用此定义
+  #define Led_cbSetBuf(pos, buf)  do{TM1628_UpdateDisp(&TM1628[0], pos, buf); }while(0)
+#endif
+
 //-----------------------得到显示缓冲函数-----------------------------
 #ifdef SUPPORT_LCD
   #define Led_cbGetBuf(pos)  (LcdDrv.Buf[(pos) + LCD_BUF_MD_START])
@@ -117,6 +127,10 @@ void Led_Task(void);
 
 #ifdef SUPPORT_TM1628
   #define Led_cbGetBuf(pos)  (TM1628_GetDisp(pos))
+#endif
+
+#ifdef SUPPORT_TM1628M
+  #define Led_cbGetBuf(pos)  TM1628_GetDisp(&TM1628[0], pos)
 #endif
 
 /***************************************************************************
