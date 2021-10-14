@@ -50,6 +50,7 @@ void TM1628_Task(struct _TM1628 *pTM1628)
 {
   unsigned char Ch = pTM1628->Ch;
   const struct _TM1628Static *pStatic = TM1628_cbGetStatic(Ch);
+  
   //周期强制更新与开机/周期初始化以支持热插入
   if(!pTM1628->PeriodInitTimer){
     pTM1628->PeriodInitTimer = TM1628_LED_PERIOD_INIT_OV;
@@ -66,19 +67,14 @@ void TM1628_Task(struct _TM1628 *pTM1628)
   
   //按键扫描
   #ifdef SUPPORT_TM1628_KEY //支持按键时
-  if(pStatic->KeyByteCount){//本实例有按键时
-    if(pTM1628->Flag & TM1628_KEY_PERIOD){//按键扫描周期实时读取数据
-      pTM1628->Flag &= ~TM1628_KEY_PERIOD;
+  if(pStatic->KeyByteCount){//本实例有按键时,强制周期读取以实现按键时间检测。
       TM1628_CommBuf[0] = 0x42;//读键扫数据
       TM1628_cbFullKey(Ch, pStatic->KeyByteCount);
-      pTM1628->Flag &= ~TM1628_KEY_ID_MASK;
-      pTM1628->Flag |= _ByteKey2KeyId(pTM1628, pStatic->KeyByteCount);
+      pTM1628->KeyId = _ByteKey2KeyId(pTM1628, pStatic->KeyByteCount);
       TM1628_cbKeyUpdate(pTM1628); //键值更新通报
-      return;
-    }
-    pTM1628->Flag |= TM1628_KEY_PERIOD;//下次为按键周期
   }
   #endif
+  
   //数码管扫描: 策略为：变化时写入
   unsigned short DirtyMask = pTM1628->DirtyMask;
   if(!DirtyMask) return; //没有数据更新

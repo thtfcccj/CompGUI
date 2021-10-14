@@ -61,13 +61,9 @@ struct _TM1628{
   unsigned char PeriodInitTimer;        //周期初始化定时器,以响应实时插入
   unsigned char Ch;                     //此TM1628通道号
   #ifdef SUPPORT_TM1628_KEY //支持按键时
-    unsigned char Flag;                 //相关标志，见定义
+    unsigned char KeyId;               //读取的键值
   #endif  
 };
-
-//相关标志定义为
-#define TM1628_KEY_PERIOD   0x80 //按键读取周期，否则在显示更新周期
-#define TM1628_KEY_ID_MASK  0x7f //扫描出的键值ID, >=用户定义时无按键
 
 extern unsigned char TM1628_CommBuf[TM1628_COM_BUF];//内建的通讯缓冲区
 /***************************************************************************
