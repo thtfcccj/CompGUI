@@ -110,8 +110,14 @@ void TM1628_cbSendData(unsigned char SendLen);
 
 //----------------------------按收按键值-------------------------------------
 #ifdef SUPPORT_TM1628_KEY //支持按键时
-  //TM1628.CommBuf[0]为已填充为读键值的1Byte指令
+  //TM1628.CommBuf[0]为已填充为读键值的1Byte指令,读回键值起始于TM1628。CommBuf[1]
   void TM1628_cbFullKey(unsigned char KeyByteLen);
+#endif
+
+//--------------------------键值更新通报-----------------------------
+#ifdef SUPPORT_TM1628_KEY //支持按键时
+  //获取到键值时将调用此函数(不管是否有按键),键值ID位于TM1628_KEY_ID_MASK
+  void TM1628_cbKeyUpdate(void);
 #endif
 
 //--------------------------是否在测试状态-----------------------------
