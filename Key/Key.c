@@ -16,7 +16,7 @@ struct _Key Key;
 void Key_Init(void)
 {
   Key.Index = 0;
-  Key.KeyId = 0xff;
+  Key.KeyId = KEY_INVALID_KEY;
   Key_cbCfgIO();
 }
 
@@ -27,7 +27,7 @@ void Key_Task(void)
   //=======================获得原始键值======================================
   #ifdef SUPPORT_KEY_ID//获得键值ID
     KeySize_t KeyId = Key_cbGetOrgKeyId();
-    if(KeyId != _INVALID_KEY) KeyId = Key_cbKeyId2Key(KeyId); //直接获得键值
+    if(KeyId != KEY_INVALID_KEY) KeyId = Key_cbKeyId2Key(KeyId); //直接获得键值
   #endif
     
   #ifdef SUPPORT_KEY_MASK //获得键值掩码
@@ -40,7 +40,7 @@ void Key_Task(void)
   #endif
     
   //==========================按键处理======================================
-	if(KeyId != _INVALID_KEY){//有按键时
+	if(KeyId != KEY_INVALID_KEY){//有按键时
     if(Key.KeyId !=  KeyId){	//键值变化,重新开始检测新的按键
       Key.KeyId =  KeyId;//记住当前按键值
       Key.Index = 0;
@@ -63,7 +63,7 @@ void Key_Task(void)
     }
     //最后复位
     Key.Index = 0;
-    Key.KeyId = _INVALID_KEY;
+    Key.KeyId = KEY_INVALID_KEY;
     Key_cbRlsNotify();//松开按键通报
   }
 }

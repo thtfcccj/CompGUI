@@ -7,7 +7,9 @@
 ****************************************************************************/
 #ifndef __KEY_H
 #define __KEY_H
-
+#ifdef SUPPORT_EX_PREINCLUDE//不支持Preinlude時
+  #include "Preinclude.h"
+#endif
 
 /*******************************************************************************
 					                  全局定义说明
@@ -15,6 +17,9 @@
 
 //是否支持硬按键功能,不支持是不含此模块(如红外等可以不支持)
 //#define SUPPORT_KEY
+
+//通报按键为独立，否则分别通报,定义此项后，键值为原始，并应确保键值<64个
+//#define SUPPORT_KEY_NOTIFY_ALONE
 
 /*******************************************************************************
 					                  内部配置区
@@ -27,14 +32,18 @@
 
 #ifdef SUPPORT_KEY_ID 
   #define KeySize_t    unsigned char  //不需定义键值
-  #define _INVALID_KEY    0xff         //定义无效键值
+  #ifndef KEY_INVALID_KEY
+    #define KEY_INVALID_KEY    0xff         //定义无效键值
+  #endif
 #endif
 
 #ifdef SUPPORT_KEY_MASK //掩码时，不定义默认只响应5个按键
   #ifndef KeySize_t
     #define KeySize_t    unsigned char
   #endif
-  #define _INVALID_KEY    0         //定义无效键值
+  #ifndef KEY_INVALID_KEY
+    #define KEY_INVALID_KEY    0         //定义无效键值
+  #endif
 #endif
 
 /*******************************************************************************
@@ -78,33 +87,60 @@ unsigned char Key_cbGetOrgKeyId(void);
 //SUPPORT_KEY_MASK时需实现
 unsigned char Key_cbIsKeySel(unsigned char KeySel);
 
-//------------------------判断当前保持按键是否为加速键------------------------
-//SUPPORT_KEY_ACCELERATE时需实现,一般将上下键设置为加速键
-unsigned char Key_cbIsAccelarateKey(KeySize_t Key);
-
 /*******************************************************************************
 					                    回调函数-上层
 *******************************************************************************/
 
 //----------------------------由物理键值ID得到键值-----------------------------
 //SUPPORT_KEY_ID时需实现
-KeySize_t Key_cbKeyId2Key(KeySize_t KeyId);
+#ifdef SUPPORT_KEY_NOTIFY_ALONE //独立ID时，在用户层转换
+  #define Key_cbKeyId2Key(keyId)  (keyId)
+#else //在此层实现
+  KeySize_t Key_cbKeyId2Key(KeySize_t KeyId);
+#endif
+
+//-------------------------------按键单个通报函数---------------------------------
+//用回调的方式实现按键处理
+#ifdef SUPPORT_KEY_NOTIFY_ALONE
+  //KeyState定义为： b7:6: 按键通报状态:0短按,1长按,2保持，3启动(0xc0)或释放(0xff)
+  //                 b5:0: 当前键值ID
+  void Key_cbNotify(KeySize_t KeyState);
+#endif
 
 //-------------------------------短按键通报函数---------------------------------
 //用回调的方式实现按键处理
-void Key_cbShortNotify(KeySize_t Key);
+#ifdef SUPPORT_KEY_NOTIFY_ALONE
+  #define Key_cbShortNotify(key)  Key_cbNotify(0x00 | (key))
+#else
+  void Key_cbShortNotify(KeySize_t Key);
+#endif 
 
 //-------------------------------长按键通报函数---------------------------------
 //不支持时可实现为空
-void Key_cbLongNotify(KeySize_t Key);
+#ifdef SUPPORT_KEY_NOTIFY_ALONE
+  #define Key_cbLongNotify(key)  Key_cbNotify(0x04 | (key))
+#else
+  void Key_cbLongNotify(KeySize_t Key);
+#endif 
 
 //-------------------------------保持按键通报函数------------------------------
 //不支持时可实现为空
-void Key_cbKeepNotify(KeySize_t Key);
+#ifdef SUPPORT_KEY_NOTIFY_ALONE
+  #define Key_cbKeepNotify(key)  Key_cbNotify(0x80 | (key))
+#else
+  void Key_cbKeepNotify(KeySize_t Key);
+#endif 
 
 //------------------------------松开按键通报函数------------------------------
 //可用于支持按键加速，不支持时可实现为空
-void Key_cbRlsNotify();
-
+#ifdef SUPPORT_KEY_NOTIFY_ALONE
+  #define Key_cbRlsNotify()  Key_cbNotify(0xff)
+#else
+  void Key_cbRlsNotify(void);
+#endif 
 #endif
+
+
+
+
 
