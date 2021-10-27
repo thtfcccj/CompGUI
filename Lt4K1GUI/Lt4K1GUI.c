@@ -23,18 +23,20 @@ void Lt4K1Gui_LedTask(void)
   
   //这里只负责当前被激活指示灯的显示更新
   unsigned char IsOn; //当前是否显示
-  if(!Lt4K1Gui.LtCount){//数值为0时，全显
-    IsOn = 1; 
-  }
-  else if(!Lt4K1Gui.LtIndex){//下个周期开始了，首个周期亮
+  if(!Lt4K1Gui.LtIndex){//下个周期开始了，首个周期亮
     IsOn = 1;
-    Lt4K1Gui.LtIndex = (Lt4K1Gui.LtCount + LT4K1_GUI_LED_IDIE) * 2;
+    if(Lt4K1Gui.LtCount) //非0时闪
+       Lt4K1Gui.LtIndex = (Lt4K1Gui.LtCount + LT4K1_GUI_LED_IDIE) * 2;
+    else Lt4K1Gui.LtIndex = LT4K1_GUI_LED_IDIE * 4; //0时亮双周期
   }
   else{
     Lt4K1Gui.LtIndex--;
     if(Lt4K1Gui.LtIndex >= (LT4K1_GUI_LED_IDIE * 2)){//指示周期
-      if(Lt4K1Gui.LtIndex & 0x01) IsOn = 0;//单数周期灭
-      else IsOn = 1; //双周期亮
+      if(Lt4K1Gui.LtCount){ //非0时闪
+        if(Lt4K1Gui.LtIndex & 0x01) IsOn = 0;//单数周期灭
+        else IsOn = 1; //双周期亮
+      }
+      else IsOn = 1; //0时亮周期全亮
     }
     else IsOn = 0;//停显周期亮
   }
