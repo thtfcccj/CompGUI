@@ -26,6 +26,10 @@
   #define TM1628_LED_MAX_COUNT      (2 * 4 + 2) //默认4位数码管+1组指示灯 
 #endif
 
+#ifndef TM1628_LED_COUNT
+  #define TM1628_LED_COUNT TM1628_LED_MAX_COUNT
+#endif
+
 //定义指令缓冲区大小
 #if TM1628_LED_MAX_COUNT > 4
   #define TM1628_COM_BUF   (TM1628_LED_MAX_COUNT + 2)

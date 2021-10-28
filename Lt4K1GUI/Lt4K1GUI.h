@@ -16,8 +16,8 @@
 //长按为功能2：长按键2~5s时松手，进入功能2， 一般实现为自检继电器输出等
 //进入菜单：短按后长按键2~5s时松手 菜单灯闪动提示对应菜单项，其它灯常亮
 //选择菜单：在菜单中按短按键循环切换菜单，以指菜单灯闪动次数表示菜单位置
-//进入调整：在选择菜单中长按进入,此时除最高位灯外，其它灯灭，
-//          注：十进制低中高位灯常亮为0，闪动次数为对应值。
+//进入调整：在选择菜单中长按进入,此时除最高调整位灯外，其它灯灭，
+//          注：十进制低中高位灯长亮为0，否则闪动次数为对应值。
 //调整数值：每短按一次键增加一个值，超过最大时自动从新开始
 //切换调整位：每长按一次键切换至到最低位显示(会首先到亮周期)
 //保存并退至菜单选择：最低位调整结束时，再次长按保存并退至菜单选择。
@@ -31,13 +31,21 @@
 //SUPPORT_LT4K1_GUI 
 
 //定义指示灯停止显示的时间,<255 - 10*2;
-#define   LT4K1_GUI_LED_IDIE        6   
+#ifndef LT4K1_GUI_LED_IDIE
+  #define   LT4K1_GUI_LED_IDIE          4   
+#endif
 
 //按键时刻判断
-#define   LT4K1_GUI_KEY_VILID       2    //定义有效按键时间,>=2
-#define   LT4K1_GUI_KEY_LONG        25   //定义长按键时间
+#ifndef LT4K1_GUI_KEY_VILID
+  #define   LT4K1_GUI_KEY_VILID       2    //定义有效按键时间,>=2
+#endif
+#ifndef LT4K1_GUI_KEY_LONG
+  #define   LT4K1_GUI_KEY_LONG        25   //定义长按键时间
+#endif
 
-#define   LT4K1_GUI_QUIT_OV         250    //退出菜单计时器超时值
+#ifndef LT4K1_GUI_QUIT_OV
+  #define   LT4K1_GUI_QUIT_OV         250  //退出菜单计时器超时值
+#endif
 
 /*************************************************************************
                                相关结构
@@ -73,7 +81,7 @@ extern struct _Lt4K1Gui Lt4K1Gui;
 void Lt4K1Gui_Init(void);
 
 //----------------------------------任务函数----------------------------
-//建议放入64mS进程中
+//建议放入16mS进程中
 void Lt4K1Gui_Task(void);
 
 //--------------------------指示灯任务函数-------------------------
@@ -149,7 +157,7 @@ unsigned short Lt4K1Gui_cbGetCurVol(unsigned char Sel); //得到当前值
 unsigned short Lt4K1Gui_cbGetMinVol(unsigned char Sel); //得到最小值
 unsigned short Lt4K1Gui_cbGetMaxVol(unsigned char Sel); //得到最大值
 //-1:短按，2，长按，>=1菜单内保存
-void Lt4K1Gui_cbSetCurVol(signed char Sel, unsigned char CurVol);
+void Lt4K1Gui_cbSetCurVol(signed char Sel, unsigned short CurVol);
 
 #endif //#define __LT4K1_GUI_H
 

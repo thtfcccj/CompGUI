@@ -19,21 +19,28 @@ void Lt4K1Gui_Init(void)
 //放入256mS进程中
 void Lt4K1Gui_LedTask(void)
 {
+  //=========================自动退出菜单处理===============================
+  unsigned char ePrvState = Lt4K1Gui.eState;
+  if(Lt4K1Gui.QuitIndex){
+    Lt4K1Gui.QuitIndex--;
+    if(!Lt4K1Gui.QuitIndex)  Lt4K1Gui_QuitMenu(); //时间到，退出菜单
+  }
+
   if(Lt4K1Gui.eState < Lt4K1Gui_eMenuSel) return;//不在受控状态
   
-  //这里只负责当前被激活指示灯的显示更新
+  //========================当前被激活指示灯的显示更新=======================
   unsigned char IsOn; //当前是否显示
   if(!Lt4K1Gui.LtIndex){//下个周期开始了，首个周期亮
     IsOn = 1;
     if(Lt4K1Gui.LtCount) //非0时闪
-       Lt4K1Gui.LtIndex = (Lt4K1Gui.LtCount + LT4K1_GUI_LED_IDIE) * 2;
+       Lt4K1Gui.LtIndex = Lt4K1Gui.LtCount * 2 + ((LT4K1_GUI_LED_IDIE * 2) - 1);
     else Lt4K1Gui.LtIndex = LT4K1_GUI_LED_IDIE * 4; //0时亮双周期
   }
   else{
     Lt4K1Gui.LtIndex--;
     if(Lt4K1Gui.LtIndex >= (LT4K1_GUI_LED_IDIE * 2)){//指示周期
       if(Lt4K1Gui.LtCount){ //非0时闪
-        if(Lt4K1Gui.LtIndex & 0x01) IsOn = 0;//单数周期灭
+        if(!(Lt4K1Gui.LtIndex & 0x01)) IsOn = 0;//双数周期灭
         else IsOn = 1; //双周期亮
       }
       else IsOn = 1; //0时亮周期全亮
@@ -66,8 +73,7 @@ static unsigned char _GetDecBitNum(unsigned short Num,
 static void _MenuEnterInit(void)
 {
   Lt4K1Gui_cbOnLight(0xff); //数值全亮,
-  Lt4K1Gui.Sel = 1;//从菜单1开始(其它亮，菜单一闪一闪表示进入)
-  Lt4K1Gui.LtCount = 1;
+  Lt4K1Gui.LtCount = Lt4K1Gui.Sel;
   Lt4K1Gui.LtIndex = 0; //重新初始化
   Lt4K1Gui.eState = Lt4K1Gui_eMenuSel;//菜单内了
 }
@@ -77,7 +83,7 @@ static void _MenuSelSwitch(void)
 {
   if(Lt4K1Gui.Sel < Lt4K1Gui_cbGetMaxMenuSel())
     Lt4K1Gui.Sel++;
-  else Lt4K1Gui.Sel = 1; //回环了
+  else Lt4K1Gui.Sel = 0; //回环了
   Lt4K1Gui.LtCount = Lt4K1Gui.Sel;//更新闪动次数
   Lt4K1Gui.LtIndex = 0; //重头闪动
 }
@@ -88,7 +94,16 @@ static void _NumEnterInit(unsigned char DecBit) //对应进入制调整位
   unsigned char Bit = 1 << (1 + DecBit);
   Lt4K1Gui_cbOnLight(Bit); //调整位亮
   Lt4K1Gui_cbOffLight(~Bit); //其它全灭
-  Lt4K1Gui.LtCount = _GetDecBitNum(Lt4K1Gui.CurVol, DecBit);//此位值
+  //切换时自动边界纠错
+  unsigned short Max = Lt4K1Gui_cbGetMaxVol(Lt4K1Gui.Sel);
+  unsigned short Vol = Lt4K1Gui.CurVol;  
+  if(Vol > Max) Vol = Max;
+  else{
+    unsigned short Min = Lt4K1Gui_cbGetMinVol(Lt4K1Gui.Sel);
+    if(Vol < Min) Vol = Min;
+  }
+  Lt4K1Gui.CurVol = Vol;
+  Lt4K1Gui.LtCount = _GetDecBitNum(Vol, DecBit);//此位值
   Lt4K1Gui.LtIndex = 0; //重新初始化
   Lt4K1Gui.eState = (enum _Lt4K1Gui_eState)(DecBit + Lt4K1Gui_eNumH);//对应调整位
 }
@@ -99,11 +114,21 @@ static void _NumChange(void)
   unsigned char BitPos = Lt4K1Gui.eState - Lt4K1Gui_eNumH;
   unsigned short Vol = Lt4K1Gui.CurVol;
   unsigned char BNum = _GetDecBitNum(Vol, BitPos);//此位值
-  Vol -= _DecBit2Mask[BitPos] * BNum; //去此位
+  unsigned short DecMask = _DecBit2Mask[BitPos];
+  Vol -= DecMask * BNum; //去此位
   BNum++;//增加了，需检查是否回环
-  if(BNum > _GetDecBitNum(Lt4K1Gui_cbGetMaxVol(Lt4K1Gui.Sel), BitPos))
-    BNum = _GetDecBitNum(Lt4K1Gui_cbGetMinVol(Lt4K1Gui.Sel), BitPos);
-  Lt4K1Gui.CurVol = Vol + _DecBit2Mask[BitPos] * BNum; //加此位
+  unsigned short Max = Lt4K1Gui_cbGetMaxVol(Lt4K1Gui.Sel);
+  if(BNum >= 10){//回环了
+    if(Max / (DecMask * 10)) BNum = 0; //高位有值时可到底
+    else{//无高位时，本位只能取最低
+      BNum = _GetDecBitNum(Lt4K1Gui_cbGetMinVol(Lt4K1Gui.Sel), BitPos);
+    }
+  }
+  else if((Max / DecMask) < 10){//增加有限制了
+    if(BNum > _GetDecBitNum(Max, BitPos))
+      BNum = _GetDecBitNum(Lt4K1Gui_cbGetMinVol(Lt4K1Gui.Sel), BitPos);
+  }
+  Lt4K1Gui.CurVol = Vol + DecMask * BNum; //加此位
   Lt4K1Gui.LtCount = BNum;//更新闪动次数
   Lt4K1Gui.LtIndex = 0; //重头闪动  
 }
@@ -117,29 +142,25 @@ void Lt4K1Gui_Task(void)
   //检查按键的按下与松开时刻
   if(Lt4K1Gui_cbIsKeyDown()){//一直按着计时
     if(Lt4K1Gui.KeyIndex < 255) Lt4K1Gui.KeyIndex++;
+    //直到需到长按
+    if(Lt4K1Gui.KeyIndex != LT4K1_GUI_KEY_LONG) return;
+    KeyState = 2;//长按了
   }
   else{//没按或松开了
-    if((Lt4K1Gui.KeyIndex >= LT4K1_GUI_KEY_VILID) &&  //按键有效了
-       (Lt4K1Gui.KeyIndex < (LT4K1_GUI_KEY_LONG * 3))){//长按时间不能过长
-      if(Lt4K1Gui.KeyIndex < LT4K1_GUI_KEY_LONG) KeyState = 1;//短按
-      else  KeyState = 2;//长按
-      Lt4K1Gui.QuitIndex = LT4K1_GUI_QUIT_OV;//有效按键触发了
-      Lt4K1Gui_cbKeyValidNotify(KeyState); //有效按键通报
-    }
-    //else KeyState = 0;
+    unsigned char KeyIndex = Lt4K1Gui.KeyIndex;
     Lt4K1Gui.KeyIndex = 0;//重新计数
+    if((KeyIndex >= LT4K1_GUI_KEY_VILID) &&  //按键有效了
+       (KeyIndex < LT4K1_GUI_KEY_LONG)){//为短按了
+       KeyState = 1;//短按了
+    }
+    else return; //无效
   }
-  
-  //=========================自动退出菜单处理===============================
-  unsigned char ePrvState = Lt4K1Gui.eState;
-  if(Lt4K1Gui.QuitIndex){
-    Lt4K1Gui.QuitIndex--;
-    if(!Lt4K1Gui.QuitIndex)  Lt4K1Gui_QuitMenu(); //时间到，退出菜单
-  }
-  else return; //没在菜单内
-  if(KeyState == 0) return; //当前无按键
+  //按键有效了
+  Lt4K1Gui.QuitIndex = LT4K1_GUI_QUIT_OV;//有效按键触发了
+  Lt4K1Gui_cbKeyValidNotify(KeyState); //有效按键通报
 
   //===========================有效按键处理=============================
+  unsigned short Max;
   switch(Lt4K1Gui.eState){
     //空闲状态，准备识别长按
     case Lt4K1Gui_eIdie: 
@@ -149,6 +170,7 @@ void Lt4K1Gui_Task(void)
     case Lt4K1Gui_eFun0: //功能0状态
       if(KeyState == 2){//长按进入菜单
         Lt4K1Gui_cbEnterGUI();
+        Lt4K1Gui.Sel = 1;//从菜单1开始(其它亮，菜单一闪一闪表示进入)
         _MenuEnterInit();
       }
       else Lt4K1Gui_QuitMenu(); //短按退出菜单
@@ -159,8 +181,16 @@ void Lt4K1Gui_Task(void)
     case Lt4K1Gui_eMenuSel: //菜单选择状态按键
       if(KeyState == 1) _MenuSelSwitch(); //短按键菜单项切换
       else{//长按数值的进入最高位调整
-        Lt4K1Gui_cbGetCurVol(Lt4K1Gui.Sel); //加载原始值  
-        _NumEnterInit(0);
+        if(Lt4K1Gui.Sel == 0){//主动退出菜单
+          Lt4K1Gui_QuitMenu(); 
+          return;
+        }
+        //加载原始值与决定调整位
+        Lt4K1Gui.CurVol = Lt4K1Gui_cbGetCurVol(Lt4K1Gui.Sel); 
+        unsigned short Max = Lt4K1Gui_cbGetMaxVol(Lt4K1Gui.Sel);
+        if(Max >= 100) _NumEnterInit(0);//有最高位
+        else if(Max >= 10) _NumEnterInit(1);//有中间位
+        else _NumEnterInit(2);//只有最低位
       }
     break;
     case Lt4K1Gui_eNumH: 
@@ -177,6 +207,7 @@ void Lt4K1Gui_Task(void)
           _NumEnterInit(Pos - Lt4K1Gui_eNumH); //下一位初始化
         }
       }
+    break;
     default: Lt4K1Gui_QuitMenu(); break;
   }
 }
