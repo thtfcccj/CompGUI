@@ -55,7 +55,7 @@ void Lt4K1Gui_LedTask(void)
 //------------------------------退出菜单函数----------------------------
 void Lt4K1Gui_QuitMenu(void)
 {
-  if(Lt4K1Gui.eState >= Lt4K1Gui_eMenuSel)
+  //if(Lt4K1Gui.eState >= Lt4K1Gui_eMenuSel)
     Lt4K1Gui_cbQuitGUI();
   Lt4K1Gui.eState = Lt4K1Gui_eIdie;
 }
@@ -134,14 +134,21 @@ static void _NumChange(void)
 }
 
 //----------------------------------任务函数----------------------------
-//建议放入64mS进程中
+//建议放入16mS或32ms进程中
 void Lt4K1Gui_Task(void)
 {
   //===========================得到当前按键状态=============================
   unsigned char KeyState = 0; //0无效,1短按 2长按
   //检查按键的按下与松开时刻
   if(Lt4K1Gui_cbIsKeyDown()){//一直按着计时
-    if(Lt4K1Gui.KeyIndex < 255) Lt4K1Gui.KeyIndex++;
+    if(Lt4K1Gui.KeyIndex < (LT4K1_GUI_KEY_OV - 1)) Lt4K1Gui.KeyIndex++;
+    #ifdef SUPPORT_LT4K1_GUI_FUN3     //支持功能3时
+      else if(Lt4K1Gui.KeyIndex == (LT4K1_GUI_KEY_OV - 1)){
+        Lt4K1Gui.KeyIndex = LT4K1_GUI_KEY_OV;//结束
+        if(Lt4K1Gui.eState == Lt4K1Gui_eFun0) //进入功能3
+          Lt4K1Gui_cbSetCurVol(-3, 0); 
+      }
+    #endif
     //直到需到长按
     if(Lt4K1Gui.KeyIndex != LT4K1_GUI_KEY_LONG) return;
     KeyState = 2;//长按了
@@ -162,21 +169,25 @@ void Lt4K1Gui_Task(void)
   //===========================有效按键处理=============================
   unsigned short Max;
   switch(Lt4K1Gui.eState){
-    //空闲状态，准备识别长按
+    //空闲状态，准备识别长短按
     case Lt4K1Gui_eIdie: 
       Lt4K1Gui.eState = (enum _Lt4K1Gui_eState)KeyState;//1,2对应
-      Lt4K1Gui_cbSetCurVol(0 - KeyState, 0);
+      if(KeyState == 1) //短按进入功能1
+        Lt4K1Gui_cbSetCurVol(-1, 0); 
       break;
     case Lt4K1Gui_eFun0: //功能0状态
-      if(KeyState == 2){//长按进入菜单
+      if(KeyState == 2)//长按进入功能2
+        Lt4K1Gui_cbSetCurVol(-2, 0);             
+      else Lt4K1Gui_QuitMenu(); //短按退出
+      break;
+    case Lt4K1Gui_eFun1://功能1状态
+      if(KeyState == 1){//短按进入菜单
         Lt4K1Gui_cbEnterGUI();
-        Lt4K1Gui.Sel = 1;//从菜单1开始(其它亮，菜单一闪一闪表示进入)
+        //Lt4K1Gui.Sel = 1;//从菜单1开始(其它亮，菜单一闪一闪表示进入)
+        Lt4K1Gui.Sel = 0;//从菜单0开始方便直接退出(不响声音，但指示灯全亮)
         _MenuEnterInit();
       }
-      else Lt4K1Gui_QuitMenu(); //短按退出菜单
-      break;
-    case Lt4K1Gui_eFun1://功能1状态按键直接退出菜单    
-      Lt4K1Gui_QuitMenu(); 
+      else Lt4K1Gui_QuitMenu(); //长按退出菜单
       break;
     case Lt4K1Gui_eMenuSel: //菜单选择状态按键
       if(KeyState == 1) _MenuSelSwitch(); //短按键菜单项切换
