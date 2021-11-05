@@ -57,6 +57,7 @@ void Lt4K1Gui_QuitMenu(void)
 {
   //if(Lt4K1Gui.eState >= Lt4K1Gui_eMenuSel)
     Lt4K1Gui_cbQuitGUI();
+  Lt4K1Gui.QuitIndex = 0;
   Lt4K1Gui.eState = Lt4K1Gui_eIdie;
 }
 
@@ -178,7 +179,7 @@ void Lt4K1Gui_Task(void)
     case Lt4K1Gui_eFun0: //功能0状态
       if(KeyState == 2)//长按进入功能2
         Lt4K1Gui_cbSetCurVol(-2, 0);             
-      else Lt4K1Gui_QuitMenu(); //短按退出
+      else Lt4K1Gui_cbSetCurVol(-4, 0); //短按功能4
       break;
     case Lt4K1Gui_eFun1://功能1状态
       if(KeyState == 1){//短按进入菜单

@@ -45,6 +45,9 @@ void BuzzerDrv_Start(unsigned short Hz)
   unsigned short Pr = ((unsigned long)SYS_MHZ * 1000000) / Div / Hz;
 	BZ_TIM->ARR = Pr;			     //设定计数器自动重装值 
 	BZ_TIM->BZ_CCR = Pr >> 1; //分频值设为50%
+  #ifdef BZ_CCRN //配置有负极性时(配置需反向)
+  	BZ_TIM->BZ_CCRN = Pr >> 1; //分频值设为50%
+  #endif
   BZ_TIM->CR1 = TIM_CR1_CEN | TIM_CR1_ARPE;    //开启定时器并启用预装载
   EnOutBZ(); //允许输出
 }
