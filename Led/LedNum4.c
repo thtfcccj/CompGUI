@@ -7,11 +7,12 @@
 #include "LedSign.h"
 
 #include <string.h>
-//-----------------------4位共阳数码管显示0-9字模----------------------
+//-----------------------4位共阳数码管显示0-F字模----------------------
 
-__flash const unsigned char LED_SIGN_NumLut[10] = \
+__flash const unsigned char LED_SIGN_NumLut[] = \
 {LED_SIGN_0,LED_SIGN_1,LED_SIGN_2,LED_SIGN_3,LED_SIGN_4,
- LED_SIGN_5,LED_SIGN_6,LED_SIGN_7,LED_SIGN_8,LED_SIGN_9};
+ LED_SIGN_5,LED_SIGN_6,LED_SIGN_7,LED_SIGN_8,LED_SIGN_9,
+ LED_SIGN_A,LED_SIGN_B,LED_SIGN_C,LED_SIGN_D,LED_SIGN_E,LED_SIGN_F};
 
 //----------------------4位数显示函数-------------------------------
 //靠右显示,为负时显示负号,指定小数点

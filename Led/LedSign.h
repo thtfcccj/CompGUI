@@ -66,7 +66,7 @@
   #include "LedSign_51432067.h"
 #endif
 
-//---------------------------4位共阳数码管显示0-9字模---------------------------
+//---------------------------4位共阳数码管显示0-F字模---------------------------
 extern __flash const unsigned char LED_SIGN_NumLut[];
 
 #endif //#ifndef __LED_SIGN_H
