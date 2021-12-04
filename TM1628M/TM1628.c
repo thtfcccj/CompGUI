@@ -17,6 +17,7 @@ void TM1628_Init(struct _TM1628 *pTM1628,
                  unsigned char Gray)       //0~7越高越亮, 8关闭显示
 {
   memset(pTM1628, 0, sizeof(struct _TM1628));
+  pTM1628->Ch = Ch;  
   pTM1628->Gray = Gray;
   TM1628_Task(pTM1628);  //开机初始化并更新一次显示
 }
