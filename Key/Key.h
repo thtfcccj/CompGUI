@@ -118,7 +118,7 @@ unsigned char Key_cbIsKeySel(unsigned char KeySel);
 //-------------------------------长按键通报函数---------------------------------
 //不支持时可实现为空
 #ifdef SUPPORT_KEY_NOTIFY_ALONE
-  #define Key_cbLongNotify(key)  Key_cbNotify(0x04 | (key))
+  #define Key_cbLongNotify(key)  Key_cbNotify(0x40 | (key))
 #else
   void Key_cbLongNotify(KeySize_t Key);
 #endif 
