@@ -39,7 +39,7 @@
 #define LED_SIGN_E     0x6D
 #define LED_SIGN_F     0x65
 #define LED_SIGN_G     0x3D
-#define LED_SIGN_H     0x5F
+#define LED_SIGN_H     0x57
 #define LED_SIGN_h     0x55  //Сдh
 #define LED_SIGN_I     0x05
 #define LED_SIGN_J     0x1A
@@ -47,9 +47,10 @@
 #define LED_SIGN_N     0x37
 #define LED_SIGN_n     0x54  //Сдn
 #define LED_SIGN_O     0x5C
-#define LED_SIGN_P     0x57
+#define LED_SIGN_P     0x67
 #define LED_SIGN_Q     0x73
-#define LED_SIGN_R     0x44
+#define LED_SIGN_R     0x25
+#define LED_SIGN_r     0x44  //Сдr
 #define LED_SIGN_S     0x79
 #define LED_SIGN_T     0x4D
 #define LED_SIGN_U     0x1F
