@@ -85,9 +85,11 @@ void TM1628_Task(struct _TM1628 *pTM1628)
   TM1628_cbSendData(Ch, 1);
   //写显存
   TM1628_CommBuf[0] = 0xC0;//显示每次从头开始
-  if(TM1628_cbIsTest()) 
+  if(TM1628_cbIsTest()) //测试时全亮
     memset(&TM1628_CommBuf[1], 0xff, pStatic->LedCount);
-  else 
+  else if(TM1628_cbIsShutDown()) //掉电时全灭
+    memset(&TM1628_CommBuf[1], 0, pStatic->LedCount);  
+  else //正常时
     memcpy(&TM1628_CommBuf[1], pTM1628->DispBuf, pStatic->LedCount);
   TM1628_cbSendData(Ch, 1 + pStatic->LedCount);  
 }

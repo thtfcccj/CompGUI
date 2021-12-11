@@ -124,5 +124,10 @@ void TM1628_cbSendData(unsigned char Ch,
 #include "Test.h"
 #define TM1628_cbIsTest()    Test_IsDoing()
 
+//--------------------------是否在掉电状态-----------------------------
+//用于实现指示灯全灭
+unsigned char TM1628_cbIsShutDown(void);
+
+
 #endif //#define __LED_DRV_1628_H
 
