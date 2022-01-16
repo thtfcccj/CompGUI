@@ -3,9 +3,10 @@
           频率可控蜂鸣器模块底层驱动接口-在ASM32单片机定时器中的实现
 //使用单向驱动， 最大频率范围10K
 ****************************************************************************/
-
 #include "BuzzerDrv.h"
 #include "IoCtrl.h"
+#ifndef SUPPORT_DIS_BUZZER_DRV      //支持时
+
 
 #ifndef BZ_TIM   //默认定义时用T9
   #define BZ_TIM     TIM9  
@@ -65,4 +66,4 @@ unsigned char BuzzerDrv_IsStart(void)
   return BZ_TIM->CR1 & TIM_CR1_CEN;
 }
 
-
+#endif //#ifndef SUPPORT_DIS_BUZZER_DRV      //支持时
