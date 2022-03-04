@@ -4,6 +4,9 @@
 ********************************************************************************/
 #ifndef _PLOT_H
 #define _PLOT_H
+#ifdef SUPPORT_EX_PREINCLUDE//不支持Preinlude時
+  #include "Preinclude.h"
+#endif
 
 #include "Color.h"
 #include "DefStdType.h" //标准定义简写
