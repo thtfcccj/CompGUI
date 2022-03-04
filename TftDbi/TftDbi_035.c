@@ -12,6 +12,7 @@
 /*******************************************************************************
                            硬件相关函数
 ********************************************************************************/
+//横屏参考：https://wenku.baidu.com/view/dd4f6885f46527d3250ce091.html
 
 //----------------------------ST7796S启动代码----------------------------------
 static void _HwCfg_ST7796S(void)
@@ -92,6 +93,13 @@ static void _HwCfg_ST7796S(void)
   TftDbi_WrCmd(0xf0);
   TftDbi_WrData(0x69);
 
+  #ifdef SUPPORT_TFT_DRV_MV //横屏时
+    TftDbi_WrCmd(0x36);
+    TftDbi_WrData(0x2C); 
+  #else  //竖屏时默认
+    
+  #endif
+  
   TftDbi_WrCmd(0x3A);//TFT_DCOL_PIXEL_16BIT
   TftDbi_WrData(0x55);//‘101’ = 16bit/pixel
 }
@@ -183,8 +191,12 @@ static void _HwCfg_HX8357(void)
   TftDbi_WrData(0x08);  //61.51Hz
 
   TftDbi_WrCmd(0X0036);
-  TftDbi_WrData(0X000a);
-
+  #ifdef SUPPORT_TFT_DRV_MV //  横屏时
+    TftDbi_WrData(0X002a); 
+  #else  //竖屏时
+    TftDbi_WrData(0X000a);
+  #endif
+  
   TftDbi_WrCmd(0X003A);
   TftDbi_WrData(0X0005);
 
@@ -259,9 +271,13 @@ static void _HwCfg_ILI9488(void)
   TftDbi_WrData(0x10); 
   TftDbi_WrData(0x80); 
 
-  TftDbi_WrCmd(0x36); 
-  TftDbi_WrData(0x08); 
-
+  TftDbi_WrCmd(0x36);
+  #ifdef SUPPORT_TFT_DRV_MV //横屏时
+    TftDbi_WrData(0x2C); 
+  #else  //竖屏时
+    TftDbi_WrData(0x08); 
+  #endif
+  
   TftDbi_WrCmd(0x3A);//Interface Mode Control
   TftDbi_WrData(0x55);
 

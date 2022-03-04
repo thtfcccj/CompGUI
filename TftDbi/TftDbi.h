@@ -5,17 +5,31 @@
 ********************************************************************************/
 #ifndef _TFT_DBI_H
 #define _TFT_DBI_H
+#ifdef SUPPORT_EX_PREINCLUDE//不支持Preinlude時
+  #include "Preinclude.h"
+#endif
 
 /*******************************************************************************
                                   相关配置
 ********************************************************************************/
 
+//定义为横屏，默在认为竖屏
+//#define SUPPORT_TFT_DRV_MV   //竖屏时定义
+
 #ifndef TFT_DRV_H_PIXEl//水平像素点数
-  #define TFT_DRV_H_PIXEl    320     //竖屏时
+  #ifdef SUPPORT_TFT_DRV_MV //横屏时
+    #define TFT_DRV_H_PIXEl    480 
+  #else  //竖屏时
+    #define TFT_DRV_H_PIXEl    320 
+  #endif
 #endif
 
 #ifndef TFT_DRV_V_PIXEl//垂直像素点数
-  #define TFT_DRV_V_PIXEl    480      //竖屏时
+  #ifdef SUPPORT_TFT_DRV_MV //横屏时
+    #define TFT_DRV_V_PIXEl    320 
+  #else  //竖屏时
+    #define TFT_DRV_V_PIXEl    480 
+  #endif
 #endif
 
 #ifndef TFT_DRV_TIM_OV   //定时器溢出时间,16ms为单位
