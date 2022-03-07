@@ -293,8 +293,8 @@ static unsigned char _GetBitSize(u8 mapSize)
   return 8;
 }
 
-//由占位得到掩码
-static const u8 _BitSize2Mask[9] = {
+//-----------------------------由占位得到掩码---------------------------------
+const u8 Plot_BitSize2Mask[9] = {
   0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
 
 //-----------------------------画索引位图-------------------------------------
@@ -308,7 +308,7 @@ void Plot_IndexBmp(u16 x,u16 y,u16 w,u16 h,
   
   u8 bitSize = _GetBitSize(mapSize);     //占位
   u32 dataBitSize = w * h * bitSize;     //以位计算的数据矩阵大小  
-  u8 bitMask = _BitSize2Mask[bitSize];   //位掩码
+  u8 bitMask = Plot_BitSize2Mask[bitSize];   //位掩码
 
   Color_t *pLineEndBuf = pBuf + w;       //显示缓冲本行结束
   u8 Data = *data; //读取首个数据
@@ -320,13 +320,13 @@ void Plot_IndexBmp(u16 x,u16 y,u16 w,u16 h,
     //下个索引点在Data中的起始Bit
     u8 nextShift = (dataBit + bitSize) & 0x07;      
     if(nextShift <= curShift){//下个索引点回环了，即在下个data里
-      indexColor = Data & _BitSize2Mask[8 - curShift];//高位在前时取高位数据
+      indexColor = Data & Plot_BitSize2Mask[8 - curShift];//高位在前时取高位数据
       data++; //移至下个数据
       Data = *data; //更新至下个数据
       if(nextShift){//下个索引点不是从0开始的，即本次不全，需取出本次的高位数据
         //indexColor |= (Data & _BitSize2Mask[nextShift]) << curShift;//低位在前时
         indexColor <<= nextShift; //高位在前时,高位移前到前面
-        indexColor |= (Data >> (8 - nextShift)) & _BitSize2Mask[nextShift];
+        indexColor |= (Data >> (8 - nextShift)) & Plot_BitSize2Mask[nextShift];
       }
     }
     else{//高位在前时够了，直接取数
