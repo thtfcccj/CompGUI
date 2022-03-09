@@ -19,10 +19,14 @@ struct _ePicBuf ePicBuf; //仅支持单线程
   #define _GetU16Data(data) (((unsigned short)*((data) + 1)) << 8) + *(data);
 #endif
 
-//------------------------由ePic图像格式数据更新数据头--------------------------------
+//------------------------由ePic图像格式数据更新数据头---------------------------
 //同时填充返回非0图像格式 错误
-signed char ePic_ePicBuf(const unsigned char *ePicData)
+signed char ePic_ePicBuf(const unsigned char *ePicData,
+                          unsigned long IconSize)
 {
+  if(IconSize < 5) return -1; //数据太小
+  
+  const unsigned char *eOrgData = ePicData;
   //==================图像类型与色深解析====================
   unsigned char Data;
   #ifdef EPIC_FIX_PIC_TYPE
@@ -81,7 +85,9 @@ signed char ePic_ePicBuf(const unsigned char *ePicData)
     ePicBuf.Header.PaletteCount = *ePicData++;
   #endif
 
-  ePicBuf.pNextData = ePicData;
+  unsigned char HeaderSize = ePicData - eOrgData;
+  if(HeaderSize >= IconSize) return -1;//异常
+  ePicBuf.NextDataSize =   IconSize - HeaderSize;
   return 0; //数据正确了
 }
 
@@ -117,7 +123,6 @@ signed char ePic_Plot(unsigned short x,
   if(ePicBuf.Header.Type ==  'b'){
     if(ePicBuf.Header.ZipInfo == 0){//不压缩时
       if(ePicBuf.Header.DeepInfo > 8){
-        
         return -1;//暂不支持16，24，32位非索引图像
       }
       else{//1，2，4，8索引色
@@ -139,7 +144,7 @@ signed char ePic_Plot(unsigned short x,
   return -1;//其它暂不支持  
 }
 
-//----------------------利用调用板绘制当前点----------------------------
+//----------------------利用调色板绘制当前点----------------------------
 //返回pBuf位置
 Color_t *ePic_pPlotIndexDot(Color_t *pBuf,//绘制位置
                        const unsigned char *map,//索引表表

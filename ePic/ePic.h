@@ -46,13 +46,14 @@ struct _ePicHeader{
   signed short  w;           //图像宽度
   signed short  h;           //图像深度
   unsigned char ZipInfo;     //压缩数据等信息
-  unsigned char PaletteCount;//调色板数量 
+  unsigned char PaletteCount;//调色板数量,0时所有
 };
 
 //数据缓冲
 struct _ePicBuf{
   struct _ePicHeader Header;      //数据头缓冲，仅支持单线程绘制 
   const unsigned char *pNextData;//缓冲的数据头后的数据
+  unsigned long NextDataSize;     //缓冲的数据头后的数据长度
   //调色板缓冲：
   //const unsigned char *map,//索引表表
   //unsigned char mapSize,    //索引表大小
@@ -91,7 +92,8 @@ Color_t *ePic_pPlotIndexDot(Color_t *pBuf,//绘制位置
 
 //------------------------由ePic图像格式数据更新数据头--------------------------------
 //同时填充返回非0图像格式 错误
-signed char ePic_ePicBuf(const unsigned char *ePicData);
+signed char ePic_ePicBuf(const unsigned char *ePicData,
+                          unsigned long IconSize);
 
 //------------------------由Wbm图像格式数据更新数据头--------------------------------
 //同时填充返回非0图像格式错误
