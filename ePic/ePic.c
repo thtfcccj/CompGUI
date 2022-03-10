@@ -35,9 +35,9 @@ signed char ePic_ePicBuf(const unsigned char *ePicData,
     Data = *ePicData++;    
   #endif
   unsigned char Type = Data & 0x7f;//图像类型    
-  if((Type != 'w') || (Type != 'b') || (Type != 'p')){
-      ePicBuf.Header.Type = 0;//0不支持  
-      return -1; //不支持的图像格式
+  if((Type != 'w') || (Type != 'b') || (Type != 'p') || (Type != 'g')){
+    ePicBuf.Header.Type = 0;//0不支持  
+    return -1; //不支持的图像格式
   }
   ePicBuf.Header.Type = Type;
   
@@ -105,6 +105,11 @@ signed char ePic_PlotRle8(unsigned short x, unsigned short y);
 //暂仅支持8B绘制
 signed char ePic_PlotPNG(u16 x,u16 y);
 
+//-----------------------------画GIF图-----------------------------------
+//横向取模w*h点位,此函数不依赖调色板
+//暂仅支持 全局静态非透明图绘制
+signed char ePic_PlotGIF(u16 x,u16 y);
+
 //------------------------------绘制缓冲的数据----------------------------------
 //调用此函数前需ePic_ePicBuf()，然后设置好背景色：Plot_SetBrushColor()
 //若为wbm格式，还在需提前设置前景色：Plot_SetPenColor()
@@ -141,6 +146,11 @@ signed char ePic_Plot(unsigned short x,
   if(ePicBuf.Header.Type ==  'p'){
     return ePic_PlotPNG(x,y);
   }
+  //GIF格式时
+  if(ePicBuf.Header.Type ==  'g'){
+    return ePic_PlotGIF(x,y);
+  }  
+  
   return -1;//其它暂不支持  
 }
 
@@ -162,6 +172,30 @@ Color_t *ePic_pPlotIndexDot(Color_t *pBuf,//绘制位置
   else{//忽略对当前点的绘制
     Plot_cbUpdateNext(pBuf);
   }
+  return pBuf;
+}
+
+//----------------------利用调色板绘制当前行---------------------------
+//返回pBuf位置
+Color_t *ePic_pPlotIndexLine(Color_t *pBuf,//绘制位置
+                             const unsigned char *map,//索引表表
+                             unsigned char mapSize,    //索引表大小
+                             const unsigned char *data,//数据流
+                             unsigned char bpp,        //色占位,1,2,4,8
+                             unsigned short w)         //宽度
+{
+  unsigned char bitMask = Plot_BitSize2Mask[bpp];   //位掩码
+  do{//宽度一点点绘制
+    unsigned char Data = *data++; //取位数据
+    unsigned char curLen;
+      if(w < (unsigned short)bpp) curLen = w; //宽度对齐，余下丢弃
+      else curLen = 8;
+      for(unsigned char pos = 0; pos < curLen; pos += bpp, w--){
+        //填充色
+        unsigned char indexColor = (Data >> pos) & bitMask;
+        pBuf = ePic_pPlotIndexDot(pBuf, map, mapSize, indexColor);
+      }//end for
+    }while(w > 0);
   return pBuf;
 }
 

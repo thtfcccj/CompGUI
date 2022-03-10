@@ -5,18 +5,16 @@
 ********************************************************************************/
 
 #include "DecodePNG.h"
-#include "ZlibDecompress.h" //PNG的压缩方式
 #include "Adler32.h" //Adler32压缩包校验方式
+#include "struct.h" //struct_get()
 #include <string.h>
 
-//------------------------------------内部变量---------------------------------
-//定义数据缓冲区大小,至少两倍宽最大显示宽度
-#define _DATA_BUF_SIZE  ((DECODER_PNG_BUF_SIZE)*2+(DECODER_PNG_RESERVED_SPACE))
 
-//缓冲的数据结构
-winWriter_t wOut;  
-//wOut->data用
-unsigned char _outData[_DATA_BUF_SIZE];  
+//--------------------------接收数据缓冲out使用声明---------------------------
+//1： out->Cfg,     底层已用0xc0
+//2： out->U32Para  底层用作了Adler32中的校验结果缓存
+//3： out->U8Para   用作记录色深bpp
+//4： out->U16Para  用作有作记录一行大小
 
 /*******************************************************************************
                            相关函数实现
@@ -42,7 +40,7 @@ static signed char _unfilterL2(const struct  _winWriter *out)
 {
   unsigned short  length = out->U16Para;            //一行数据占位
   //if(out->start < (length * 2)) return 0;           //不够两行的数据
-  unsigned char *precon = wOut.data + 1;      //上次输出为第一行数据
+  unsigned char *precon = out->data + 1;      //上次输出为第一行数据
   unsigned char *recon  = precon + length;         //输出的数据也是第二行
   const unsigned char *scanline = recon;          //本行扫描处理的是第于数据
   length--;//去除类型标志
@@ -168,21 +166,22 @@ static signed char _unfilterL2(const struct  _winWriter *out)
 
 //-------------------------数据后续处理函数-----------------------------------
 //返回用掉了多少数据
-brsize_t _LaterPro(struct  _winWriter *out)
+static brsize_t _LaterPro(struct  _winWriter *out)
 {
   unsigned short start = out->start;
   unsigned short length = out->U16Para;               //一行数据占位
   if(start < ((length * 2) + DECODER_PNG_RESERVED_SPACE)) return 0;//不够两行的数据时
   if(out->OutedSize == 0){//统计第一行累加和
-     wOut.Checksum = Adler32_Get(1, out->data, length);
-     wOut.OutedSize = length;
+     out->U32Para = Adler32_Get(1, out->data, length);//Checksum
+     out->OutedSize = length;
   }
   //统计第二行累加和
-  wOut.Checksum += Adler32_Get(wOut.Checksum, 
-                                    out->data + length, length);
+  out->U32Para += Adler32_Get(out->U32Para, 
+                              out->data + length, length);
   _unfilterL2(out); //反滤波处理第二行数据
-  DecodePNG_cbOutLine(out->data + 1, wOut.OutedSize / length); //绘制第一行数据
-  wOut.OutedSize += length;
+  struct _DecodePNG *pDecode = struct_get(out, struct _DecodePNG, wOut);
+  pDecode->cbOutLine(out);//绘制第一行数据
+  out->OutedSize += length;
   return length;   //第一行数据被绘制了
 }
 
@@ -191,11 +190,12 @@ static void _EndPro(struct  _winWriter *out)
 {
   unsigned short count = out->start;
   unsigned short length = out->U16Para; 
-  unsigned short curLien = wOut.OutedSize / length;
+  unsigned short curLien = out->OutedSize / length;
   //依次处理前两行数据
+  struct _DecodePNG *pDecode = struct_get(out, struct _DecodePNG, wOut);
   for(; count >= (length * 2); count-= length){
     _unfilterL2(out); //反滤波处理第二行数据
-    DecodePNG_cbOutLine(out->data + 1, curLien); //绘制第一行数据
+    pDecode->cbOutLine(out);//绘制第一行数据
     //移出绘制完成的数据，并将数据前移
     out->start -= length;
     curLien++;
@@ -203,35 +203,45 @@ static void _EndPro(struct  _winWriter *out)
   }
   //最后第2行数据移入第一行
   memcpy(out->data, out->data + length, length);
-  DecodePNG_cbOutLine(out->data + 1, curLien); //绘制最后一行数据
+  pDecode->cbOutLine(out);//绘制第一行数据
 }
+
+//-----------------------------默认OutLine-----------------------------------
+static void _cbOutLine(const struct  _winWriter *out){(void)out;}
 
 //-----------------------------PNG译码器实现-----------------------------------
 //暂仅支持索引色,逐行扫，默认压缩方式与自动滤波器格式
-signed char DecodePNG(unsigned char bbp,//色深,1,2,4,8,只仅支持索引色
+signed char DecodePNG(struct _DecodePNG *pDecode,//无需初始化
+                        DecodePNG_cbOutLine_t cbOutLine,//回调输出函数
+                        unsigned char bbp,//色深,1,2,4,8,只仅支持索引色
                         unsigned short w, //图像宽度
                         unsigned short h,  //图像高度
                         const unsigned char *idat,//idat区域的压缩数据
                         unsigned long idatLen)    //idat区域数据长度
 {
+  //if(pDecode == NULL) return -1;//异常
+  if(cbOutLine == NULL) pDecode->cbOutLine = _cbOutLine;//防止异常
+  else  pDecode->cbOutLine = cbOutLine;
+  
   //得到每行实际占用字节数
   unsigned short Line = ((w  >> 3) * bbp) + 1; //整数部分占位+行首滤波标志 
   Line += ((w & 0x07) * bbp + 7) >> 3; //末尾像素未对齐部分占1字节
   
   //初始化winWriter
-  winWriter_Clr(&wOut);
-  wOut.U8Para = bbp;  //用作记录色深bpp
-  wOut.U16Para = Line; //有作记录一行大小
-  wOut.data = _outData;
-  wOut.capability = _DATA_BUF_SIZE;
-  wOut.MaxOutSize = Line * h;
-  wOut.Cfg = 0xf0; //启用所有功能
-  wOut.LaterPro = _LaterPro; //窗口处理函数
+  winWriter_t *out = &pDecode->wOut;
+  winWriter_Clr(out);
+  out->U8Para = bbp;  //用作记录色深bpp
+  out->U16Para = Line; //有作记录一行大小
+  out->data = pDecode->OutData;
+  out->capability = DECODER_PNG_DATA_BUF_SIZE;
+  out->MaxOutSize = Line * h;
+  out->Cfg = 0xf0; //启用所有功能
+  out->LaterPro = _LaterPro; //窗口处理函数
 
   //解压缩数据
-  signed char err = ZlibDecompress(idat, idatLen, &wOut);
+  signed char err = ZlibDecompress(&pDecode->Base, idat, idatLen, out);
   //解压
   if(err) return err; //解压异常
-  _EndPro(&wOut); //后续图像处理
+  _EndPro(out); //后续图像处理
   return 0;
 }

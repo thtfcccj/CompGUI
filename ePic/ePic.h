@@ -85,25 +85,34 @@ Color_t *ePic_pPlotIndexDot(Color_t *pBuf,//绘制位置
                        unsigned char mapSize,    //索引表大小
                        unsigned char indexColor); //索引色
 
+//----------------------利用调色板绘制当前行---------------------------
+//返回pBuf位置
+Color_t *ePic_pPlotIndexLine(Color_t *pBuf,//绘制位置
+                             const unsigned char *map,//索引表表
+                             unsigned char mapSize,    //索引表大小
+                             const unsigned char *data,//数据流
+                             unsigned char bpp,        //色占位,1,2,4,8
+                             unsigned short w);        //宽度
+                       
 
 /*******************************************************************************
                               相关行为函数
 ********************************************************************************/
 
-//------------------------由ePic图像格式数据更新数据头--------------------------------
+//------------------------由ePic图像格式数据更新数据头---------------------------
 //同时填充返回非0图像格式 错误
 signed char ePic_ePicBuf(const unsigned char *ePicData,
                           unsigned long IconSize);
 
-//------------------------由Wbm图像格式数据更新数据头--------------------------------
+//------------------------由Wbm图像格式数据更新数据头----------------------------
 //同时填充返回非0图像格式错误
 //signed char ePic_ePicBuf_Wbm(const unsigned char *pWbm);暂不支持对此头的解析
 
-//------------------------由BMP图像格式数据更新数据头--------------------------------
+//------------------------由BMP图像格式数据更新数据头----------------------------
 //同时填充返回非0图像格式错误
 //signed char ePic_ePicBuf_Bmp(const unsigned char *pBmp);暂不支持对此头的解析
 
-//------------------------由PNG图像格式数据更新数据头--------------------------------
+//------------------------由PNG图像格式数据更新数据头---------------------------
 //同时填充返回非0图像格式 错误
 //signed char ePic_ePicBuf_Png(const unsigned char *pPng);暂不支持对此头的解析
 
@@ -113,6 +122,15 @@ signed char ePic_ePicBuf(const unsigned char *ePicData,
 //返回0正确绘制，否则异常
 signed char ePic_Plot(unsigned short x,
                        unsigned short y);
+
+/*******************************************************************************
+                             回调函数
+********************************************************************************/
+//------------------------申请指定容量的解码缓存空间-----------------------------
+//返回空间确保4字节对齐,NULL申请失败
+void *ePic_cbGetDecodeSpace(unsigned long Size);
+
+
 
 #endif //_EPIC_H
 
