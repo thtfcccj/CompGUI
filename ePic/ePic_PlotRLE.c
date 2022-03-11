@@ -21,7 +21,7 @@ signed char ePic_PlotRle4(unsigned short x, unsigned short y)
   const unsigned char *data = map + sizeof(Color_t) * mapSize;
   
   Color_t *pBuf = Plot_cbAbsLocalArea(x,y, w, h);     //显示缓冲行起始
-  for(; h > 0; h++){//行为单位绘制
+  for(; h > 0; h--){//行为单位绘制
     u16 cw = w;
     do{//宽度一点点绘制
       unsigned char Data0 = *data++; //取位数据

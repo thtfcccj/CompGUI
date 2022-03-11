@@ -26,7 +26,7 @@ void ePic_PlotIndexBmp(u16 x,u16 y)
   const unsigned char *data = map + sizeof(Color_t) * mapSize;
   
   Color_t *pBuf = Plot_cbAbsLocalArea(x,y, w, h);     //显示缓冲行起始
-  for(; h > 0; h++){//行为单位绘制
+  for(; h > 0; h--){//行为单位绘制
     ePic_pPlotIndexLine(pBuf, map, mapSize, data, bitSize, w);//画当前行
     pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
   }//end for h
