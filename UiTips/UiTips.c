@@ -147,9 +147,18 @@ void UiTips_ReplaceAt(unsigned char Info, //7b
   else //允许带小数点信息与正负号
     pNum2StringFlag(para, UiTips.Para, ParaLen, Info);
   //替换
-  if(StringReplace(pStr, "@",  UiTips.Para)) 
-    UiTips.ReplaceCount = 0xff; //未找到
-  else UiTips.ReplaceCount++;
+  char At[3];
+  At[0] = '@';
+  At[1] = UiTips.ReplaceCount + '1';
+  At[2] = '\0';
+  if(StringReplace(pStr, At, UiTips.Para)){//可能多个参数，先查找"@1","@2"位置
+    if(StringReplace(pStr, "@",  UiTips.Para)){ //若为1位参数，则只查找"@"位置
+      UiTips.ReplaceCount = 0xff; //未找到
+      return;
+    }
+  }
+  //找到并替换成功了
+  UiTips.ReplaceCount++;
 }
 
 #endif

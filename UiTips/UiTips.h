@@ -73,7 +73,8 @@ void UiTips_UpdateS(const char *pStr);
 #define UiTips_CancelS()  do{UiTips.TimerS = 1; }while(0)
 
 //--------------------------------替换@函数-------------------------------
-//如："等待@秒后将自动重启", @将被替换为指定参数,允许有多个@(多次调用)
+//如：单参数："等待@秒后将自动重启", @将被替换为指定参数
+//多参数 ："正在等待@1应答，@2秒后应答超时", @后参数最多可跟1~9个
 #ifdef SUPPORT_UI_TIPS_AT 
   //Info定义为：7b：para为带符号数显示+-号，6~3b：替换长度,低3bit:小数点位置
   void UiTips_ReplaceAt(unsigned char Info, //7b

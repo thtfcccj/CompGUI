@@ -33,6 +33,10 @@ void UiPage_Refresh(void);
 //---------------------------------更新本页名称--------------------------------
 void UiPage_UpdateName(const char *pName);
 
+//---------------------------------更新为无页码-----------------------------
+//即只有一页，不面要显示页码
+void UiPage_UpdateNoPage(void);
+
 //---------------------------------更新为位置-------------------------------
 void UiPage_UpdatePos(unsigned short Cur,        //当页起始位置
                       unsigned short Count);      //总行

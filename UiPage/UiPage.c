@@ -26,7 +26,15 @@ void UiPage_Refresh(void)
 void UiPage_UpdateName(const char *pName)
 {
   UiPage.pName = pName;
-  UiPage_cbUpdateUi(0x02);
+  UiPage_cbUpdateUi(0x03); //更新所有
+}
+
+//---------------------------------更新为无页码-----------------------------
+//即只有一页，不面要显示页码
+void UiPage_UpdateNoPage(void)
+{
+  UiPage.Count = 0;
+  UiPage_cbUpdateUi(0x03); //更新所有
 }
 
 //---------------------------------更新为位置-------------------------------
