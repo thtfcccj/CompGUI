@@ -132,27 +132,37 @@ void UiTips_UpdateS(const char *pStr)  //提示字符
 #ifdef SUPPORT_UI_TIPS_AT 
 #include "stringEx.h"
   //Info定义为：7b：para为带符号数显示+-号，6~3b：替换长度,低3bit:小数点位置
-void UiTips_ReplaceAt(unsigned char Info, //7b
-                      unsigned long  para)  //需替换的参数
+void UiTips_ReplaceAtPara(unsigned char Info, //7b
+                          unsigned long  para)  //需替换的参数
 {
-  if(UiTips.ReplaceCount == 0xff) return; //已替换完成了
-  char *pStr = UiTips.ParaBuf[UiTips.CurStr];
-  if(UiTips.ReplaceCount == 0){//首次使用需缓冲
-    strcpyEx(pStr, UiTips.pStr[UiTips.CurStr], SUPPORT_UI_TIPS_AT);
-    UiTips.pStr[UiTips.CurStr] = pStr; //指向新的位置
-  }
+  //使用临时缓冲将参数转换为字符串
   unsigned char ParaLen = (Info >> 3) & 0x0f;
   if(ParaLen > 5) //暂不支持带小数点与正负号
     Value4StringMin(para, UiTips.Para, ParaLen);
   else //允许带小数点信息与正负号
-    pNum2StringFlag(para, UiTips.Para, ParaLen, Info);
+    pNum2StringFlag(para, UiTips.Para, ParaLen, Info);  
+  //字符串替换
+  UiTips_ReplaceAtStr(UiTips.Para);
+}
+
+//--------------------------------替换@为字符函数-------------------------------
+//如：单参数："@用户已登录", @将被替换为“管理员用户已登录”
+void UiTips_ReplaceAtStr(const char *pStr)
+{
+  if(UiTips.ReplaceCount == 0xff) return; //已替换完成了
+  char *pAtStr = UiTips.ParaBuf[UiTips.CurStr];
+  if(UiTips.ReplaceCount == 0){//首次使用需缓冲
+    strcpyEx(pAtStr, UiTips.pStr[UiTips.CurStr], SUPPORT_UI_TIPS_AT);
+    UiTips.pStr[UiTips.CurStr] = pAtStr; //指向新的位置
+  }
+
   //替换
   char At[3];
   At[0] = '@';
   At[1] = UiTips.ReplaceCount + '1';
   At[2] = '\0';
-  if(StringReplace(pStr, At, UiTips.Para)){//可能多个参数，先查找"@1","@2"位置
-    if(StringReplace(pStr, "@",  UiTips.Para)){ //若为1位参数，则只查找"@"位置
+  if(StringReplace(pAtStr, At, pStr)){//可能多个参数，先查找"@1","@2"位置
+    if(StringReplace(pAtStr, "@",  pStr)){ //若为1位参数，则只查找"@"位置
       UiTips.ReplaceCount = 0xff; //未找到
       return;
     }

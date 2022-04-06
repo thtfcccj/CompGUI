@@ -72,13 +72,19 @@ void UiTips_UpdateS(const char *pStr);
 //取消短期任务
 #define UiTips_CancelS()  do{UiTips.TimerS = 1; }while(0)
 
-//--------------------------------替换@函数-------------------------------
+//--------------------------------替换@为参数函数-------------------------------
 //如：单参数："等待@秒后将自动重启", @将被替换为指定参数
 //多参数 ："正在等待@1应答，@2秒后应答超时", @后参数最多可跟1~9个
 #ifdef SUPPORT_UI_TIPS_AT 
   //Info定义为：7b：para为带符号数显示+-号，6~3b：替换长度,低3bit:小数点位置
-  void UiTips_ReplaceAt(unsigned char Info, //7b
-                        unsigned long  para);  //需替换的参数
+  void UiTips_ReplaceAtPara(unsigned char Info, //7b
+                            unsigned long  para);  //需替换的参数
+#endif
+  
+//--------------------------------替换@为字符函数-------------------------------
+//如：单参数："@用户已登录", @将被替换为“管理员用户已登录”
+#ifdef SUPPORT_UI_TIPS_AT 
+  void UiTips_ReplaceAtStr(const char *pStr);
 #endif
 
 /******************************************************************************
