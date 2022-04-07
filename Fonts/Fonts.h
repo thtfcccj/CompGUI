@@ -37,7 +37,7 @@ struct _FontsDesc{
   signed short  w;           //字体宽度
   signed short  h;           //字体高度
   unsigned char Type;       //取模类型，见定义
-  unsigned char Note[25];   //展示在显示屏上的字体信息
+  char Note[23];             //展示在显示屏上的字体信息
 };
 
 //取模类型定义为：
@@ -51,7 +51,7 @@ struct _FontsDesc{
 #define FONTS_2312_NANO 5 //GB2312点阵精简字库: 去除GB2312字中的空白(AA~AF)与不常用(A4-A5，A7-A8)区域
 
 
-#define FONTS_TYPE_COUNT 6 //最大支持种类
+#define FONTS_TYPE_COUNT 4 //最大支持种类
 /*******************************************************************************
                               相关函数
 ********************************************************************************/

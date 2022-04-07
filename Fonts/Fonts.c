@@ -10,18 +10,19 @@
 #include "Plot_cbHw.h"//底层操作函数
 #include <string.h>
 
+//struct _FontsDesc _Desc;//测试
 //----------------------------查找表--------------------------------------------
 //ASC前三个类型的基址
-static unsigned char _TypeHalfBase[3] = {0, 32, '*'};
+static const unsigned char _TypeHalfBase[3] = {0, 32, '*'};
 //ASC前三个类型的支持字符总量
-static unsigned char _TypeHalfCount[3] = {128, 128 - 32, 16};
+static const unsigned char _TypeHalfCount[3] = {128, 128 - 32, 16};
 
 //2312取模：标准类型与精简类型时区码 BO开始位置
-static unsigned char _Type2312B0[2] = {9,5};
+static const unsigned char _Type2312B0[2] = {9,5};
 
 //2312取模：标准类型与精简类型时区码 A1~AF对应位置
 
-static unsigned char _Type2312A1[][2] = {
+static const unsigned char _Type2312A1[][2] = {
   /*A1*/{0,0},/*A2*/{1,1},/*A3*/{2,2},/*A4*/{3,2}, 
   /*A5*/{4,2},/*A6*/{5,3},/*A7*/{6,3},/*A8*/{7,3},
   /*A9*/{8,4},/*AA*/{8,4},/*AB*/{8,4},/*AC*/{8,4},
