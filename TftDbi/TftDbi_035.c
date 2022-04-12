@@ -273,7 +273,11 @@ static void _HwCfg_ILI9488(void)
 
   TftDbi_WrCmd(0x36);
   #ifdef SUPPORT_TFT_DRV_MV //横屏时
-    TftDbi_WrData(0x2C); 
+    #ifdef SUPPORT_TFT_DRV_MV_ANTI //反向放置时(下部在左侧)
+      TftDbi_WrData(0x2C);
+    #else //正向放置时(下部在右侧)
+      TftDbi_WrData(0x68); 
+    #endif
   #else  //竖屏时
     TftDbi_WrData(0x08); 
   #endif
@@ -281,7 +285,7 @@ static void _HwCfg_ILI9488(void)
   TftDbi_WrCmd(0x3A);//Interface Mode Control
   TftDbi_WrData(0x55);
 
-  TftDbi_WrCmd(0x21); 
+  TftDbi_WrCmd(0x21); //显示反转
 
   TftDbi_WrCmd(0XB0);  //Interface Mode Control  
   TftDbi_WrData(0x00); 

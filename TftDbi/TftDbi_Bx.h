@@ -50,8 +50,8 @@
 #define TftDbi_cbDelayTchw()   do{}while(0)                 //片选取消时间,ILI9488>=0ns 
 #define TftDbi_cbDelayTcs()   do{DelayUs(0); }while(0)     //片选建立时间,ILI9488>=15,读id45,读FM355
 
-#define TftDbi_cbDelayTwrl()   do{DelayUs(0); }while(0)     //写低电平保持时间,ILI9488>=15ns 
-#define TftDbi_cbDelayTwrh()   do{DelayUs(0); }while(0)      //写高电平保持时间,ILI9488>=15ns
+#define TftDbi_cbDelayTwrl()   do{}while(0)     //写低电平保持时间,ILI9488>=15ns 
+#define TftDbi_cbDelayTwrh()   do{}while(0)      //写高电平保持时间,ILI9488>=15ns
 
 #define TftDbi_cbDelayTrdl()   do{DelayUs(5); }while(0)     //读低电平保持时间,ILI9488>=45~160ns 
 #define TftDbi_cbDelayTrdh()   do{DelayUs(10); }while(0)     //读高电平保持时间,ILI9488>=90~450ns

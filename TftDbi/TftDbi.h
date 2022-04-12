@@ -15,6 +15,7 @@
 
 //定义为横屏，默在认为竖屏
 //#define SUPPORT_TFT_DRV_MV   //竖屏时定义
+//#define SUPPORT_TFT_DRV_MV_ANTI //反向放置时(竖屏时下部在左侧,不定义时在右侧)
 
 #ifndef TFT_DRV_H_PIXEl//水平像素点数
   #ifdef SUPPORT_TFT_DRV_MV //横屏时

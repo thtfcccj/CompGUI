@@ -16,7 +16,7 @@ struct _TftTest TftTest;
 *******************************************************************************/
 
 //--------------------------色彩测试时标准颜色值------------------------------
-static const Color_t _Color[] = {
+static const Color_t _Color[8] = {
   RGB000000, 
   RGBFFFFFF,
   RGBFF00FF,   
@@ -33,8 +33,8 @@ static void _Refresh(void)
   //根据定时值与测试类型填充屏幕
   
   //色彩测试:
-  if(!(TftTest.Timer % (TFT_TEST_OV / sizeof(_Color)))){//颜色变化切换
-    unsigned char Id = TftTest.Timer / (TFT_TEST_OV / sizeof(_Color));
+  if(!(TftTest.Timer % (TFT_TEST_OV / 8))){//颜色变化切换
+    unsigned char Id = TftTest.Timer / (TFT_TEST_OV / 8);
     if(Id >= sizeof(_Color)) Plot_SetBrushColor(RGB000000);
     else Plot_SetBrushColor(_Color[Id]);
     Plot_FullRect(0, 0, TFT_DRV_H_PIXEl, TFT_DRV_V_PIXEl);

@@ -69,6 +69,8 @@ void KeyLight_IntTask(void);
 //#define KeyLight_cbScanLut()   {0xnn, 0xnn,0xnn} 
 //EO8上有其它固定位时，该位的值，无时为0
 //#define KeyLight_cbGetFixBit()    0
+//定义EO8(如595)上，指示灯位置掩码    
+//#define KeyLight_cbLightMask()   0xnn
 
 //----------------------------得到当前键值----------------------------------
 //对应位为1表示按下了

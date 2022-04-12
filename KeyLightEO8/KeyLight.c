@@ -34,10 +34,10 @@ void KeyLight_IntTask(void)
   KeyLight.Key[ScanPos] = KeyLight_cbGetKeyVol();
   //下一行
   ScanPos++; 
-  if(KeyLight.ScanPos >= KEY_LIGHT_SCAN_COUNT) ScanPos = 0;
+  if(ScanPos >= KEY_LIGHT_SCAN_COUNT) ScanPos = 0;
   KeyLight.ScanPos = ScanPos;
   //获得需更新的数据
-  unsigned char Data = KeyLight.Light[ScanPos]; //指示灯列
+  unsigned char Data = KeyLight.Light[ScanPos] & KeyLight_cbLightMask(); //指示灯列
   Data |= _ScanLut[ScanPos] | KeyLight_cbGetFixBit(); //扫描位及固定位更新
   //一起更新了
   EO8_SetAllFast(Data);

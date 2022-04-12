@@ -15,7 +15,7 @@ extern unsigned short  Color_RGB666_2RGB[];
 //-----------------------------------写颜色函数--------------------------------
 void TftDbi_WrColor(Color_t Color)
 {
-  TftDbi_cbWrClkL();  //低电平时入数据
+  TftDbi_cbWrClkL();  //低电平时准备入数据
   #ifndef SUPPORT_RGB_HW_565 //全色域
     unsigned long Data;
   #else
@@ -36,12 +36,15 @@ void TftDbi_WrColor(Color_t Color)
     TftDbi_cbDelayTwrl();//等待数据稳定
     TftDbi_cbWrClkH();  //上升沿锁存
     TftDbi_cbDelayTwrh();  //等待锁存
+    TftDbi_cbWrClkL();    //低电平时准备入数据
   #endif
   //8~15b送出
   TftDbi_cbDbWr(Data >> 8);  
   TftDbi_cbDelayTwrl();//等待数据稳定
   TftDbi_cbWrClkH();  //上升沿锁存
   TftDbi_cbDelayTwrh();  //等待锁存
+  TftDbi_cbWrClkL();    //低电平时准备入数据
+  
   //0~7b送出
   TftDbi_cbDbWr(Data);  
   TftDbi_cbDelayTwrl();//等待数据稳定
