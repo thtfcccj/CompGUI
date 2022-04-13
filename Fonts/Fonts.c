@@ -18,7 +18,7 @@ static const unsigned char _TypeHalfBase[3] = {0, 32, '*'};
 static const unsigned char _TypeHalfCount[3] = {128, 128 - 32, 16};
 
 //2312取模：标准类型与精简类型时区码 BO开始位置
-static const unsigned char _Type2312B0[2] = {9,5};
+static const unsigned char _Type2312B0[2] = {6,10};
 
 //2312取模：标准类型与精简类型时区码 A1~AF对应位置
 
@@ -49,12 +49,12 @@ const unsigned char *Font_pGetHmode(const struct _FontsDesc *pHfonts,//半角字体
 
 //--------------------------------得到全角字符字模-------------------------------
 //返回NULL异常不绘制
-const unsigned char *Font_pGetFmode(const struct _FontsDesc *pHfonts,//半角字体
+const unsigned char *Font_pGetFmode(const struct _FontsDesc *pFfonts,//全角字体
                                      unsigned char c1, //区码
                                      unsigned char c2) //位码
 {
-  unsigned char Type = pHfonts->Type;
-  if((Type < 3) || (Type < 6))return NULL;//暂只支持GB2312
+  unsigned char Type = pFfonts->Type;
+  if((Type < 3) || (Type > 6))return NULL;//暂只支持GB2312
   
   //得到当前字对应的字模位置，区位码不对时，字模位置自动纠正至0
   unsigned short Pos;
@@ -64,13 +64,13 @@ const unsigned char *Font_pGetFmode(const struct _FontsDesc *pHfonts,//半角字体
     c1 -= 0xA1;
     if(Type != FONTS_2312_NOR){//标准或精简字体时
       unsigned char Id = Type - FONTS_2312_NOR;
-      if(Pos >= (0xB0 - 0xA1)) c1 -= _Type2312B0[Id]; //B0后
-      else c1 = _Type2312A1[Id][c1];
+      if(c1 >= (0xB0 - 0xA1)) c1 -= _Type2312B0[Id]; //B0后
+      else c1 = _Type2312A1[c1][Id];
     }
     Pos = c1 * 94 + (c2 - 0xa1);
   }
-  unsigned short Count = ((pHfonts->w + 7) >> 3) * pHfonts->h;
-  return Font_pGetZM(pHfonts->Base + Pos * Count, Count);
+  unsigned short Count = ((pFfonts->w + 7) >> 3) * pFfonts->h;
+  return Font_pGetZM(pFfonts->Base + Pos * Count, Count);
 }
 
 //------------------------------绘制指定字模字------------------------------
@@ -87,18 +87,24 @@ static void _PlotModule(const unsigned char *pMode,//取得的字模
     y += MaxH - h;
   }
   
-  //绘制当前字符
+  //绘制当前字符,横向取模方式为：高左低右,丢弃最低位
   Color_t *pBuf = Plot_cbAbsLocalArea(x,y, w, h);     //显示缓冲行起始
   for(; h > 0; h--){//行为单位绘制
     unsigned char curW = w;
     do{//宽度一点点绘制
       unsigned char Data = *pMode++; //取字模
-      unsigned char curLen;
-      if(curW < 8) curLen = w; //宽度对齐，余下丢弃
-      else curLen = 8;
-      for(unsigned char pos = 0; pos < curLen; pos++, curW--){
+      unsigned char EndMask;
+      if(curW >= 8){
+        EndMask = 0;
+        curW -= 8;
+      }
+      else{
+        EndMask = 1 << (7 - curW);
+        curW = 0;
+      }
+      for(unsigned char Mask = 0x80; Mask > EndMask; Mask >>= 1){
         Color_t color;
-        if(Data & (1 << pos)) color = Plot_GetPenColor();
+        if(Data & Mask) color = Plot_GetPenColor();
         else color = Plot_GetBrushColor();
         Plot_cbSetCurColor(pBuf, color);
       }//end for
@@ -119,7 +125,7 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
   unsigned short Len = 0;
   unsigned char MaxH = 0;
   const char *ps = pString;  
-  for(char c = *ps; c != '\0'; ps++){
+  for(char c = *ps; c != '\0'; ps++, c = *ps){
     unsigned char h;
     if(c < 0x80) h = pHfonts->h; //ASCII直接转换
     else h = pFfonts->h;
@@ -128,7 +134,7 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
     if(Len >= FONTS_STR_MAX) return -1; //长度异常不绘制
   }
   
-  for(char c = *pString; c != '\0'; pString++){
+  for(char c = *pString; c != '\0'; pString++, c = *pString){
     //============得到高宽与字模===============
     unsigned char w, h; 
     const unsigned char *pMode; //取得的字模
@@ -140,10 +146,11 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
     else{//未GB2312检查正确性！！！！
       w = pFfonts->w;
       h = pFfonts->h; 
-      pMode = Font_pGetFmode(pHfonts, c, *pString++);//取下半个字
+      pString++;//下半字了
+      pMode = Font_pGetFmode(pFfonts, c, *pString);
     }
-    x += w; //下个字符位置
     if(pMode != NULL) _PlotModule(pMode, x, y, w, h, MaxH);
+    x += w; //下个字符位置
   };
   return 0;
 }

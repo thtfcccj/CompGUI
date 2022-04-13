@@ -34,10 +34,10 @@
 //字体描述，可固化在资源中，每个固定占用32字节，组成陈列最多FONTS_ID_MAX个
 struct _FontsDesc{
   unsigned long Base;        //存放在FLASH中的基址
-  signed short  w;           //字体宽度
-  signed short  h;           //字体高度
+  signed char  w;           //字体宽度
+  signed char  h;           //字体高度
   unsigned char Type;       //取模类型，见定义
-  char Note[23];             //展示在显示屏上的字体信息
+  char Note[25];             //展示在显示屏上的字体信息
 };
 
 //取模类型定义为：
@@ -71,7 +71,7 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
 //-------------------------由位置得到字模------------------------------------
 //定义为程序内部时，直接指向转换
 #ifdef FONTS_INNER  
-#define  Font_pGetZM(base,len) (const unsigned char*)(base)
+#define  Font_pGetZM(base,len)    (const unsigned char*)(base)
 //3. 字库芯片或外部Flash里，需实现缓冲:
 #else
   const unsigned char *Font_pGetZM(unsigned long Base, unsigned char Len);      

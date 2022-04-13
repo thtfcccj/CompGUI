@@ -35,7 +35,7 @@ signed char ePic_ePicBuf(const unsigned char *ePicData,
     Data = *ePicData++;    
   #endif
   unsigned char Type = Data & 0x7f;//图像类型    
-  if((Type != 'w') || (Type != 'b') || (Type != 'p') || (Type != 'g')){
+  if((Type != 'w') && (Type != 'b') && (Type != 'p') && (Type != 'g')){
     ePicBuf.Header.Type = 0;//0不支持  
     return -1; //不支持的图像格式
   }
@@ -43,9 +43,9 @@ signed char ePic_ePicBuf(const unsigned char *ePicData,
   
   //WBM格式数据头时，仅有宽度与高度数据，色深固定为1
   #ifdef SUPPORT_EPIC_WBM_WH
-    if(Type != 'w'){
-      ePicBuf.Header.DeepInfo = *ePicData++;
-    }
+    if(Type == 'w')
+      ePicBuf.Header.DeepInfo = 1;//wbmp格式固定1位色深
+    else ePicBuf.Header.DeepInfo = *ePicData++;
   #else
     ePicBuf.Header.DeepInfo = *ePicData++;
   #endif
@@ -53,13 +53,13 @@ signed char ePic_ePicBuf(const unsigned char *ePicData,
   //===================图像长宽解析===================
   if(Data & 0x80){//压缩长度
     Data = *ePicData++;
-    if(Data & 0x80){
+    if(Data & 0x80)
       ePicBuf.Header.w = ((unsigned short)(*ePicData++) << 7) + (Data & 0x7f);
-    }
+    else ePicBuf.Header.w = Data;
     Data = *ePicData++;
-    if(Data & 0x80){
+    if(Data & 0x80)
       ePicBuf.Header.h = ((unsigned short)(*ePicData++) << 7) + (Data & 0x7f);
-    }
+    else ePicBuf.Header.h = Data;
   }
   else{//固定长度
     #if EPIC_HEADER_LEN == 1
@@ -85,9 +85,10 @@ signed char ePic_ePicBuf(const unsigned char *ePicData,
     ePicBuf.Header.PaletteCount = *ePicData++;
   #endif
 
+  ePicBuf.pNextData = ePicData; //图像或调色板数据了    
   unsigned char HeaderSize = ePicData - eOrgData;
   if(HeaderSize >= IconSize) return -1;//异常
-  ePicBuf.NextDataSize =   IconSize - HeaderSize;
+  ePicBuf.NextDataSize = IconSize - HeaderSize;
   return 0; //数据正确了
 }
 
