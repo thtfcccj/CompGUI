@@ -32,6 +32,9 @@
 #define DECODER_PNG_DATA_BUF_SIZE  \
                      ((DECODER_PNG_W_MAX) * 2 + (DECODER_PNG_RESERVED_SPACE))
 
+                       
+                       
+                       
 //------------------------------------主结构----------------------------------
 //回调输出(用于绘屏输出或保存)结构，需输出的数据位置out->data+1, 长out->U16Para-1
 typedef void (*DecodePNG_cbOutLine_t)(const struct  _winWriter *out);

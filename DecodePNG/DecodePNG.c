@@ -168,6 +168,7 @@ static signed char _unfilterL2(const struct  _winWriter *out)
 //返回用掉了多少数据
 static brsize_t _LaterPro(struct  _winWriter *out)
 {
+  //这里只显示及丢弃第一行数据，以防止解码里需要
   unsigned short start = out->start;
   unsigned short length = out->U16Para;               //一行数据占位
   if(start < ((length * 2) + DECODER_PNG_RESERVED_SPACE)) return 0;//不够两行的数据时
@@ -190,15 +191,19 @@ static void _EndPro(struct  _winWriter *out)
 {
   unsigned short count = out->start;
   unsigned short length = out->U16Para; 
-  unsigned short curLien = out->OutedSize / length;
   //依次处理前两行数据
   struct _DecodePNG *pDecode = struct_get(out, struct _DecodePNG, wOut);
+  if(count <= length){//只有一行数据时
+    pDecode->cbOutLine(out);//绘制第一行数据
+    return;
+  }
+  
+  //完成后继绘图工作
   for(; count >= (length * 2); count-= length){
     _unfilterL2(out); //反滤波处理第二行数据
     pDecode->cbOutLine(out);//绘制第一行数据
     //移出绘制完成的数据，并将数据前移
     out->start -= length;
-    curLien++;
     memcpy(out->data, out->data + length, length);
   }
   //最后第2行数据移入第一行

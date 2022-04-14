@@ -62,7 +62,8 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
                        const struct _FontsDesc *pFfonts, //全角时使用的字体
                        unsigned short x,               //屏上的x轴位置
                        unsigned short y,               //屏上的y轴位置
-                       const char *pString);           //要绘制的字符串
+                       const char *pString,                 //要绘制的字符串
+                       unsigned char ScaleMuti);            //放大倍率,>=1;
 
 /*******************************************************************************
                               回调函数

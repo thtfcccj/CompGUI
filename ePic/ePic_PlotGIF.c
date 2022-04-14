@@ -4,23 +4,15 @@
 此模块支持多线程调用！
 ********************************************************************************/
 
+#include "ePic_PlotGIF.h"
+
 #include "ePic.h"
 #include "Plot.h"
 #include "Plot_cbHw.h"//底层操作函数
 #include <string.h>
 #include "struct.h" //struct_get()
 
-#include "DecodeGIF.h"
 
-//内部结构
-struct _Plot{
-  unsigned short x;
-  unsigned short y;  
-  Color_t *pBuf;            //下次使用
-  struct _DecodeGIF Decode; //译码器
-};
-
-//struct _Plot Plot; //测试需要内存,默认时需13780字节;
 /*******************************************************************************
                               相关函数实现
 ********************************************************************************/
@@ -29,7 +21,7 @@ struct _Plot{
 //此行数在DecodeGIF()中调用,以保存或或绘制一行图像
 static void _cbOutLine(const struct  _winWriter *out)
 {
-  struct _Plot *pPlot = struct_get(out, struct _Plot, Decode.wOut);
+  struct _PlotGIF *pPlot = struct_get(out, struct _PlotGIF, Decode.wOut);
   
   const unsigned char *data = out->data + 1; //索引色或真实色
   unsigned short w = ePicBuf.Header.w;
@@ -58,8 +50,8 @@ static void _cbOutLine(const struct  _winWriter *out)
 //暂仅支持 全局静态非透明图绘制
 signed char ePic_PlotGIF(u16 x,u16 y)
 {
-  struct _Plot *pPlot = 
-                   (struct _Plot *)ePic_cbGetDecodeSpace(sizeof(struct _Plot));
+  struct _PlotGIF *pPlot = 
+                   (struct _PlotGIF *)ePic_cbGetDecodeSpace(sizeof(struct _PlotGIF));
   pPlot->x = x;
   pPlot->y = y;  
 

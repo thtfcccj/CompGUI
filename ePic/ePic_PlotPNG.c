@@ -3,6 +3,8 @@
           ePic格式图像子模块-绘制PNG图像非压缩引引图实现
 此模块支持多线程调用！
 ********************************************************************************/
+#include "ePic_PlotPNG.h"
+
 
 #include "ePic.h"
 #include "Plot.h"
@@ -10,17 +12,7 @@
 #include <string.h>
 #include "struct.h" //struct_get()
 
-#include "DecodePNG.h"
-
-//内部结构
-struct _Plot{
-  unsigned short x;
-  unsigned short y;  
-  Color_t *pBuf;            //下次使用
-  struct _DecodePNG Decode; //译码器
-};
-
-//struct _Plot Plot; //测试需要内存,默认时需9100字节;
+//struct _PlotPNG Plot; //测试需要内存,默认时需9100字节;
 /*******************************************************************************
                               相关函数实现
 ********************************************************************************/
@@ -29,7 +21,7 @@ struct _Plot{
 //此行数在DecodePNG()中调用,以保存或或绘制一行图像
 static void _cbOutLine(const struct  _winWriter *out)
 {
-  struct _Plot *pPlot = struct_get(out, struct _Plot, Decode.wOut);
+  struct _PlotPNG *pPlot = struct_get(out, struct _PlotPNG, Decode.wOut);
   
   const unsigned char *data = out->data + 1; //索引色或真实色
   unsigned short w = ePicBuf.Header.w;
@@ -63,18 +55,18 @@ static void _cbOutLine(const struct  _winWriter *out)
 //暂仅支持8B绘制
 signed char ePic_PlotPNG(u16 x,u16 y)
 {
-  struct _Plot *pPlot = 
-                   (struct _Plot *)ePic_cbGetDecodeSpace(sizeof(struct _Plot));
+  struct _PlotPNG *pPlot = 
+                   (struct _PlotPNG *)ePic_cbGetDecodeSpace(sizeof(struct _PlotPNG));
   pPlot->x = x;
   pPlot->y = y;  
 
   unsigned char DeepInfo = ePicBuf.Header.DeepInfo;
   if(DeepInfo & 0xe0 != (3 << 5)) return -1;  //图像类型：只支持索引彩色图像
-  DeepInfo &= ~0x1f;  //保留色深 
+  DeepInfo &= 0x1f;  //保留色深 
   
   //b7仅idat数据,扫描方法(b6~5), 滤波器方法(b4~2), 压缩方法(b1~0)  
   unsigned char ZipInfo = ePicBuf.Header.ZipInfo;
-  if(ZipInfo != 0) return -1;//只支持逐行扫，默认压缩与自动滤波器(索引格式无)
+  if(ZipInfo != 0x80) return -1;//只支持逐行扫，默认压缩与自动滤波器(索引格式无)
   
   //得到调色板信息
   unsigned short MapCount = ePicBuf.Header.PaletteCount;

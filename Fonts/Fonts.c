@@ -79,37 +79,48 @@ static void _PlotModule(const unsigned char *pMode,//取得的字模
                        unsigned short y,               //屏上的y轴位置
                         unsigned char w, 
                         unsigned char h,
-                        unsigned char MaxH)
+                        unsigned char MaxH,
+                        unsigned char ScaleMuti)      //放大倍率
 {
+  unsigned short ScaleW = w * ScaleMuti;
+  unsigned short ScaleH = h * ScaleMuti;
+  MaxH *= ScaleMuti;    
   //底部对齐时，顶部需填充为背景色
-  if(h < MaxH){
-    Plot_FullRect(x,y,w,MaxH - h);
-    y += MaxH - h;
+  if(ScaleH < MaxH){
+    Plot_FullRect(x,y,ScaleW,MaxH - ScaleH);
+    y += MaxH - ScaleH;
   }
   
   //绘制当前字符,横向取模方式为：高左低右,丢弃最低位
-  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, w, h);     //显示缓冲行起始
-  for(; h > 0; h--){//行为单位绘制
-    unsigned char curW = w;
-    do{//宽度一点点绘制
-      unsigned char Data = *pMode++; //取字模
-      unsigned char EndMask;
-      if(curW >= 8){
-        EndMask = 0;
-        curW -= 8;
-      }
-      else{
-        EndMask = 1 << (7 - curW);
-        curW = 0;
-      }
-      for(unsigned char Mask = 0x80; Mask > EndMask; Mask >>= 1){
-        Color_t color;
-        if(Data & Mask) color = Plot_GetPenColor();
-        else color = Plot_GetBrushColor();
-        Plot_cbSetCurColor(pBuf, color);
-      }//end for
-    }while(curW > 0);
-    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
+  Color_t *pBuf = Plot_cbAbsLocalArea(x, y, ScaleW, ScaleH);     //显示缓冲行起始
+  for(; h > 0; h--){//y轴单位绘制
+    //y轴重复绘制以实现多倍放大
+    const unsigned char *pPrvMode = pMode;
+    for(unsigned char Repeat = ScaleMuti; Repeat > 0; Repeat--){
+      pMode = pPrvMode; //重复时
+      unsigned char curW = w;
+      do{//宽度一点点绘制
+        unsigned char Data = *pMode++; //取字模
+        unsigned char EndMask;
+        if(curW >= 8){
+          EndMask = 0;
+          curW -= 8;
+        }
+        else{
+          EndMask = 1 << (7 - curW);
+          curW = 0;
+        }
+        for(unsigned char Mask = 0x80; Mask > EndMask; Mask >>= 1){
+          Color_t color;
+          if(Data & Mask) color = Plot_GetPenColor();
+          else color = Plot_GetBrushColor();
+          //x辆重复绘制以实现多倍放大
+          for(unsigned char Next = ScaleMuti; Next > 0; Next--)
+            Plot_cbSetCurColor(pBuf, color);
+        }//end for
+      }while(curW > 0);
+      pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
+    }//end for Repeat
   }//end for h
 }
 
@@ -119,7 +130,8 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
                        const struct _FontsDesc *pFfonts,    //全角时使用的字体
                        unsigned short x,                    //屏上的x轴位置
                        unsigned short y,                    //屏上的y轴位置
-                       const char *pString)                 //要绘制的字符串
+                       const char *pString,                 //要绘制的字符串
+                       unsigned char ScaleMuti)            //放大倍率,>=1;
 {
   //得到最大高度，高度不同时，以底部对齐
   unsigned short Len = 0;
@@ -134,6 +146,7 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
     if(Len >= FONTS_STR_MAX) return -1; //长度异常不绘制
   }
   
+  if(ScaleMuti > 8) ScaleMuti = 8; //最大放大倍数
   for(char c = *pString; c != '\0'; pString++, c = *pString){
     //============得到高宽与字模===============
     unsigned char w, h; 
@@ -149,8 +162,8 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
       pString++;//下半字了
       pMode = Font_pGetFmode(pFfonts, c, *pString);
     }
-    if(pMode != NULL) _PlotModule(pMode, x, y, w, h, MaxH);
-    x += w; //下个字符位置
+    if(pMode != NULL) _PlotModule(pMode, x, y, w, h, MaxH, ScaleMuti);
+    x += w * ScaleMuti; //下个字符位置
   };
   return 0;
 }

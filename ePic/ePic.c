@@ -101,15 +101,8 @@ void ePic_PlotIndexBmp(u16 x,u16 y);
 signed char ePic_PlotRle4(unsigned short x, unsigned short y);
 signed char ePic_PlotRle8(unsigned short x, unsigned short y);
 
-//-----------------------------画PNG图-----------------------------------
-//横向取模w*h点位,此函数不依赖调色板
-//暂仅支持8B绘制
-signed char ePic_PlotPNG(u16 x,u16 y);
-
-//-----------------------------画GIF图-----------------------------------
-//横向取模w*h点位,此函数不依赖调色板
-//暂仅支持 全局静态非透明图绘制
-signed char ePic_PlotGIF(u16 x,u16 y);
+#include "ePic_PlotGIF.h"
+#include "ePic_PlotPNG.h"
 
 //------------------------------绘制缓冲的数据----------------------------------
 //调用此函数前需ePic_ePicBuf()，然后设置好背景色：Plot_SetBrushColor()
