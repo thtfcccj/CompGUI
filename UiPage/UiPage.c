@@ -51,9 +51,9 @@ void UiPage_UpdatePage(unsigned short Start,       //当页起始行
                        unsigned short Count,      //总行
                        unsigned char PageLine)    //每页行数
 {
-  UiPage.Cur = (Start / PageLine) + 1;
+  UiPage.Cur = Start / PageLine;
   if(Count == 0) UiPage.Count = 1;
-  else UiPage.Count =  ((Count - 1) / PageLine) + 1; 
+  else UiPage.Count =  (Count + PageLine - 1) / PageLine; 
   UiPage_cbUpdateUi(0x01);  
 }
 

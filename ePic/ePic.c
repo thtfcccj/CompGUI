@@ -19,17 +19,33 @@ struct _ePicBuf ePicBuf; //仅支持单线程
   #define _GetU16Data(data) (((unsigned short)*((data) + 1)) << 8) + *(data);
 #endif
 
+//-----------------------------------得到图像数据区------------------------------
+const unsigned char *ePic_pGetImageData(void)
+{
+  const unsigned char *pData = ePicBuf.pNextData;
+  if(ePicBuf.Header.Type == 'w') return pData;  //无调色板
+  if(ePicBuf.Header.PaletteCount) //局部调色板时
+    return pData + sizeof(Color_t) * ePicBuf.Header.PaletteCount; 
+  //值为0表示全调色板
+  //bmp格式固定调色板是为256
+  if((ePicBuf.Header.Type == 'b') && (ePicBuf.Header.ZipInfo & 0x80))
+    return pData + sizeof(Color_t) * 256;
+  return pData + sizeof(Color_t) * ((unsigned short)1 << ePicBuf.Header.DeepInfo);
+}
+
 //------------------------由ePic图像格式数据更新数据头---------------------------
 //同时填充返回非0图像格式 错误
 signed char ePic_ePicBuf(const unsigned char *ePicData,
                           unsigned long IconSize)
 {
+  memset(&ePicBuf, 0,sizeof(struct _ePicBuf));
+  
   if(IconSize < 5) return -1; //数据太小
   
   const unsigned char *eOrgData = ePicData;
   //==================图像类型与色深解析====================
   unsigned char Data;
-  #ifdef EPIC_FIX_PIC_TYPE
+  #ifdef EPIC_FIX_PIC_TYPE //支持一种图像格式时
     Data = EPIC_FIX_PIC_TYPE;
   #else
     Data = *ePicData++;    
@@ -75,15 +91,16 @@ signed char ePic_ePicBuf(const unsigned char *ePicData,
   
   //===================压缩数据与调色板数量解析===================
   //WBM格式数据头时，仅有宽度与高度数据，无压缩与调色板
-  #ifdef SUPPORT_EPIC_WBM_WH
-    if(Type != 'w'){
-      ePicBuf.Header.ZipInfo = *ePicData++;
-      ePicBuf.Header.PaletteCount = *ePicData++;      
-    }
-  #else
+  if(Type == 'w'){
+    #ifndef SUPPORT_EPIC_WBM_WH //未省略此两位时
+    ePicBuf.Header.ZipInfo = *ePicData++;
+    ePicBuf.Header.PaletteCount = *ePicData++; 
+    #endif
+  }
+  else{ 
     ePicBuf.Header.ZipInfo = *ePicData++;
     ePicBuf.Header.PaletteCount = *ePicData++;
-  #endif
+  }
 
   ePicBuf.pNextData = ePicData; //图像或调色板数据了    
   unsigned char HeaderSize = ePicData - eOrgData;
@@ -120,7 +137,8 @@ signed char ePic_Plot(unsigned short x,
   }
   //BMP格式绘图
   if(ePicBuf.Header.Type ==  'b'){
-    if(ePicBuf.Header.ZipInfo == 0){//不压缩时
+    unsigned char ZipMode = ePicBuf.Header.ZipInfo & 0x7f;
+    if(ZipMode == 0){//不压缩时
       if(ePicBuf.Header.DeepInfo > 8){
         return -1;//暂不支持16，24，32位非索引图像
       }
@@ -129,10 +147,10 @@ signed char ePic_Plot(unsigned short x,
         return 0;
       }
     }
-    else if(ePicBuf.Header.DeepInfo == 4)//LRE4压缩格式时
-      return ePic_PlotRle4(x,y);//RLE4格式缓图
-    else if(ePicBuf.Header.DeepInfo == 8)//LRE8压缩格式时
-      return ePic_PlotRle8(x,y);//RLE8格式缓图
+    else if(ZipMode == 1)//LRE8压缩
+      return ePic_PlotRle8(x,y);
+    else if(ZipMode == 2)//LRE4压缩
+      return ePic_PlotRle4(x,y);
     return -1;//异常
   }
   
@@ -143,7 +161,7 @@ signed char ePic_Plot(unsigned short x,
   //GIF格式时
   if(ePicBuf.Header.Type ==  'g'){
     return ePic_PlotGIF(x,y);
-  }  
+  }
   
   return -1;//其它暂不支持  
 }
@@ -169,6 +187,30 @@ Color_t *ePic_pPlotIndexDot(Color_t *pBuf,//绘制位置
   return pBuf;
 }
 
+//----------------------利用调色板重复绘制当前点----------------------------
+//返回pBuf位置
+Color_t *ePic_pPlotIndexDotRepeat(Color_t *pBuf,//绘制位置
+                       const unsigned char *map,//索引表表
+                       unsigned char mapSize,    //索引表大小
+                       unsigned char indexColor, //索引色
+                       unsigned short RepeatCount)//重复次数
+{
+  //非透明时填充并移至下一点
+  if((indexColor < mapSize) ||!mapSize){
+    Color_t color; //为防止查找表数据未对齐
+    memcpy(&color, //MSB,LSB自适应
+           map + indexColor * sizeof(Color_t),
+           sizeof(color));
+    for(; RepeatCount > 0; RepeatCount--) 
+      Plot_cbSetCurColor(pBuf, color);
+  }
+  else{//忽略对当前点的绘制
+    for(; RepeatCount > 0; RepeatCount--) 
+      Plot_cbUpdateNext(pBuf);
+  }
+  return pBuf;
+}
+
 //----------------------利用调色板绘制当前行---------------------------
 //返回pBuf位置
 Color_t *ePic_pPlotIndexLine(Color_t *pBuf,//绘制位置
@@ -178,15 +220,22 @@ Color_t *ePic_pPlotIndexLine(Color_t *pBuf,//绘制位置
                              unsigned char bpp,        //色占位,1,2,4,8
                              unsigned short w)         //宽度
 {
+  if(bpp >= 8){//字节为单位
+    for(; w > 0; w--, data++){
+      pBuf = ePic_pPlotIndexDot(pBuf, map, mapSize, *data);
+    }
+    return pBuf;
+  }
+  //1,2,4时:
   unsigned char bitMask = Plot_BitSize2Mask[bpp];   //位掩码
   do{//宽度一点点绘制
     unsigned char Data = *data++; //取位数据
-    unsigned char curLen;
-      if(w < (unsigned short)bpp) curLen = w; //宽度对齐，余下丢弃
+    signed char curLen;
+      if(w < (8 / bpp)) curLen = w * bpp; //宽度对齐，余下丢弃
       else curLen = 8;
-      for(unsigned char pos = 0; pos < curLen; pos += bpp, w--){
+      for(curLen -= bpp; curLen >= 0; curLen -= bpp, w--){
         //填充色
-        unsigned char indexColor = (Data >> pos) & bitMask;
+        unsigned char indexColor = (Data >> curLen) & bitMask;
         pBuf = ePic_pPlotIndexDot(pBuf, map, mapSize, indexColor);
       }//end for
     }while(w > 0);

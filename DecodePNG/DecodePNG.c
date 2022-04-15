@@ -40,9 +40,9 @@ static signed char _unfilterL2(const struct  _winWriter *out)
 {
   unsigned short  length = out->U16Para;            //一行数据占位
   //if(out->start < (length * 2)) return 0;           //不够两行的数据
-  unsigned char *precon = out->data + 1;      //上次输出为第一行数据
+  unsigned char *precon = out->data + 1;           //上次输出为第一行数据
   unsigned char *recon  = precon + length;         //输出的数据也是第二行
-  const unsigned char *scanline = recon;          //本行扫描处理的是第于数据
+  const unsigned char *scanline = recon;          //本行扫描处理的是第二数据
   length--;//去除类型标志
   unsigned short bytewidth = (out->U8Para + 7) >> 3;//色深占位
   
@@ -164,6 +164,16 @@ static signed char _unfilterL2(const struct  _winWriter *out)
   return 0;
 }
 
+//-----------ZlibDecompress回调函数实现：得到校验结果---------------------------
+unsigned long ZlibDecompress_cbGetAdler32(winWriter_t *out) //接收数据缓冲
+{
+  //起始
+  if(out->OutedSize == 0) return Adler32_Get(1, out->data, out->start);
+  //out->OutedSize要比out->U32Para少一页
+  unsigned short length = out->U16Para;  
+  return Adler32_Get(out->U32Para, out->data + length, out->start - length);
+}
+
 //-------------------------数据后续处理函数-----------------------------------
 //返回用掉了多少数据
 static brsize_t _LaterPro(struct  _winWriter *out)
@@ -174,7 +184,6 @@ static brsize_t _LaterPro(struct  _winWriter *out)
   if(start < ((length * 2) + DECODER_PNG_RESERVED_SPACE)) return 0;//不够两行的数据时
   if(out->OutedSize == 0){//统计第一行累加和
      out->U32Para = Adler32_Get(1, out->data, length);//Checksum
-     out->OutedSize = length;
   }
   //统计第二行累加和
   out->U32Para += Adler32_Get(out->U32Para, 
@@ -182,7 +191,7 @@ static brsize_t _LaterPro(struct  _winWriter *out)
   _unfilterL2(out); //反滤波处理第二行数据
   struct _DecodePNG *pDecode = struct_get(out, struct _DecodePNG, wOut);
   pDecode->cbOutLine(out);//绘制第一行数据
-  out->OutedSize += length;
+  out->OutedSize += length; //主要用作Adler32计数
   return length;   //第一行数据被绘制了
 }
 
@@ -204,7 +213,8 @@ static void _EndPro(struct  _winWriter *out)
     pDecode->cbOutLine(out);//绘制第一行数据
     //移出绘制完成的数据，并将数据前移
     out->start -= length;
-    memcpy(out->data, out->data + length, length);
+    out->OutedSize += length;    
+    memcpy(out->data, out->data + length, out->start);
   }
   //最后第2行数据移入第一行
   memcpy(out->data, out->data + length, length);

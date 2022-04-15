@@ -27,22 +27,17 @@ static void _cbOutLine(const struct  _winWriter *out)
   unsigned short w = ePicBuf.Header.w;
   //此应用作为绘图使用
   Color_t *pBuf = pPlot->pBuf;
-  if(out->OutedSize <= out->U16Para)//第一行：显示缓冲行起始
-    pBuf = Plot_cbAbsLocalArea(pPlot->x,pPlot->y, w, ePicBuf.Header.h); 
+  if(out->OutedSize <= out->U16Para){//第一行：显示缓冲行起始
+    pBuf = Plot_cbAbsLocalArea(pPlot->x,pPlot->y, w, ePicBuf.Header.h);
+    pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
+  }
   else
     pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
    
   const unsigned char *map = ePicBuf.pNextData;  
   unsigned char mapSize = ePicBuf.Header.PaletteCount;
   unsigned char bpp = out->U8Para;
-  if(bpp >= 8){//字节为单位
-    for(unsigned short w = ePicBuf.Header.w; w > 0; w--, data++){
-      pBuf = ePic_pPlotIndexDot(pBuf, map, mapSize, *data);
-    }
-  }
-  else{//位为单位
-    ePic_pPlotIndexLine(pBuf, map, mapSize, data, bpp, w);//画当前行
-  }
+  pBuf = ePic_pPlotIndexLine(pBuf, map, mapSize, data, bpp, w);//画当前行
   
   pPlot->pBuf = pBuf;
 }

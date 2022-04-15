@@ -18,6 +18,7 @@
 //支持的图像格式有：
 //wbm: 即单色位图转ePic格式
 //bmp：支持2,4,8位索引位图，支持RLE压缩方式图的绘制
+//     bmp格式由下往上绘制，因显存顺序原因解析为由上向下，故导入时需垂直镜像处理！！
 //png: 8位索引位置绘制
 
 //若应用中只支持一种类型时，定义固定支持的图像类型，需为 'w' 'b' 'p'之一
@@ -74,6 +75,9 @@ extern struct _ePicBuf ePicBuf; //仅支持单线程
 #define ePic_GetZipInfo()      (ePicBuf.Header.ZipInfo)
 #define ePic_GetPaletteCount() (ePicBuf.Header.PaletteCount)
 
+//-----------------------------------得到图像数据区------------------------------
+const unsigned char *ePic_pGetImageData(void);
+
 //-------------------------------缓冲的数据头后的数据---------------------------
 #define ePic_pGetNextData() (ePicBuf.pNextData)
 
@@ -84,6 +88,14 @@ Color_t *ePic_pPlotIndexDot(Color_t *pBuf,//绘制位置
                        const unsigned char *map,//索引表表
                        unsigned char mapSize,    //索引表大小
                        unsigned char indexColor); //索引色
+
+//----------------------利用调色板重复绘制当前点----------------------------
+//返回pBuf位置
+Color_t *ePic_pPlotIndexDotRepeat(Color_t *pBuf,//绘制位置
+                       const unsigned char *map,//索引表表
+                       unsigned char mapSize,    //索引表大小
+                       unsigned char indexColor, //索引色
+                       unsigned short RepeatCount);//重复次数
 
 //----------------------利用调色板绘制当前行---------------------------
 //返回pBuf位置
