@@ -42,9 +42,9 @@
 //返回用掉了多少数据
 static brsize_t _LaterPro(struct  _winWriter *out)
 {
-  unsigned short length = out->U16Para; //一行数据占位
   struct _DecodeGIF *pDecode = struct_get(out, struct _DecodeGIF, wOut);
   pDecode->cbOutLine(out);//绘制一行数据
+  unsigned short length = out->U16Para; //一行数据占位  
   out->OutedSize += length;
   return length;   //第一行数据被绘制了
 }
@@ -62,32 +62,30 @@ static unsigned short _Out4Dict(struct _DecodeGIF *pDecode,
   //直接数，不需查表
   if(DictId < IdStart){
     *(out->data + out->start++) = DictId; //输出前缀
-    //回调输出
-    if(out->start >= out->capability) winWriter_OutData(out);
+    //满了先回调输出
+    if((out->capability - out->start) < out->U16Para) 
+      winWriter_OutData(out);
     return DictId;
   }
   
   //需递归查表,为提高率，每次找到的最低字符也缓存
   unsigned short Deep = DECODER_STRING_SIZE - 1;
-  unsigned short FirstS; //要找表首个字符
   do{
     //反向依次压入最后一个字符
     pDecode->AntiChar[Deep--] = pDecode->DictChar[DictId];
     if(Deep == 0) return -1;//字符太长，缓冲不够了
-    DictId = pDecode->DictId[DictId]; //找下一级
+    DictId = pDecode->DictId[DictId];
     if(DictId >= DictLen) return -1;//字典出错
-    //找到直接数,结束了
+    //找到直接数(至少两个字符),结束了
     if(DictId < IdStart){
       pDecode->AntiChar[Deep] = DictId;
-      FirstS = DictId;
       break;
     }
   }while(1);
   //将反向缓冲的字符输出
   winWriter_Copy(out, &pDecode->AntiChar[Deep], 
-                 DECODER_STRING_SIZE - Deep, 0);
-  
-  return FirstS;
+                 DECODER_STRING_SIZE - Deep, out->U16Para);
+  return DictId;
 }
 
 //-----------------------------译码实现-----------------------------------
@@ -105,20 +103,20 @@ static signed char _Decode(struct _DecodeGIF *pDecode)
 
   BitSpace++;//已经比原数据多出一位了。
 
-  unsigned char Bit = 0;
+  signed char Bit = 0;
   unsigned short PrvCode = 0xffff; 
   unsigned short CurCode;   
   unsigned short CurS;
   do{
     //缓冲比特流
+    Bit -= BitSpace; //下次起始位置
     if(Bit < BitSpace){//不够就缓冲
-      if(reader->bitsize >= reader->bp) //读完也没结束字符，异常了
+      if(reader->bitsize <= reader->bp) //读完了(没结束字符是否异常?)
         return -1;
       bReader_2BufferB32(reader); //最多读32位
-      Bit = 32;
+      Bit = 32;// - (reader->bp & 0x07);
     }
-    else Bit-= BitSpace;
-    //并读值
+    //读值
     CurCode = bReader_RdB(reader, BitSpace); 
     //特殊字符处理:
     if(CurCode == endCode) break;//结束了
@@ -127,25 +125,26 @@ static signed char _Decode(struct _DecodeGIF *pDecode)
       PrvCode = 0xffff;  //重新开始
       continue;
     }
-    
-    //输出结果
-    if(CurCode <= DictInPos){ 
-      CurS = _Out4Dict(pDecode, CurCode, DictInPos);
-      if(CurS >= 256) return -2;//未找到字符，数据异常
-    }
-    else return -1;//字典未建立，数据异常
-    
-    //加入字典
-    if(PrvCode != 0xffff){
+
+    if(PrvCode != 0xffff){//非首次时
       pDecode->DictId[DictInPos] = PrvCode;
-      pDecode->DictChar[DictInPos] = CurS;
+      pDecode->DictChar[DictInPos] = CurS;//预建立
       DictInPos++; //扩容了
       if(DictInPos >= DECODER_DICT_SIZE) return -1;//超过容量了
       //位可能的扩流
       if(DictInPos >= ((unsigned short)1 << BitSpace)) BitSpace++;
     }
+    //输出结果
+    if(CurCode < DictInPos){ 
+      CurS = _Out4Dict(pDecode, CurCode, DictInPos);
+      if(CurS >= 256) return -2;//未找到字符，数据异常
+    }
+    else return -1;//字典未建立，数据异常
+    pDecode->DictChar[DictInPos - 1] = CurS; //正式建立
+    
     //后缀做前缀
     PrvCode = CurCode;
+
   }while(1);
   
   return 0;
@@ -165,12 +164,16 @@ signed char DecodeGIF(struct _DecodeGIF *pDecode,//无需初始化
                         unsigned long idatLen)    //gif图像数据长度
 {
   //if(pDecode == NULL) return -1;//异常
-  if(cbOutLine == NULL) pDecode->cbOutLine = _cbOutLine;//防止异常
-  else pDecode->cbOutLine = cbOutLine;
+  //校验数据正确性
+  if(*idat++ != bbp) return -1;//数据异常
+  idatLen--;  
   
+  if(cbOutLine == NULL) pDecode->cbOutLine = _cbOutLine;//防止异常
+  else pDecode->cbOutLine = cbOutLine;  
+
   //得到每行实际占用字节数
-  unsigned short Line = ((w  >> 3) * bbp); //整数部分占位
-  Line += ((w & 0x07) * bbp + 7) >> 3; //末尾像素未对齐部分占1字节
+  unsigned short Line = w;//((w  >> 3) * bbp); //整数部分占位
+  //Line += ((w & 0x07) * bbp + 7) >> 3; //末尾像素未对齐部分占1字节
   
   //初始化winWriter
   winWriter_t *out = &pDecode->wOut;
@@ -188,5 +191,13 @@ signed char DecodeGIF(struct _DecodeGIF *pDecode,//无需初始化
   bReader_Init(reader, idat, idatLen);
   
   //解压缩数据
-  return _Decode(pDecode);
+  signed char Resume = _Decode(pDecode);
+  if(Resume) return Resume;//异常
+  
+  //未完成图像数据输出
+  while(out->start){
+    if(winWriter_OutData(out) < 0) return -1;//输出异常
+  }
+  
+  return 0;
 }

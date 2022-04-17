@@ -22,23 +22,20 @@
 static void _cbOutLine(const struct  _winWriter *out)
 {
   struct _PlotGIF *pPlot = struct_get(out, struct _PlotGIF, Decode.wOut);
-  
-  const unsigned char *data = out->data + 1; //索引色或真实色
+
   unsigned short w = ePicBuf.Header.w;
   //此应用作为绘图使用
   Color_t *pBuf = pPlot->pBuf;
   if(out->OutedSize <= out->U16Para)//第一行：显示缓冲行起始
-    pBuf = Plot_cbAbsLocalArea(pPlot->x,pPlot->y, w, ePicBuf.Header.h); 
+    pBuf = Plot_cbAbsLocalArea(pPlot->x,pPlot->y, w, ePicBuf.Header.h);
   else
     pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
    
-  const unsigned char *map = ePicBuf.pNextData;  
-  unsigned char mapSize = ePicBuf.Header.PaletteCount;
-  
-  //解码出的数据是以字节为单位!
-  for(unsigned short w = ePicBuf.Header.w; w > 0; w--, data++){
-    pBuf = ePic_pPlotIndexDot(pBuf, map, mapSize, *data);
-  }
+  pBuf = ePic_pPlotIndexLine(pBuf, 
+                             ePicBuf.pNextData, 
+                             ePicBuf.Header.PaletteCount, 
+                             out->data, 
+                             8, w);//画当前行,字节为单位
   pPlot->pBuf = pBuf;
 }
 

@@ -15,23 +15,23 @@
 ********************************************************************************/
 
 //系统用到的，最大图宽的宽度，用于内部定义输出数据缓冲区,值越大越占内存
-#ifndef DECODER_PNG_W_MAX 
-  #define DECODER_PNG_W_MAX         480
+#ifndef DECODER_GIF_W_MAX 
+  #define DECODER_GIF_W_MAX         480
 #endif
 
-//定义数据缓冲区大小,不需要往回找，至少1.5倍宽DECODER_PNG_W_MAX宽度
+//定义数据缓冲区大小,不需要往回找，至少1.5倍宽DECODER_GIF_W_MAX宽度
 #ifndef DECODER_GIF_DATA_BUF_SIZE
-  #define DECODER_GIF_DATA_BUF_SIZE  (DECODER_PNG_W_MAX * 2)
+  #define DECODER_GIF_DATA_BUF_SIZE  (DECODER_GIF_W_MAX * 2 + 10)
 #endif
 
 //定义字典
 #ifndef DECODER_DICT_SIZE 
-  #define DECODER_DICT_SIZE      4096  //GIF标准为4096
+  #define DECODER_DICT_SIZE      4096  //GIF标准为4096,固定
 #endif
 
 //字典里字符的最大长度
 #ifndef DECODER_STRING_SIZE 
-  #define DECODER_STRING_SIZE    DECODER_PNG_W_MAX
+  #define DECODER_STRING_SIZE    DECODER_GIF_W_MAX
 #endif
 
 /*******************************************************************************
@@ -49,7 +49,7 @@ struct _DecodeGIF{
   bReader_t Reader;                                     //输入数据   
   DecodeGIF_cbOutLine_t cbOutLine;                      //回调输出函数
   winWriter_t wOut;                                    //缓冲的数据结构
-  unsigned char OutData[DECODER_GIF_DATA_BUF_SIZE];   //wOut->data用
+  unsigned char OutData[DECODER_GIF_DATA_BUF_SIZE]; //wOut->data用
  
   //LZW字典:
   //采用定长循环查找方式(以时间换空间)实现
