@@ -216,9 +216,10 @@ static void _EndPro(struct  _winWriter *out)
     out->OutedSize += length;    
     memcpy(out->data, out->data + length, out->start);
   }
+  pDecode->cbOutLine(out);//绘制已准备好的第一行数据
   //最后第2行数据移入第一行
   memcpy(out->data, out->data + length, length);
-  pDecode->cbOutLine(out);//绘制第一行数据
+  pDecode->cbOutLine(out);//绘制最后一行数据
 }
 
 //-----------------------------默认OutLine-----------------------------------

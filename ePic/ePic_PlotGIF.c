@@ -26,7 +26,7 @@ static void _cbOutLine(const struct  _winWriter *out)
   unsigned short w = ePicBuf.Header.w;
   //此应用作为绘图使用
   Color_t *pBuf = pPlot->pBuf;
-  if(out->OutedSize <= out->U16Para)//第一行：显示缓冲行起始
+  if(out->OutedSize < out->U16Para)//第一行：显示缓冲行起始
     pBuf = Plot_cbAbsLocalArea(pPlot->x,pPlot->y, w, ePicBuf.Header.h);
   else
     pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
@@ -54,7 +54,8 @@ signed char ePic_PlotGIF(u16 x,u16 y)
 
   //m(b7有全局调色板)cr(b6~b4,颜色深度-1)s(b3) pixel(b3~0全局调色板个数-1)域
   unsigned char DeepInfo = ePicBuf.Header.DeepInfo;
-  DeepInfo = ((DeepInfo >> 4) & 0x07) + 1;  //保留色深 
+  DeepInfo = ((DeepInfo >> 4) & 0x07) + 1;  //保留色深
+  if(DeepInfo == 1) DeepInfo = 2;//至少两位
    
   //ePicBuf.Header.ZipInfo; ->背景颜色
   

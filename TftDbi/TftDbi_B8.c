@@ -54,30 +54,35 @@ void TftDbi_WrColor(Color_t Color)
 }
 
 //-----------------------------------读颜色函数--------------------------------
-//读状态定义为:0结束读，负读起始，正读过程中
+//此实现针对显驱不同可能不同，实测读取不对！！！
 Color_t TftDbi_RdColor(void)
 {
   TftDbi_cbDbIn();   //默认为输出状态需转换为输入
   
   TftDbi_cbRdClkL();  //低电平时准备数据 
   TftDbi_cbDelayTrdl();//等待数据及输出稳定
-  unsigned char Data0 = TftDbi_cbDbRd(); //上升沿之前读出数据  
-  TftDbi_cbWrClkH();  //上升告知读回来了
+  unsigned char R = TftDbi_cbDbRd(); //上升沿之前读出数据  
+  TftDbi_cbRdClkH();  //上升告知读回来了
   
+  TftDbi_cbDelayTrdh(); //为下个数据准备
   TftDbi_cbRdClkL();  //低电平时准备数据 
   TftDbi_cbDelayTrdl();//等待数据及输出稳定
-  unsigned char Data1 = TftDbi_cbDbRd(); //上升沿之前读出数据  
-  TftDbi_cbWrClkH();  //上升告知读回来了  
+  unsigned char G = TftDbi_cbDbRd(); //上升沿之前读出数据  
+  TftDbi_cbRdClkH();  //上升告知读回来了  
+  
+  TftDbi_cbDelayTrdh(); //为下个数据准备
+  TftDbi_cbRdClkL();  //低电平时准备数据 
+  TftDbi_cbDelayTrdl();//等待数据及输出稳定
+  unsigned char B = TftDbi_cbDbRd(); //上升沿之前读出数据  
+  TftDbi_cbRdClkH();  //上升告知读回来了  
   
   #ifndef SUPPORT_RGB_HW_565 //GB666,RGB888，8位仅支持最大3位色值传输
-    TftDbi_cbRdClkL();  //低电平时准备数据 
-    TftDbi_cbDelayTrdl();//等待数据及输出稳定
-    unsigned char Data2 = TftDbi_cbDbRd(); //上升沿之前读出数据  
-    TftDbi_cbWrClkH();  //上升告知读回来了
-    Color_t Color = ((unsigned long)Data0 << 16) | 
-                    ((unsigned long)Data1 << 8) | Data2;
+    Color_t Color = ((unsigned long)R << 16) | 
+                    ((unsigned long)G << 8) | B;
   #else
-    Color_t Color = ((unsigned short)Data0 << 8) | Data1;
+    Color_t Color = (unsigned short)(R & 0xF1) << 11;
+    Color |= (unsigned short)(G & 0xF3) << 5;
+    Color |= (unsigned short)(B & 0xF1) >> 3;    
   #endif
 
   //TftDbi_cbDelayTrdh(); //为下个数据准备

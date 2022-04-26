@@ -36,6 +36,15 @@ Color_t * Plot_cbAbsLocalArea(unsigned short x, unsigned short y,
 extern void Plot_cbUpdateNextFun(void);
 #define Plot_cbUpdateNext(pcolor) do{Plot_cbUpdateNextFun(); (pcolor)++; }while(0)
 
+//---------------------------读绝对定位某个位置与区域函数------------------------
+//有读颜色需求时需实现
+//Color_t * Plot_cbAbsLocalAreaRd(unsigned short x, unsigned short y, 
+//                                unsigned short w, unsigned short h);
+//----------------------------------得到当前点颜色------------------------------
+//在Plot_cbAbsLocalAreaRd()后调用，可获得本区域颜色,此函数可用于实现透明
+//extern Color_t TftDbi_RdColor(void);
+//#define Plot_cbGetColor() TftDbi_RdColor()
+
 /*******************************************************************************
                         默认使用内部显存实现
 ********************************************************************************/

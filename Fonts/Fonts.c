@@ -8,7 +8,11 @@
 
 #include "Plot.h"
 #include "Plot_cbHw.h"//底层操作函数
+#include "StringEx.h"
+
 #include <string.h>
+
+static char _DestStr[FONTS_STR_MAX]; //对齐处理后的字符串
 
 //struct _FontsDesc _Desc;//测试
 //----------------------------查找表--------------------------------------------
@@ -30,7 +34,7 @@ static const unsigned char _Type2312A1[][2] = {
 };
 
 //--------------------------------得到半角字符字模------------------------------
-//返回NULL异常不绘制
+//返回NULL未找到
 const unsigned char *Font_pGetHmode(const struct _FontsDesc *pHfonts,//半角字体
                                      unsigned char c)
 {
@@ -38,23 +42,23 @@ const unsigned char *Font_pGetHmode(const struct _FontsDesc *pHfonts,//半角字体
   if(Type >= 3) return NULL; //不是半角字体
   unsigned char Base = _TypeHalfBase[Type];
   //不在最低显示范围，显示最小字符
-  if(c < Base) c = 0;
+  if(c < Base) return NULL;
   else{
     c -= Base;
-    if(c >= _TypeHalfCount[Type]) c = 0;
+    if(c >= _TypeHalfCount[Type]) return NULL;
   }
   unsigned short Count = ((pHfonts->w + 7) >> 3) * pHfonts->h;
   return Font_pGetZM(pHfonts->Base + c * Count, Count);
 }
 
 //--------------------------------得到全角字符字模-------------------------------
-//返回NULL异常不绘制
+//返回NULL未找到
 const unsigned char *Font_pGetFmode(const struct _FontsDesc *pFfonts,//全角字体
                                      unsigned char c1, //区码
                                      unsigned char c2) //位码
 {
   unsigned char Type = pFfonts->Type;
-  if((Type < 3) || (Type > 6))return NULL;//暂只支持GB2312
+  if((Type < 3) || (Type > 6)) return NULL;//暂只支持GB2312
   
   //得到当前字对应的字模位置，区位码不对时，字模位置自动纠正至0
   unsigned short Pos;
@@ -80,8 +84,9 @@ static void _PlotModule(const unsigned char *pMode,//取得的字模
                         unsigned char w, 
                         unsigned char h,
                         unsigned char MaxH,
-                        unsigned char ScaleMuti)      //放大倍率
+                        unsigned char Info)    //b0~b2放大倍效率
 {
+  unsigned char ScaleMuti = Info & 0x07;
   unsigned short ScaleW = w * ScaleMuti;
   unsigned short ScaleH = h * ScaleMuti;
   MaxH *= ScaleMuti;    
@@ -90,9 +95,10 @@ static void _PlotModule(const unsigned char *pMode,//取得的字模
     Plot_FullRect(x,y,ScaleW,MaxH - ScaleH);
     y += MaxH - ScaleH;
   }
-  
+    
   //绘制当前字符,横向取模方式为：高左低右,丢弃最低位
   Color_t *pBuf = Plot_cbAbsLocalArea(x, y, ScaleW, ScaleH);     //显示缓冲行起始
+  
   for(; h > 0; h--){//y轴单位绘制
     //y轴重复绘制以实现多倍放大
     const unsigned char *pPrvMode = pMode;
@@ -100,7 +106,9 @@ static void _PlotModule(const unsigned char *pMode,//取得的字模
       pMode = pPrvMode; //重复时
       unsigned char curW = w;
       do{//宽度一点点绘制
-        unsigned char Data = *pMode++; //取字模
+        unsigned char Data;
+        if(pMode == NULL) Data = 0; //无字模时填充背景
+        else{ Data = *pMode++;} //取字模
         unsigned char EndMask;
         if(curW >= 8){
           EndMask = 0;
@@ -114,7 +122,7 @@ static void _PlotModule(const unsigned char *pMode,//取得的字模
           Color_t color;
           if(Data & Mask) color = Plot_GetPenColor();
           else color = Plot_GetBrushColor();
-          //x辆重复绘制以实现多倍放大
+          //x重复绘制以实现多倍放大
           for(unsigned char Next = ScaleMuti; Next > 0; Next--)
             Plot_cbSetCurColor(pBuf, color);
         }//end for
@@ -131,9 +139,11 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
                        unsigned short x,                    //屏上的x轴位置
                        unsigned short y,                    //屏上的y轴位置
                        const char *pString,                 //要绘制的字符串
-                       unsigned char ScaleMuti)            //放大倍率,>=1;
+                       unsigned char MaxLen,  //字符串最大长度,用于对齐,0自动
+                       unsigned char Info)  //b0~b2放大倍效率,b4~5对齐方式
 {
   //得到最大高度，高度不同时，以底部对齐
+  if(MaxLen == 0) MaxLen = FONTS_STR_MAX;
   unsigned short Len = 0;
   unsigned char MaxH = 0;
   const char *ps = pString;  
@@ -143,10 +153,16 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
     else h = pFfonts->h;
     if(h > MaxH) MaxH = h;
     Len++;
-    if(Len >= FONTS_STR_MAX) return -1; //长度异常不绘制
+    if(Len >= MaxLen) break; //长度截取
   }
   
-  if(ScaleMuti > 8) ScaleMuti = 8; //最大放大倍数
+  //处理对齐方式
+  if((Info & 0x30) && (Len < MaxLen) && (MaxLen < FONTS_STR_MAX)){
+    strFull(_DestStr, pString, MaxLen, Info >> 4);
+    _DestStr[MaxLen] = '\0';
+    pString = _DestStr;
+  }
+  
   for(char c = *pString; c != '\0'; pString++, c = *pString){
     //============得到高宽与字模===============
     unsigned char w, h; 
@@ -162,8 +178,8 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
       pString++;//下半字了
       pMode = Font_pGetFmode(pFfonts, c, *pString);
     }
-    if(pMode != NULL) _PlotModule(pMode, x, y, w, h, MaxH, ScaleMuti);
-    x += w * ScaleMuti; //下个字符位置
+    if(pMode != NULL) _PlotModule(pMode, x, y, w, h, MaxH, Info);
+    x += w * (Info & 0x07); //下个字符位置
   };
   return 0;
 }

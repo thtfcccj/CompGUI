@@ -17,15 +17,13 @@
 
 //支持的最多字体类型，由资源描
 #ifndef FONTS_ID_MAX
-  #define FONTS_ID_MAX   8
+  #define FONTS_ID_MAX   3
 #endif
 
 //支持的最大字符串长度，超过此长度不再绘制
 #ifndef FONTS_STR_MAX
   #define FONTS_STR_MAX   (320 / 8)
 #endif
-
-
 
 /******************************************************************************
                              相关结构
@@ -63,7 +61,8 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
                        unsigned short x,               //屏上的x轴位置
                        unsigned short y,               //屏上的y轴位置
                        const char *pString,                 //要绘制的字符串
-                       unsigned char ScaleMuti);            //放大倍率,>=1;
+                       unsigned char MaxLen,  //字符串最大长度,用于对齐,0自动
+                       unsigned char Info);  //b0~b2放大倍效率,b4~5对齐方式
 
 /*******************************************************************************
                               回调函数

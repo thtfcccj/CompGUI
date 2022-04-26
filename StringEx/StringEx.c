@@ -412,6 +412,7 @@ unsigned char strFullMax(char *pDest, const char *pSource,
   //Align复用作起始位置
   if(Align == 1) Align = (DestLen - Len) >> 1;
   else if(Align == 2) Align = (DestLen - Len);
+  else Align = 0;//左对齐
   memcpy(pDest + Align, pSource, Len);
   return Align;
 }
