@@ -31,7 +31,8 @@ void UiPage_Init(void);
 void UiPage_Refresh(void);
 
 //---------------------------------更新本页名称--------------------------------
-void UiPage_UpdateName(const char *pName);
+void UiPage_UpdateName(const char *pName); //更新到显示
+#define UiPage_ReName(name) do{UiPage.pName = name;}while(0)  //仅重命名
 
 //---------------------------------更新为无页码-----------------------------
 //即只有一页，不面要显示页码
