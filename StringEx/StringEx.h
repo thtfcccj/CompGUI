@@ -16,7 +16,7 @@ unsigned char GetPosEqualU8(unsigned char Cur,
                              unsigned char Count);
 
 //-----------------------转换为字符串-显示为最简函数----------------------
-//返回结束位置,最大支持10^8数显示(超过显示99999999)
+//返回结束位置,最大显示10位
 char *Value4StringMin(unsigned long Value,
                       char *pString,//接收缓冲
                       unsigned char Min);//保证的最小位数

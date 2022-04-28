@@ -17,13 +17,23 @@ unsigned char GetPosEqualU8(unsigned char Cur,
 }
 
 //-----------------------转换为字符串-显示为最简函数----------------------
-//返回结束位置,最大支持10^8数显示(超过显示99999999)
+//返回结束位置,最大显示10位
 char *Value4StringMin(unsigned long Value,
                       char *pString,//接收缓冲
                       unsigned char Min)//保证的最小位数
 {
-  if((Value >= 10000) || (Min >= 5)){//高位
-    if(Value > 99999999) Value = 99999999;
+  //因Value2StringMin显示不全(9999共4位)，这里分段组合
+  //9~10位
+  if((Value > 99999999) || (Min > 8)){
+    unsigned char CurMin;
+    if(Min <= 8) CurMin = 0;
+    else CurMin = Min - 8;
+    pString = Value2StringMin(Value / 100000000, pString, CurMin);
+    Value %= 100000000;
+    Min = 8;
+  }
+  
+  if((Value >= 10000) || (Min > 4)){//高位
     unsigned char CurMin;
     if(Min <= 4) CurMin = 0;
     else CurMin = Min - 4;
@@ -113,12 +123,19 @@ char *pNum2StringFlag(signed short Value,   //当前数值
   }
   if(Value < 0) Value = 0 - Value;  //正值显示
       
-  //带小数点时,先检查数值是否<1,若是,则检查前面补了多少个0.或0.0
-  Flag &= 0x07;
+  Flag &= 0x07;//小数点了
+  
+  //有小数点且最小位数不够时
+  if(Flag && (Len <= Flag)){
+    Len = Flag;//最小位数强制扩展
+    if(Value > _Ov[Flag]) Len++; //1以上时,需扩展1位
+  }
+  
+  //带小数点时,先检查数值是否<1,若是,则检查前面补了多少个0.或0.0  
   if(Flag >= Len){ //<0了,0.
     FullLen = Flag - Len;
     *pBuf++ = '0';
-    *pBuf++ = '.'; 
+    *pBuf++ = '.';
     while(FullLen--) *pBuf++ = '0';//填充无效的0
     pBuf = Value2StringMin(Value,pBuf,Len);
   }
