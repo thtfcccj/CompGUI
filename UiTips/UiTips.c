@@ -48,7 +48,8 @@ static void _UpdateString(unsigned char StrPos)//¶Ì0³¤1
   else cFg = pDesc->cFg[StrPos]; //Ä¬ÈÏ¾°
   UiTips_cbUsedNotify();  
   Plot_SetBrushColor(pDesc->cBg);
-  Plot_SetBrushColor(cFg);   
+  Plot_SetBrushStyle(PLOT_BRUSH_STYLE_FULL);//±³¾°É«  
+  Plot_SetPenColor(cFg);  
   unsigned char Len = strlen(pStr);
   if(Len > pDesc->w) Len = pDesc->w;
   Plot_String(pDesc->x, pDesc->y, pStr, Len);
