@@ -64,6 +64,9 @@ void UiTips_UpdateL(const char *pStr,unsigned char TimeOv);//定时时间0xff驻留
 //取消长期任务
 #define UiTips_CancelL()  do{UiTips.TimerL = 1;}while(0)
 
+//是否同长期提示字符串
+#define UiTips_IsSameL(str)  ((str) == UiTips.pStr[1])
+
 //------------------------------短期提示相关-------------------------------
 //更新短期提示
 void UiTips_UpdateS(const char *pStr); 
