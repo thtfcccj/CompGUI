@@ -45,10 +45,10 @@
 
 
 //-----------------------------指定色填充函数-----------------------------------
-void Color_Full(Color_t C, Color_t *pC, unsigned char cCount);
+void Color_Full(Color_t C, Color_t *pC, unsigned short cCount);
 
 //-------------------------------颜色copy函数-----------------------------------
-void Color_Copy(Color_t *pDist, const Color_t *pSource, unsigned char cCount);
+void Color_Copy(Color_t *pDist, const Color_t *pSource, unsigned short cCount);
 
 //--------------------------RGB全色域与硬件支持色域相关--------------------------
 #ifdef SUPPORT_RGB_HW_565  //565模式(全局里定义)
