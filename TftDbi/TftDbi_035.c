@@ -338,7 +338,9 @@ signed char TftDbi_Init(void)
   //根据读取的设备ID配置显示屏
   if(ManufacturerID == 0x6B){//0x6b: W350BE024Z实测
     _HwCfg_ST7796S();     
-    TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
+    #ifndef SUPPORT_TFT_DRV_MV //坚屏时
+     TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
+    #endif
   }
   else if(ManufacturerID == 0x11){//0x11随手写(未验证)
     _HwCfg_HX8357();
