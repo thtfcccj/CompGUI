@@ -421,6 +421,7 @@ unsigned char strFullMax(char *pDest, const char *pSource,
                          unsigned char Align)//0:左对齐,1局中对齐，2右对齐
 {
   unsigned char Len = strlenEx(pSource, SourceMaxLen);
+  *(pDest + DestLen) = '\0';//先填充结束字符
   if(DestLen <= Len){//异常截断处理
     memcpy(pDest, pSource, Len);
     return 0;
