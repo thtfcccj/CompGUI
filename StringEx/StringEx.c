@@ -193,6 +193,16 @@ char *strcpyR(char *pStr, const char *pSub)
   return pStr;
 }
 
+//-----------------------------从右往左复制函数-------------------------------
+void memcpyR(void *pDest, const void *pSource, unsigned short Len)
+{
+  //if(Len) return;
+  //直接实现用于替换MPLABX 中 memcpy()部分出错问题
+  unsigned char *d = (unsigned char *)pDest + (Len - 1); 
+  unsigned char *s = (unsigned char *)pSource + (Len - 1);   
+  for(; Len > 0; Len--){*d-- = *s--;}
+}
+
 //-------------------------------内存复制函数-------------------------------
 //此函数替换memcpy(),用于返回的是结束位置的指针
 char *memcpyL(char *pStr, const char *pSub, unsigned short Len)

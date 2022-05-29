@@ -52,6 +52,9 @@ char *strcpyL(char *pStr, const char *pSub);
 //此函数替换strcpy(),返回pStr
 char *strcpyR(char *pStr, const char *pSub);
 
+//-----------------------------从右往左复制函数-------------------------------
+void memcpyR(void *pDest, const void *pSource, unsigned short Len);
+
 //-------------------------------内存复制函数-------------------------------
 //此函数替换memcpy(),用于返回的是结束位置的指针
 char *memcpyL(char *pStr, const char *pSub, unsigned short Len);
