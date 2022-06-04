@@ -63,6 +63,8 @@ void UiTips_UpdateL(const char *pStr,unsigned char TimeOv);//定时时间0xff驻留
 #define UiTips_HaveL()  (UiTips.TimerL)
 //取消长期任务
 #define UiTips_CancelL()  do{UiTips.TimerL = 1;}while(0)
+//手工设置时间
+#define UiTips_SetTimerL(l)  do{UiTips.Timerl = l; }while(0)
 
 //是否同长期提示字符串
 #define UiTips_IsSameL(str)  ((str) == UiTips.pStr[1])
@@ -74,7 +76,8 @@ void UiTips_UpdateS(const char *pStr);
 #define UiTips_HaveS()  (UiTips.TimerS)
 //取消短期任务
 #define UiTips_CancelS()  do{UiTips.TimerS = 1; }while(0)
-
+//手工设置时间
+#define UiTips_SetTimerS(s)  do{UiTips.TimerS = s; }while(0)
 //--------------------------------替换@为参数函数-------------------------------
 //如：单参数："等待@秒后将自动重启", @将被替换为指定参数
 //多参数 ："正在等待@1应答，@2秒后应答超时", @后参数最多可跟1~9个
