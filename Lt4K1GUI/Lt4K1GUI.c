@@ -165,7 +165,7 @@ void Lt4K1Gui_Task(void)
   }
   //按键有效了
   Lt4K1Gui.QuitIndex = LT4K1_GUI_QUIT_OV;//有效按键触发了
-  Lt4K1Gui_cbKeyValidNotify(KeyState); //有效按键通报
+  if(Lt4K1Gui_cbKeyValidNotify(KeyState)) return; //有效按键通报
 
   //===========================有效按键处理=============================
   unsigned short Max;

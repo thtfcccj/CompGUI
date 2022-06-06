@@ -155,7 +155,8 @@ void Lt4K1Gui_cbOffLight(unsigned char Mask);  //对应掩码灯灭
 
 //---------------------------有效按键通报--------------------------
 //形参为1:短按 2:长按
-void Lt4K1Gui_cbKeyValidNotify(unsigned char KeyState);
+//形参为1:短按 2:长按,返回0未处理，1内部处理完成
+signed char Lt4K1Gui_cbKeyValidNotify(unsigned char KeyState);
 
 /*************************************************************************
                         相关回调函数-应用相关
