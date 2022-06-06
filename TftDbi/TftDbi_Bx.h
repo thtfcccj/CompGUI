@@ -1,17 +1,9 @@
 /*******************************************************************************
 
-           TFT MCU接口驱动-使用TypeB 16位并口时实现-私有接口文件
-
+           TFT MCU接口驱动-使用 并口时的实现-私有接口文件
+此接口可驱动8,9,16,18,24位接口等，与具体使用显示屏控制器无关
 *******************************************************************************/
 
-
-/*******************************************************************************
-                               函数接口
-*******************************************************************************/
-
-//-----------------------------直接写16位颜色-----------------------------------
-//底层实现相关
-void TftDbi_B16_WrColor(unsigned short ColorB16);
 
 /*******************************************************************************
                                底层回调
@@ -43,7 +35,7 @@ void TftDbi_B16_WrColor(unsigned short ColorB16);
 
 //数据线,16bit
 #define TftDbi_cbDbOut()     do{OutLcdDB();}while(0)    //置输出
-#define TftDbi_cbDbWr(data)  do{WrLcdDB(data);}while(0) //写数据
+#define TftDbi_cbDbWr(data)  do{WrLcdDB(data);}while(0) //写数据,取有效位已在底层实现
 #define TftDbi_cbDbIn()      do{InLcdDB();}while(0)     //置输入
 #define TftDbi_cbDbRd()      RdLcdDB()                   //读数据
 
@@ -58,8 +50,8 @@ void TftDbi_B16_WrColor(unsigned short ColorB16);
 #define TftDbi_cbDelayTchw()   do{}while(0)                 //片选取消时间,ILI9488>=0ns 
 #define TftDbi_cbDelayTcs()   do{DelayUs(0); }while(0)     //片选建立时间,ILI9488>=15,读id45,读FM355
 
-#define TftDbi_cbDelayTwrl()   do{DelayUs(0); }while(0)     //写低电平保持时间,ILI9488>=15ns 
-#define TftDbi_cbDelayTwrh()   do{DelayUs(0); }while(0)      //写高电平保持时间,ILI9488>=15ns
+#define TftDbi_cbDelayTwrl()   do{}while(0)     //写低电平保持时间,ILI9488>=15ns 
+#define TftDbi_cbDelayTwrh()   do{}while(0)      //写高电平保持时间,ILI9488>=15ns
 
 #define TftDbi_cbDelayTrdl()   do{DelayUs(5); }while(0)     //读低电平保持时间,ILI9488>=45~160ns 
 #define TftDbi_cbDelayTrdh()   do{DelayUs(10); }while(0)     //读高电平保持时间,ILI9488>=90~450ns

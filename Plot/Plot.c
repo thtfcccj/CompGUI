@@ -293,8 +293,8 @@ static unsigned char _GetBitSize(u8 mapSize)
   return 8;
 }
 
-//由占位得到掩码
-static const u8 _BitSize2Mask[9] = {
+//-----------------------------由占位得到掩码---------------------------------
+const u8 Plot_BitSize2Mask[9] = {
   0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
 
 //-----------------------------画索引位图-------------------------------------
@@ -305,44 +305,37 @@ void Plot_IndexBmp(u16 x,u16 y,u16 w,u16 h,
                    Color_t *map)  //调色板查找表,查找表结果为0时表示透明
 {
   Color_t *pBuf = Plot_cbAbsLocalArea(x,y, w, h);     //显示缓冲行起始
-  
   u8 bitSize = _GetBitSize(mapSize);     //占位
-  u32 dataBitSize = w * h * bitSize;     //以位计算的数据矩阵大小  
-  u8 bitMask = _BitSize2Mask[bitSize];   //位掩码
-
-  Color_t *pLineEndBuf = pBuf + w;       //显示缓冲本行结束
-  u8 Data = *data; //读取首个数据
-  for(u32 dataBit = 0; dataBit < dataBitSize; dataBit += bitSize){//索引点位置移动
-    //1. 得到索引色
-    u8 curShift = dataBit & 0x07;                   //当前索引点在Data中的起始Bit
-    u8 indexColor; //索引色
-    //indexColor = (Data >> curShift) & bitMask; //低位在前时先取出，可能不全
-    //下个索引点在Data中的起始Bit
-    u8 nextShift = (dataBit + bitSize) & 0x07;      
-    if(nextShift <= curShift){//下个索引点回环了，即在下个data里
-      indexColor = Data & _BitSize2Mask[8 - curShift];//高位在前时取高位数据
-      data++; //移至下个数据
-      Data = *data; //更新至下个数据
-      if(nextShift){//下个索引点不是从0开始的，即本次不全，需取出本次的高位数据
-        //indexColor |= (Data & _BitSize2Mask[nextShift]) << curShift;//低位在前时
-        indexColor <<= nextShift; //高位在前时,高位移前到前面
-        indexColor |= (Data >> (8 - nextShift)) & _BitSize2Mask[nextShift];
+  u8 bitMask = Plot_BitSize2Mask[bitSize];   //位掩码
+  for(; h > 0; h--){//行为单位
+    u8 Data = *data; //读取首个数据      
+    u32 dataBitSize = w * bitSize;     //以位计算的数据矩阵大小 
+    for(u32 dataBit = 0; dataBit < dataBitSize; dataBit += bitSize){//索引点位置移动
+      //1. 得到索引色
+      u8 curShift = dataBit & 0x07;         //当前索引点在Data中的起始Bit
+      u8 indexColor; //索引色
+      //下个索引点在Data中的起始Bit
+      u8 nextShift = (dataBit + bitSize) & 0x07;      
+      if(nextShift <= curShift){//下个索引点回环了，即在下个data里
+        indexColor = Data & Plot_BitSize2Mask[8 - curShift];//高位在前时取高位数据
+        data++; //移至下个数据
+        Data = *data; //更新至下个数据
+        if(nextShift){//下个索引点不是从0开始的，即本次不全，需取出本次的高位数据
+          //indexColor |= (Data & _BitSize2Mask[nextShift]) << curShift;//低位在前时
+          indexColor <<= nextShift; //高位在前时,高位移前到前面
+          indexColor |= (Data >> (8 - nextShift)) & Plot_BitSize2Mask[nextShift];
+        }
       }
+      else{//高位在前时够了，直接取数
+        indexColor = (Data >> ((8 - bitSize) - curShift)) & bitMask;
+      }
+      
+      //2. 填充色
+      Color_t color = *(map + indexColor);
+      if(color < (Color_t)-1) Plot_cbSetCurColor(pBuf, color); //非透明时填充并移至下一点
+      else Plot_cbUpdateNext(pBuf);
     }
-    else{//高位在前时够了，直接取数
-      indexColor = (Data >> ((8 - bitSize) - curShift)) & bitMask;
-    }
-    
-    //2. 填充色
-    Color_t color = *(map + indexColor);
-    if(color < (Color_t)-1) Plot_cbSetCurColor(pBuf, color); //非透明时填充并移至下一点
-    else Plot_cbUpdateNext(pBuf);
-    
-    //3. 下一点判断
-    if(pBuf >= pLineEndBuf){//一行结束了
-      pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
-      pLineEndBuf += TFT_DRV_H_PIXEl; //下行结束
-    }
+    if(dataBitSize & 0x07) data++; //一行有多余的，丢掉余下部分
   }
 }
 

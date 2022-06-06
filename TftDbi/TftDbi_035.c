@@ -12,6 +12,7 @@
 /*******************************************************************************
                            硬件相关函数
 ********************************************************************************/
+//横屏参考：https://wenku.baidu.com/view/dd4f6885f46527d3250ce091.html
 
 //----------------------------ST7796S启动代码----------------------------------
 static void _HwCfg_ST7796S(void)
@@ -92,6 +93,13 @@ static void _HwCfg_ST7796S(void)
   TftDbi_WrCmd(0xf0);
   TftDbi_WrData(0x69);
 
+  #ifdef SUPPORT_TFT_DRV_MV //横屏时
+    TftDbi_WrCmd(0x36);
+    TftDbi_WrData(0x2C); 
+  #else  //竖屏时默认
+    
+  #endif
+  
   TftDbi_WrCmd(0x3A);//TFT_DCOL_PIXEL_16BIT
   TftDbi_WrData(0x55);//‘101’ = 16bit/pixel
 }
@@ -183,8 +191,12 @@ static void _HwCfg_HX8357(void)
   TftDbi_WrData(0x08);  //61.51Hz
 
   TftDbi_WrCmd(0X0036);
-  TftDbi_WrData(0X000a);
-
+  #ifdef SUPPORT_TFT_DRV_MV //  横屏时
+    TftDbi_WrData(0X002a); 
+  #else  //竖屏时
+    TftDbi_WrData(0X000a);
+  #endif
+  
   TftDbi_WrCmd(0X003A);
   TftDbi_WrData(0X0005);
 
@@ -259,13 +271,21 @@ static void _HwCfg_ILI9488(void)
   TftDbi_WrData(0x10); 
   TftDbi_WrData(0x80); 
 
-  TftDbi_WrCmd(0x36); 
-  TftDbi_WrData(0x08); 
-
+  TftDbi_WrCmd(0x36);
+  #ifdef SUPPORT_TFT_DRV_MV //横屏时
+    #ifdef SUPPORT_TFT_DRV_MV_ANTI //反向放置时(下部在左侧)
+      TftDbi_WrData(0x2C);
+    #else //正向放置时(下部在右侧)
+      TftDbi_WrData(0x68); 
+    #endif
+  #else  //竖屏时
+    TftDbi_WrData(0x08); 
+  #endif
+  
   TftDbi_WrCmd(0x3A);//Interface Mode Control
   TftDbi_WrData(0x55);
 
-  TftDbi_WrCmd(0x21); 
+  TftDbi_WrCmd(0x21); //显示反转
 
   TftDbi_WrCmd(0XB0);  //Interface Mode Control  
   TftDbi_WrData(0x00); 
@@ -318,7 +338,9 @@ signed char TftDbi_Init(void)
   //根据读取的设备ID配置显示屏
   if(ManufacturerID == 0x6B){//0x6b: W350BE024Z实测
     _HwCfg_ST7796S();     
-    TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
+    #ifndef SUPPORT_TFT_DRV_MV //坚屏时
+     TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
+    #endif
   }
   else if(ManufacturerID == 0x11){//0x11随手写(未验证)
     _HwCfg_HX8357();

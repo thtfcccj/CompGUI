@@ -10,8 +10,13 @@
 		                            相关函数
 ******************************************************************************/
 
+//------------------------------得到减正值结果----------------------------------
+//Cur >= Count将返回0
+unsigned char GetPosEqualU8(unsigned char Cur,
+                             unsigned char Count);
+
 //-----------------------转换为字符串-显示为最简函数----------------------
-//返回结束位置,最大支持10^8数显示(超过显示99999999)
+//返回结束位置,最大显示10位
 char *Value4StringMin(unsigned long Value,
                       char *pString,//接收缓冲
                       unsigned char Min);//保证的最小位数
@@ -46,6 +51,9 @@ char *strcpyL(char *pStr, const char *pSub);
 //--------------------------字符复制函数,从右往左copy--------------------------
 //此函数替换strcpy(),返回pStr
 char *strcpyR(char *pStr, const char *pSub);
+
+//-----------------------------从右往左复制函数-------------------------------
+void memcpyR(void *pDest, const void *pSource, unsigned short Len);
 
 //-------------------------------内存复制函数-------------------------------
 //此函数替换memcpy(),用于返回的是结束位置的指针

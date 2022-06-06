@@ -166,10 +166,10 @@
 //1Byte形参位定义为:
 #define TFT_MAC_MY         (1 << 7)//行排列方向
 #define TFT_MAC_MX         (1 << 6)//列排列方向
-#define TFT_MAC_MV         (1 << 5)//行列选择
-#define TFT_MAC_ML         (1 << 5)//LCD vertical refresh direction control
-#define TFT_MAC_BGR        (1 << 5)//RGB-BGR ORDER (BGR)
-#define TFT_MAC_SS         (1 << 5)//LCD horizontal refresh direction control
+#define TFT_MAC_MV         (1 << 5)//行列选择,即模坚屏切换，需配合行列方向进行
+#define TFT_MAC_ML         (1 << 4)//LCD vertical refresh direction control
+#define TFT_MAC_BGR        (1 << 3)//RGB-BGR ORDER (BGR)
+#define TFT_MAC_SS         (1 << 2)//LCD horizontal refresh direction control
 
 //☆单写滚动光标地址,与33h配合使用，3byte形参：
 //前1Byte描述滚动方式 ，前2~3bit描述起始位置

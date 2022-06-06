@@ -7,14 +7,33 @@
 #include "StringEx.h"
 #include <string.h>
 
+//------------------------------得到减正值结果----------------------------------
+//Cur >= Count将返回0
+unsigned char GetPosEqualU8(unsigned char Cur,
+                            unsigned char Count)
+{
+  if(Cur >= Count) return 0;
+  return Count - Cur;
+}
+
 //-----------------------转换为字符串-显示为最简函数----------------------
-//返回结束位置,最大支持10^8数显示(超过显示99999999)
+//返回结束位置,最大显示10位
 char *Value4StringMin(unsigned long Value,
                       char *pString,//接收缓冲
                       unsigned char Min)//保证的最小位数
 {
-  if((Value >= 10000) || (Min >= 5)){//高位
-    if(Value > 99999999) Value = 99999999;
+  //因Value2StringMin显示不全(9999共4位)，这里分段组合
+  //9~10位
+  if((Value > 99999999) || (Min > 8)){
+    unsigned char CurMin;
+    if(Min <= 8) CurMin = 0;
+    else CurMin = Min - 8;
+    pString = Value2StringMin(Value / 100000000, pString, CurMin);
+    Value %= 100000000;
+    Min = 8;
+  }
+  
+  if((Value >= 10000) || (Min > 4)){//高位
     unsigned char CurMin;
     if(Min <= 4) CurMin = 0;
     else CurMin = Min - 4;
@@ -104,12 +123,19 @@ char *pNum2StringFlag(signed short Value,   //当前数值
   }
   if(Value < 0) Value = 0 - Value;  //正值显示
       
-  //带小数点时,先检查数值是否<1,若是,则检查前面补了多少个0.或0.0
-  Flag &= 0x07;
+  Flag &= 0x07;//小数点了
+  
+  //有小数点且最小位数不够时
+  if(Flag && (Len <= Flag)){
+    Len = Flag;//最小位数强制扩展
+    if(Value > _Ov[Flag]) Len++; //1以上时,需扩展1位
+  }
+  
+  //带小数点时,先检查数值是否<1,若是,则检查前面补了多少个0.或0.0  
   if(Flag >= Len){ //<0了,0.
     FullLen = Flag - Len;
     *pBuf++ = '0';
-    *pBuf++ = '.'; 
+    *pBuf++ = '.';
     while(FullLen--) *pBuf++ = '0';//填充无效的0
     pBuf = Value2StringMin(Value,pBuf,Len);
   }
@@ -165,6 +191,16 @@ char *strcpyR(char *pStr, const char *pSub)
     pStr--; pEndSub--;
   }while(pEndSub >= pSub);
   return pStr;
+}
+
+//-----------------------------从右往左复制函数-------------------------------
+void memcpyR(void *pDest, const void *pSource, unsigned short Len)
+{
+  //if(Len) return;
+  //直接实现用于替换MPLABX 中 memcpy()部分出错问题
+  unsigned char *d = (unsigned char *)pDest + (Len - 1); 
+  unsigned char *s = (unsigned char *)pSource + (Len - 1);   
+  for(; Len > 0; Len--){*d-- = *s--;}
 }
 
 //-------------------------------内存复制函数-------------------------------
@@ -395,6 +431,7 @@ unsigned char strFullMax(char *pDest, const char *pSource,
                          unsigned char Align)//0:左对齐,1局中对齐，2右对齐
 {
   unsigned char Len = strlenEx(pSource, SourceMaxLen);
+  *(pDest + DestLen) = '\0';//先填充结束字符
   if(DestLen <= Len){//异常截断处理
     memcpy(pDest, pSource, Len);
     return 0;
@@ -403,6 +440,7 @@ unsigned char strFullMax(char *pDest, const char *pSource,
   //Align复用作起始位置
   if(Align == 1) Align = (DestLen - Len) >> 1;
   else if(Align == 2) Align = (DestLen - Len);
+  else Align = 0;//左对齐
   memcpy(pDest + Align, pSource, Len);
   return Align;
 }

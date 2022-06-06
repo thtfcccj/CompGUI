@@ -4,6 +4,9 @@
 ********************************************************************************/
 #ifndef _PLOT_H
 #define _PLOT_H
+#ifdef SUPPORT_EX_PREINCLUDE//不支持Preinlude時
+  #include "Preinclude.h"
+#endif
 
 #include "Color.h"
 #include "DefStdType.h" //标准定义简写
@@ -146,6 +149,12 @@ void Plot_Bmp1Alpha(u16 x,u16 y,u16 w,u16 h, uc8 *data);
 //--------------------将对应区域的前景色替换为指定色----------------------------
 //此函数只支持内置显存
 void Plot_ReplacePenColor(u16 x,u16 y,u16 w,u16 h, Color_t newColor);
+
+/*******************************************************************************
+                              其它函数
+********************************************************************************/
+//-----------------------------由占位得到掩码---------------------------------
+extern const u8 Plot_BitSize2Mask[9];
 
 #endif //_PLOT_H
 
