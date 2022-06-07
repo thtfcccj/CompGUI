@@ -157,7 +157,7 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
   }
   
   //处理对齐方式
-  if((Info & 0x30) && (Len < MaxLen) && (MaxLen < FONTS_STR_MAX)){
+  if((Len < MaxLen) && (MaxLen < FONTS_STR_MAX)){
     strFull(_DestStr, pString, MaxLen, Info >> 4);
     _DestStr[MaxLen] = '\0';
     pString = _DestStr;
@@ -169,7 +169,7 @@ signed char Font_PlotLine(const struct _FontsDesc *pHfonts,//半角时使用的字体
     const unsigned char *pMode; //取得的字模
     if(c < 0x80){//ASCII直接转换
       w = pHfonts->w;
-      h = pHfonts->h; 
+      h = pHfonts->h;
       pMode = Font_pGetHmode(pHfonts,c);
     }
     else{//未GB2312检查正确性！！！！
