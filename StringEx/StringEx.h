@@ -23,7 +23,7 @@ char *Value4StringMin(unsigned long Value,
 
 //-----------------------转换为字符串-显示为最简函数----------------------
 //返回结束位置(此位置强制填充结束字符)
-char *Value2StringMin(signed short Value,
+char *Value2StringMin(unsigned short Value,
                       char *pString,//接收缓冲
                       unsigned char Min);//保证的最小位数
 
