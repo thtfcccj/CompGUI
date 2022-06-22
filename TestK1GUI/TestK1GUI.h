@@ -112,6 +112,9 @@ void TestK1GUI_Task(void);
 //-----------------------------是否在菜单中-----------------------
 #define TestK1GUI_IsInMenu()    (TestK1GUI.eState >= TestK1GUI_eMenuSel)
 
+//-----------------------------是否在菜单调整模式--------------------
+#define TestK1GUI_IsMenuAdj()    (TestK1GUI.eState > TestK1GUI_eMenuSel)
+
 //------------------------------退出菜单函数----------------------------
 void TestK1GUI_QuitMenu(void);
 
