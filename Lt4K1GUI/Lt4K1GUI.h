@@ -64,7 +64,7 @@ enum _Lt4K1Gui_eState{
   Lt4K1Gui_eIdie    = 0,   //空闲状态，准备识别按键
   Lt4K1Gui_eFun0    = 1,   //短按进入功能0状态
   Lt4K1Gui_eFun1    = 2,   //长按进入功能1状态
-  Lt4K1Gui_eMenuSel = 3,   //短按再长按进入菜单选择状态 
+  Lt4K1Gui_eMenuSel = 3,   //长按再短按进入菜单选择状态 
   Lt4K1Gui_eNumH    = 4,   //数值高位调整状态  
   Lt4K1Gui_eNumM    = 5,   //数值中位调整状态
   Lt4K1Gui_eNumL    = 6,   //数值低位调整状态
@@ -155,7 +155,8 @@ void Lt4K1Gui_cbOffLight(unsigned char Mask);  //对应掩码灯灭
 
 //---------------------------有效按键通报--------------------------
 //形参为1:短按 2:长按
-void Lt4K1Gui_cbKeyValidNotify(unsigned char KeyState);
+//形参为1:短按 2:长按,返回0未处理，1内部处理完成
+signed char Lt4K1Gui_cbKeyValidNotify(unsigned char KeyState);
 
 /*************************************************************************
                         相关回调函数-应用相关
