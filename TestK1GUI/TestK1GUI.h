@@ -79,7 +79,8 @@ enum _TestK1GUI_eState{
   
   TestK1GUI_eNumH    = 5,   //数值高位调整状态  
   TestK1GUI_eNumM    = 6,   //数值中位调整状态
-  TestK1GUI_eNumL    = 7,   //数值低位调整状态(非浓度显时)
+  TestK1GUI_eNumML   = 7,   //数值中位调整状态  
+  TestK1GUI_eNumL    = 8,   //数值低位调整状态
 };
 
 struct _TestK1GUI{
@@ -112,8 +113,14 @@ void TestK1GUI_Task(void);
 //-----------------------------是否在菜单中-----------------------
 #define TestK1GUI_IsInMenu()    (TestK1GUI.eState >= TestK1GUI_eMenuSel)
 
+//-----------------------------是否在菜单选择模式--------------------
+#define TestK1GUI_IsMenuSel()    (TestK1GUI.eState == TestK1GUI_eMenuSel)
+
 //-----------------------------是否在菜单调整模式--------------------
 #define TestK1GUI_IsMenuAdj()    (TestK1GUI.eState > TestK1GUI_eMenuSel)
+
+//--------------------------菜单调整模式时，得到调整位------------------
+#define TestK1GUI_GetAdjPos()    (TestK1GUI_eNumL - TestK1GUI.eState)
 
 //------------------------------退出菜单函数----------------------------
 void TestK1GUI_QuitMenu(void);

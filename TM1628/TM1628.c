@@ -27,9 +27,10 @@ void TM1628_Init(unsigned char Gray)    //0~7越高越亮, 8关闭显示
 #ifdef SUPPORT_TM1628_KEY //支持按键时
 static unsigned char _ByteKey2KeyId(void)
 {
-  unsigned char KeyId = 0;
+  unsigned char KeyId = 1;
   unsigned char KeyByte;
-  for(unsigned Pos = 1; Pos <= SUPPORT_TM1628_KEY; Pos++){
+  unsigned Pos = 1;
+  for(; Pos <= SUPPORT_TM1628_KEY; Pos++){
     KeyByte = TM1628.CommBuf[Pos];
     if(KeyByte & 0x01) break;   //B0按下
     KeyId++;
@@ -40,6 +41,7 @@ static unsigned char _ByteKey2KeyId(void)
     if(KeyByte & 0x10) break;   //B3按下
     KeyId++;
   }
+  if(Pos > SUPPORT_TM1628_KEY) return 0;//无按键
   return KeyId;
 }
 #endif
