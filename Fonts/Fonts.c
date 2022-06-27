@@ -40,6 +40,7 @@ const unsigned char *Font_pGetHmode(const struct _FontsDesc *pHfonts,//半角字体
 {
   unsigned char Type = pHfonts->Type;
   if(Type >= 3) return NULL; //不是半角字体
+  if((Type == 2) && (c == ' ')) c = ',';//数字点阵字库时，需将空格替换为,做模时需注意
   unsigned char Base = _TypeHalfBase[Type];
   //不在最低显示范围，显示最小字符
   if(c < Base) return NULL;
