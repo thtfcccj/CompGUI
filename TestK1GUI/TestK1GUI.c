@@ -24,9 +24,9 @@ void TestK1GUI_QuitMenu(void)
 }
 
 //-----------------------------得到十进制位数值------------------------
-static const unsigned short _DecBit2Mask[] = {100,10,1};
+static const unsigned short _DecBit2Mask[] = {1000,100,10,1};
 static unsigned char _GetDecBitNum(unsigned short Num,
-                                   unsigned char DecBit)//支持0,1,2
+                                   unsigned char DecBit)//支持0,1,2,3
 {
   unsigned char BitNum = Num / _DecBit2Mask[DecBit]; //对应位在最底了
   return BitNum % 10;//得到了
@@ -44,21 +44,13 @@ static void _MenuSelSwitch(void)
   if(TestK1GUI.Sel < TestK1GUI_cbGetMaxMenuSel())
     TestK1GUI.Sel++;
   else TestK1GUI.Sel = 0; //回环了
+  //先加载原始值以用于显示
+  TestK1GUI.CurVol = TestK1GUI_cbGetCurVol(TestK1GUI.Sel);  
 }
 
 //--------------------进入或切换数值位初始化函数---------------------
 static void _NumEnterInit(unsigned char DecBit) //对应进入制调整位
 {
-  unsigned char Bit = 1 << (1 + DecBit);
-  //切换时自动边界纠错
-  unsigned short Max = TestK1GUI_cbGetMaxVol(TestK1GUI.Sel);
-  unsigned short Vol = TestK1GUI.CurVol;  
-  if(Vol > Max) Vol = Max;
-  else{
-    unsigned short Min = TestK1GUI_cbGetMinVol(TestK1GUI.Sel);
-    if(Vol < Min) Vol = Min;
-  }
-  TestK1GUI.CurVol = Vol;
   TestK1GUI.eState = (enum _TestK1GUI_eState)(DecBit + TestK1GUI_eNumH);//对应调整位
 }
 
@@ -72,17 +64,18 @@ static void _NumChange(void)
   Vol -= DecMask * BNum; //去此位
   BNum++;//增加了，需检查是否回环
   unsigned short Max = TestK1GUI_cbGetMaxVol(TestK1GUI.Sel);
-  if(BNum >= 10){//回环了
-    if(Max / (DecMask * 10)) BNum = 0; //高位有值时可到底
-    else{//无高位时，本位只能取最低
-      BNum = _GetDecBitNum(TestK1GUI_cbGetMinVol(TestK1GUI.Sel), BitPos);
-    }
+  unsigned char MaxBNum;
+  if(Max / (DecMask * 10)) MaxBNum = 9;//高位有值时
+  else MaxBNum = _GetDecBitNum(Max, BitPos);//此位值
+  if(BNum <= MaxBNum){//没回环增加了,需高纠错
+    Vol += DecMask * BNum; 
+    if(Vol > Max) Vol = Max;
   }
-  else if((Max / DecMask) < 10){//增加有限制了
-    if(BNum > _GetDecBitNum(Max, BitPos))
-      BNum = _GetDecBitNum(TestK1GUI_cbGetMinVol(TestK1GUI.Sel), BitPos);
+  else{//回环减至0了,需低纠错
+    unsigned short Min = TestK1GUI_cbGetMinVol(TestK1GUI.Sel);
+    if(Vol < Min) Vol = Min;    
   }
-  TestK1GUI.CurVol = Vol + DecMask * BNum; //加此位
+  TestK1GUI.CurVol = Vol;
 }
 
 //----------------------------------任务函数----------------------------
@@ -144,28 +137,30 @@ void TestK1GUI_Task(void)
       }
       else TestK1GUI_QuitMenu(); //长按退出菜单
       break;
-    case TestK1GUI_eMenuSel: //菜单选择状态按键
+    case TestK1GUI_eMenuSel: //菜单选择状态按键     
       if(KeyState == 1) _MenuSelSwitch(); //短按键菜单项切换
       else{//长按数值的进入最高位调整
         if(TestK1GUI.Sel == 0){//主动退出菜单
           TestK1GUI_QuitMenu(); 
           return;
         }
-        //先加载原始值与决定调整位
-        TestK1GUI.CurVol = TestK1GUI_cbGetCurVol(TestK1GUI.Sel); 
         //为只读状态或指令
-        if(TestK1GUI_cbGetMaskVol(TestK1GUI.Sel) == 0){
+        unsigned short Mask = TestK1GUI_cbGetMaskVol(TestK1GUI.Sel);        
+        if(Mask == 0){
           TestK1GUI_cbSetCurVol(TestK1GUI.Sel, 0);//通报用户执行
           break;
         }
-        unsigned short Mask = TestK1GUI_cbGetMaskVol(TestK1GUI.Sel);
-        if(Mask & 0x40) _NumEnterInit(0);//有最高位
-        else if(Mask & 0x20) _NumEnterInit(1);//有中间位
-        else _NumEnterInit(2);//只有最低位
+        if(Mask & 0x08) _NumEnterInit(0);//有最高位        
+        else if(Mask & 0x04) _NumEnterInit(1);//有最高位
+        else if(Mask & 0x02) _NumEnterInit(2);//有中间位
+        else _NumEnterInit(3);//只有最低位
+        //重新加载防止显示与调整模式值不同
+        TestK1GUI.CurVol = TestK1GUI_cbGetCurVol(TestK1GUI.Sel);  
       }
     break;
     case TestK1GUI_eNumH: 
-    case TestK1GUI_eNumM:      
+    case TestK1GUI_eNumM: 
+    case TestK1GUI_eNumML:       
     case TestK1GUI_eNumL:    
       if(KeyState == 1) _NumChange(); //短按键数值调整项切换
       else{//长按时切换下一位，最低位长按保存
