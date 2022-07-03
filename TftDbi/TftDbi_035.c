@@ -8,6 +8,7 @@
 #include "Delay.h"
 
 #include "TftDbi.h" //驱动与硬件无关
+#include "Plot_cbHw.h" //Plot_cbAbsLocalArea
 
 /*******************************************************************************
                            硬件相关函数
@@ -365,10 +366,11 @@ signed char TftDbi_Init(void)
   DelayMs(120); //Delay 120ms
 
   TftDbi_WrCmd(TFT_CMD_WR_DISPON); //Display ON
-  //先清屏为黑色
-  TftDbi_WrCmd(TFT_CMD_WR_RAM); 
+  //先清屏为指定颜色
+  Plot_cbAbsLocalArea(0, 0, TFT_DRV_H_PIXEl, TFT_DRV_V_PIXEl);
+  Color_t Color = TftDbi_cbGetInitBg();
   for(unsigned long Ram = 0; Ram < (TFT_DRV_H_PIXEl * TFT_DRV_V_PIXEl); Ram++){
-    TftDbi_WrColor(0);
+    TftDbi_WrColor(Color);
   }
   
   return 0;

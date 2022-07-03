@@ -127,12 +127,17 @@ void TftDbi_WrCmdS1(unsigned char Cmd, unsigned short Para);
 //---------------------------------硬件初始化函数----------------------------------
 void TftDbi_cbHwInit(void);
 
-//----------------------得到用户颜色查找表----------------------------------
+//------------------------得到用户颜色查找表----------------------------------
 #if defined(SUPPORT_COLOR_RGB666) || defined(SUPPORT_COLOR_INDEX)
   const RgbHwType *TftDrv_pcbGetUserCLut(void); //表
   unsigned char TftDrv_cbGetUserCLutSize(void); //表大小,< (255 - COLOR_COUNT)
 #endif
 
+//---------------------------------得到开机底色-------------------------------
+//开机时将用此色清屏，可用于准备入场动画的底色
+Color_t TftDbi_cbGetInitBg(void);
+  
+  
 #endif //#define _TFT_DRV_H
 
 
