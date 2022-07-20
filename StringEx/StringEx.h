@@ -15,6 +15,11 @@
 unsigned char GetPosEqualU8(unsigned char Cur,
                              unsigned char Count);
 
+//---------------------1字节转换为字符串-显示为最简函数----------------------
+//返回结束位置(此位置强制填充结束字符)
+char *Value1StringMin(unsigned char Value,
+                      char *pString);//接收缓冲
+
 //-----------------------转换为字符串-显示为最简函数----------------------
 //返回结束位置,最大显示10位
 char *Value4StringMin(unsigned long Value,
@@ -41,8 +46,14 @@ char *pNum2StringFlag(signed short Value,   //当前数值
                       //标志,定义为：低3bit:小数点位置,0x80:显示正负号
                       unsigned char Flag);
 
-//-----------------------十进制无符号整数字符转换为整数------------------------
+//-----------------------十进制无符号整数字符转换为整数---------------------
 unsigned short DecStr2Us(const char *pDecStr);
+
+//-------------------------填充十进制8位无符号整数---------------------------
+//仅支持1~3位：“0”到“255”字符的转换，需其它字符自动结束。
+//返回正: 已用字符串长度，0或负字符中的错误位置
+signed char FullDecMem2Uc(const char *pDecStr, unsigned char Len,
+                            unsigned char *pData); //填充位置,仅支持1字节
 
 //-------------------------------字符复制函数-------------------------------
 //此函数替换strcpy(),用于返回的是字符结束位置的指针
@@ -78,7 +89,10 @@ signed char StringReplace(char *pStr, const char *pFrom, const char *pTo);
 //返回有效的字符，此函数未检查字符串结束
 const char *pGetStrSpaceEnd(const char *pStr);
 
-//-------------------------------得到数字字符长度函数---------------------------
+//-----------------------------删除字符串中的某个特定字符-------------------
+void StrClrCar(char *pStr, char C);
+
+//-------------------------得到数字字符长度函数--------------------
 unsigned char StrGetAscNumLen(const char *pStr);
 
 //----------------------------由字符串得到数值函数---------------------------

@@ -16,6 +16,24 @@ unsigned char GetPosEqualU8(unsigned char Cur,
   return Count - Cur;
 }
 
+//---------------------1字节转换为字符串-显示为最简函数----------------------
+//返回结束位置(此位置强制填充结束字符)
+char *Value1StringMin(unsigned char Value,
+                      char *pString)//接收缓冲
+{
+  if(Value >= 100){//有3位
+    *pString++ = (Value / 100) + '0';
+    Value %= 100;
+  } 
+  if(Value >= 10){//有两位
+    *pString++ = (Value / 10) + '0';
+    Value %= 10;
+  }
+  *pString++ = Value + '0';//个位
+  *pString = '\0'; //强制填充结束字符
+  return pString;
+}
+
 //-----------------------转换为字符串-显示为最简函数----------------------
 //返回结束位置,最大显示10位
 char *Value4StringMin(unsigned long Value,
@@ -166,6 +184,30 @@ unsigned short DecStr2Us(const char *pDecStr)
   return Us;
 }
 
+//-------------------------填充十进制8位无符号整数---------------------------
+//仅支持1~3位：“0”到“255”字符的转换，需其它字符自动结束。
+//返回正: 返回正: 已用字符串长度，0或负字符中的错误位置
+signed char FullDecMem2Uc(const char *pDecStr, unsigned char Len,
+                            unsigned char *pData) //填充位置,仅支持1字节
+{
+  if(Len == 0) return 0;//空字符
+  unsigned char Pos = 1;
+  unsigned short Data = 0;
+  for(; Pos <= Len; Pos++){
+    char c = *pDecStr++;
+    if((c < '0') || (c > '9')){//字错误
+      if(Pos == 1) return -1;//首字错误
+      else break; //数据获取完成
+    }
+    if(Pos > 3) return -4; //数据超过3位了
+    Data = Data * 10 + (c - '0');//取出一位了
+  }
+  //数据正确了
+  if(Data > 255) return -3; //数据超过255了
+  *pData = Data; //正确了
+  return Pos; //结束位置
+}
+
 //-------------------------------字符复制函数-------------------------------
 //此函数替换strcpy(),用于返回的是字符结束位置的指针
 char *strcpyL(char *pStr, const char *pSub)
@@ -292,6 +334,19 @@ const char *pGetStrSpaceEnd(const char *pStr)
 {
   while(*pStr == ' ') pStr++;
   return pStr;
+}
+
+//-------------------------清除字符串中的某个特定字符--------------------
+void StrClrCar(char *pStr, char C)
+{
+  char *pDest = pStr;//复制目标
+  do{
+    char cur = *pStr++;
+    if(cur == '\0') return; //结束了
+    if(cur != C){//有效字符了
+      *pDest++ = cur;
+    }
+  }while(1);
 }
 
 //-------------------------------得到数字字符长度函数---------------------------
