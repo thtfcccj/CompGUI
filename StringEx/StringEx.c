@@ -24,8 +24,10 @@ char *Value1StringMin(unsigned char Value,
   if(Value >= 100){//有3位
     *pString++ = (Value / 100) + '0';
     Value %= 100;
+    *pString++ = (Value / 10) + '0';
+    Value %= 10;    
   } 
-  if(Value >= 10){//有两位
+  else if(Value >= 10){//有两位
     *pString++ = (Value / 10) + '0';
     Value %= 10;
   }
@@ -191,15 +193,15 @@ signed char FullDecMem2Uc(const char *pDecStr, unsigned char Len,
                             unsigned char *pData) //填充位置,仅支持1字节
 {
   if(Len == 0) return 0;//空字符
-  unsigned char Pos = 1;
+  unsigned char Pos = 0;
   unsigned short Data = 0;
-  for(; Pos <= Len; Pos++){
+  for(; Pos < Len; Pos++){
     char c = *pDecStr++;
     if((c < '0') || (c > '9')){//字错误
-      if(Pos == 1) return -1;//首字错误
+      if(Pos == 0) return -1;//首字错误
       else break; //数据获取完成
     }
-    if(Pos > 3) return -4; //数据超过3位了
+    if(Pos >= 3) return -4; //数据超过3位了
     Data = Data * 10 + (c - '0');//取出一位了
   }
   //数据正确了
