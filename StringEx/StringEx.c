@@ -192,7 +192,7 @@ unsigned short DecStr2Us(const char *pDecStr)
 signed char FullDecMem2Uc(const char *pDecStr, unsigned char Len,
                             unsigned char *pData) //填充位置,仅支持1字节
 {
-  if(Len == 0) return 0;//空字符
+  if(Len == 0) return -1;//空字符,首字错误
   unsigned char Pos = 0;
   unsigned short Data = 0;
   for(; Pos < Len; Pos++){
