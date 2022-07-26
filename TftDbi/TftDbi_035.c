@@ -356,9 +356,9 @@ signed char TftDbi_Init(void)
   }
   else{//默认驱动: 实测:JPY3553-4OP(id=0xff)
     _HwCfg_ST7796S(); 
-    #ifdef SUPPORT_TFT_DRV_MV //模屏时
-     TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
-    #endif
+  }
+  if(TftDbi_cbIsOnAnti(ManufacturerID)){//开启反显时
+    TftDbi_WrCmd(TFT_CMD_WR_INVON);
   }
   
   //最后IC无关初始化
