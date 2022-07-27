@@ -127,8 +127,9 @@ void TftDbi_WrCmdS1(unsigned char Cmd, unsigned short Para);
 //---------------------------------硬件初始化函数-------------------------------
 void TftDbi_cbHwInit(void);
 
-//---------------------------------是否开启显示屏反显---------------------------
-unsigned char TftDbi_cbIsOnAnti(unsigned char ManufacturerID);
+//------------------------------- 得到用户配置的反显状态-------------------------
+//0默认 正取消反显，负开启反显
+signed char TftDbi_cbGetDispAnti(unsigned char ManufacturerID);
 
 //------------------------得到用户颜色查找表----------------------------------
 #if defined(SUPPORT_COLOR_RGB666) || defined(SUPPORT_COLOR_INDEX)

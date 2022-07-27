@@ -340,7 +340,7 @@ signed char TftDbi_Init(void)
   if(ManufacturerID == 0x6B){//0x6b: W350BE024Z实测
     _HwCfg_ST7796S();     
     #ifndef SUPPORT_TFT_DRV_MV //坚屏时
-     TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
+     TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显
     #endif
   }
   else if(ManufacturerID == 0x11){//0x11随手写(未验证)
@@ -348,17 +348,23 @@ signed char TftDbi_Init(void)
   }
   else if(ManufacturerID == 0x22){//0x22随手写(未验证)
     _HwCfg_ILI9488();
-    TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显(反反得正)
+    TftDbi_WrCmd(TFT_CMD_WR_INVON);//开启反显
   }
   else if(ManufacturerID == 0x54){//SX035SVGA40P-006实测
     _HwCfg_ILI9488();
-    TftDbi_WrCmd(TFT_CMD_WR_INVOFF);//开启正显(无此局还是反显)
+    TftDbi_WrCmd(TFT_CMD_WR_INVOFF);//关闭正显
   }
   else{//默认驱动: 实测:JPY3553-4OP(id=0xff)
     _HwCfg_ST7796S(); 
   }
-  if(TftDbi_cbIsOnAnti(ManufacturerID)){//开启反显时
+  
+  //反显状态(注：不能反反得正)
+  signed char DispAnti = TftDbi_cbGetDispAnti(ManufacturerID);
+  if(DispAnti < 0){//开启反显时
     TftDbi_WrCmd(TFT_CMD_WR_INVON);
+  }
+  else if(DispAnti  > 0){//取消反显时
+    TftDbi_WrCmd(TFT_CMD_WR_INVOFF);
   }
   
   //最后IC无关初始化
