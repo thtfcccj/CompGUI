@@ -318,18 +318,6 @@ signed char StringReplace(char *pStr, const char *pFrom, const char *pTo)
   return 0; //替换成功
 }
 
-/*/---------------将字符串里所有":"前大写字母转换为小写字母函数--------------------
-void StrToSmallEndColon(char *pStr)
-{
-  do{
-    char Str = *pStr;
-    if(Str == '\0') break;
-    else if(Str == ':') break; 
-    *pStr = CharToLower(Str);
-    pStr++;
-  }while(1);
-}*/
-
 //------------------得到空格后的符串函数------------------------
 //返回有效的字符，此函数未检查字符串结束
 const char *pGetStrSpaceEnd(const char *pStr)
@@ -344,11 +332,12 @@ void StrClrCar(char *pStr, char C)
   char *pDest = pStr;//复制目标
   do{
     char cur = *pStr++;
-    if(cur == '\0') return; //结束了
+    if(cur == '\0') break; //结束了
     if(cur != C){//有效字符了
       *pDest++ = cur;
     }
   }while(1);
+  *pDest = '\0'; //填充结束字符
 }
 
 //-------------------------------得到数字字符长度函数---------------------------
@@ -551,6 +540,28 @@ char *Ip4ToStr(const unsigned char *pIp4, char *pStr)
   }while(1);
   return pStr;
 }
+
+//-----------------------从字符串开头查找指令ID------------------------------
+//形参pSize输入时为ppCmdAry阵列大小，若找到了，将返回CmdId
+//如:ppCmdAry= "Insert", "Del"
+//如：pStr = "Insert data",找到了，则*pSize = 0,返回"Insert"后的指针
+//如：pStr = "xxx data"找不到，则返回NULL
+const char *pGetCmdIdFromStr(const char *pStr,
+                              const char *const* ppCmdAry,
+                              unsigned char *pSize)
+{
+  char CmdCount = *pSize;
+  for(unsigned char CmdId = 0; CmdId < CmdCount; CmdId++){
+    const char *pCmd = ppCmdAry[CmdId];
+    unsigned char Len = strlen(pCmd);
+    if((strncmp(pCmd, pStr, Len) != 0)) continue; //不匹配
+    *pSize = CmdId;//填充位置
+    return pStr + Len; //找到了,至数据位置
+  }
+  return NULL;//未找到退出
+}
+
+
 
 
 

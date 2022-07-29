@@ -82,9 +82,6 @@ const char *StrFind(const char *pStr, const char *pSub);
 //此函数忽略大小写,替换成功返回非0，否则返回0。
 signed char StringReplace(char *pStr, const char *pFrom, const char *pTo);
 
-//---------------将字符串里所有":"前大写字母转换为小写字母函数--------------------
-//void StrToSmallEndColon(char *pStr);
-
 //----------------------------得到空格后的符串函数------------------------
 //返回有效的字符，此函数未检查字符串结束
 const char *pGetStrSpaceEnd(const char *pStr);
@@ -142,6 +139,15 @@ signed char StrToIp4(const char *pStr, unsigned char *pIp4);
 //-----------------------IP4转换为字符串函数------------------------------------
 //pStr字样返回为:192.168.88.2,高位在前,返回字符结束位置
 char *Ip4ToStr(const unsigned char *pIp4, char *pStr);
+
+//-----------------------从字符串开头查找指令ID------------------------------
+//形参pSize输入时为ppCmdAry阵列大小，若找到了，将返回CmdId
+//如:ppCmdAry= "Insert", "Del"
+//如：pStr = "Insert data",找到了，则*pSize = 0,返回"Insert"后的指针
+//如：pStr = "xxx data"找不到，则返回NULL
+const char *pGetCmdIdFromStr(const char *pStr,
+                              const char *const* ppCmdAry,
+                              unsigned char *pSize);
 
 #endif
 
