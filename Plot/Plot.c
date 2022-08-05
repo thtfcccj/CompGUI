@@ -160,6 +160,32 @@ void Plot_Asc_Scale2(u16 x,u16 y,u8 code)
   }
 }
 
+//----------------------绘制单个Asc字符->8*8点阵->双倍大小-----------------------
+//横向取模8*8点位
+void Plot_Asc8_Scale2(u16 x,u16 y,u8 code)
+{
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 8, 8);  
+  uc8 *mask = GB2312ZM_pGetAsc8(code);
+  uc8 *endmask = mask + 8; //字模结束位置
+  Color_t color = PlotPalette.penColor; //缓冲至寄存器，以加速度
+  
+  for( ;mask < endmask; ){  
+    u8 ZM = *mask++; //本行点阵->指向下行
+    //填充两行8点颜色
+    for(u8 dLine = 0; dLine < 2; dLine++){//行数
+      for(u8 Mask = 0x80; Mask > 0; Mask >>= 1){
+        Color_t fullColor;
+        if(ZM & Mask) fullColor = color;
+        else if(PlotPalette.brushStyle) fullColor = PlotPalette.brushColor;
+        //x轴连续填充两次
+        Plot_cbSetCurColor(pBuf, fullColor);
+        Plot_cbSetCurColor(pBuf, fullColor); 
+      }  
+      pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 8); //下一行填充位置起始
+    }
+  }
+}
+
 //------------------------绘制字符串->支持GB2312--------------------------
 void Plot_String(u16 x,u16 y, cc8* ptr,u8 length)//长度为0时为用strlen代替
 {
@@ -193,8 +219,23 @@ void Plot_StrAsc8(u16 x,u16 y,cc8* ptr,u8 length)//长度为0时为用strlen代替
     //else{}//不支持,忽略
   }
 }
+  
+//---------------------------绘制asc8*8字符串->双倍大小-------------------------
+void Plot_StrAsc8_Scale2(u16 x,u16 y,cc8* ptr,u8 length)//长度为0时为用strlen代替
+{
+  if(length == 0) length = strlen(ptr);
+  cc8 *end = ptr + length;
+  for( ;ptr < end; ptr++){
+    u8 c = *ptr;
+    //if(c < 0x80){//ASCII直接转换
+      Plot_Asc8_Scale2(x, y, c);
+      x += 16;
+    //}
+    //else{}//不支持,忽略
+  }
+}        
 
-//----------------------绘制字符串->->双倍大小，支持GB2312-----------------------
+//----------------------绘制字符串->双倍大小，支持GB2312-----------------------
 void Plot_String_Scale2(u16 x,u16 y, cc8* ptr,u8 length)//长度为0时为用strlen代替
 {
   if(length == 0) length = strlen(ptr);
