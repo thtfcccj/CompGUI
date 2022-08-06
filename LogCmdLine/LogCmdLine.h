@@ -13,9 +13,24 @@
 		                      相关配置
 ***********************************************************************/
 
-//定义显示屏高度
-#ifndef LOG_CMD_LINE_HIGHT
-  #define LOG_CMD_LINE_HIGHT    (320 / 8)
+//定义文字使用的高度
+#ifndef LOG_CMD_FONT_H
+  #define LOG_CMD_FONT_H 7
+#endif
+
+//定义文字使用的宽度
+#ifndef LOG_CMD_FONT_W
+  #define LOG_CMD_FONT_W 5
+#endif
+
+//定义显示屏能够显示的行数
+#ifndef LOG_CMD_LINE_COUNT
+  #define LOG_CMD_LINE_COUNT    (320 / LOG_CMD_FONT_H)
+#endif
+
+//定义显示屏水平像素数
+#ifndef LOG_CMD_H_PIXEl
+  #define LOG_CMD_H_PIXEl    (480)
 #endif
 
 //下一行首行，可用于留顶部不变区域(此区域 LogCmdLine_cbUpdateLine() 直接控制)
@@ -28,8 +43,8 @@
 ***********************************************************************/
 
 struct _LogCmdLine{
-  unsigned char Pos;        //当前所处位置
-  unsigned char Index;      //
+  unsigned char Line;        //当前所处行
+  unsigned char Index;      //计时器
 };
 
 extern struct _LogCmdLine LogCmdLine;          //直接实例化
@@ -40,7 +55,7 @@ extern struct _LogCmdLine LogCmdLine;          //直接实例化
 
 //-----------------------初始化函数-------------------------------
 //void LogCmdLine_Init(void);
-#define LogCmdLine_Init() do{LogCmdLine.Pos = LOG_CMD_LINE_NEXT_START;}while(0)
+#define LogCmdLine_Init() do{LogCmdLine.Line = LOG_CMD_LINE_NEXT_START;}while(0)
 
 //----------------------普通任务函数-------------------------------
 //放入512ms进程中扫描以实现闪动

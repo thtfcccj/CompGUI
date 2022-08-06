@@ -164,7 +164,7 @@ void Plot_Asc_Scale2(u16 x,u16 y,u8 code)
 //ºáÏòÈ¡Ä£8*8µãÎ»
 void Plot_Asc8_Scale2(u16 x,u16 y,u8 code)
 {
-  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 8, 8);  
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 16, 16);  
   uc8 *mask = GB2312ZM_pGetAsc8(code);
   uc8 *endmask = mask + 8; //×ÖÄ£½áÊøÎ»ÖÃ
   Color_t color = PlotPalette.penColor; //»º³åÖÁ¼Ä´æÆ÷£¬ÒÔ¼ÓËÙ¶È
@@ -181,7 +181,33 @@ void Plot_Asc8_Scale2(u16 x,u16 y,u8 code)
         Plot_cbSetCurColor(pBuf, fullColor);
         Plot_cbSetCurColor(pBuf, fullColor); 
       }  
-      pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 8); //ÏÂÒ»ĞĞÌî³äÎ»ÖÃÆğÊ¼
+      pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 16); //ÏÂÒ»ĞĞÌî³äÎ»ÖÃÆğÊ¼
+    }
+  }
+}
+
+//----------------------»æÖÆµ¥¸öAsc×Ö·û->5*7µãÕó->Ë«±¶´óĞ¡-----------------------
+//ºáÏòÈ¡Ä£8*8µãÎ»
+void Plot_Asc57_Scale2(u16 x,u16 y,u8 code)
+{
+  Color_t *pBuf = Plot_cbAbsLocalArea(x,y, 10, 16);  
+  uc8 *mask = GB2312ZM_pGetAsc57(code);
+  uc8 *endmask = mask + 7; //×ÖÄ£½áÊøÎ»ÖÃ
+  Color_t color = PlotPalette.penColor; //»º³åÖÁ¼Ä´æÆ÷£¬ÒÔ¼ÓËÙ¶È
+  
+  for( ;mask < endmask; ){  
+    u8 ZM = *mask++; //±¾ĞĞµãÕó->Ö¸ÏòÏÂĞĞ
+    //Ìî³äÁ½ĞĞ5µãÑÕÉ«
+    for(u8 dLine = 0; dLine < 2; dLine++){//ĞĞÊı
+      for(u8 Mask = 0x80; Mask > 0x04; Mask >>= 1){
+        Color_t fullColor;
+        if(ZM & Mask) fullColor = color;
+        else if(PlotPalette.brushStyle) fullColor = PlotPalette.brushColor;
+        //xÖáÁ¬ĞøÌî³äÁ½´Î
+        Plot_cbSetCurColor(pBuf, fullColor);
+        Plot_cbSetCurColor(pBuf, fullColor); 
+      }  
+      pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - 10); //ÏÂÒ»ĞĞÌî³äÎ»ÖÃÆğÊ¼
     }
   }
 }
@@ -233,7 +259,22 @@ void Plot_StrAsc8_Scale2(u16 x,u16 y,cc8* ptr,u8 length)//³¤¶ÈÎª0Ê±ÎªÓÃstrlen´úÌ
     //}
     //else{}//²»Ö§³Ö,ºöÂÔ
   }
-}        
+}
+
+//---------------------------»æÖÆasc5*7×Ö·û´®->Ë«±¶´óĞ¡-------------------------
+void Plot_StrAsc57_Scale2(u16 x,u16 y,cc8* ptr,u8 length)//³¤¶ÈÎª0Ê±ÎªÓÃstrlen´úÌæ
+{
+  if(length == 0) length = strlen(ptr);
+  cc8 *end = ptr + length;
+  for( ;ptr < end; ptr++){
+    u8 c = *ptr;
+    //if(c < 0x80){//ASCIIÖ±½Ó×ª»»
+      Plot_Asc57_Scale2(x, y, c);
+      x += 10;
+    //}
+    //else{}//²»Ö§³Ö,ºöÂÔ
+  }
+}
 
 //----------------------»æÖÆ×Ö·û´®->Ë«±¶´óĞ¡£¬Ö§³ÖGB2312-----------------------
 void Plot_String_Scale2(u16 x,u16 y, cc8* ptr,u8 length)//³¤¶ÈÎª0Ê±ÎªÓÃstrlen´úÌæ

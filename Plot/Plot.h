@@ -101,6 +101,10 @@ void Plot_Asc_Scale2(u16 x,u16 y,u8 code);
 //横向取模8*8点位
 void Plot_Asc8_Scale2(u16 x,u16 y,u8 code);
 
+//----------------------绘制单个Asc字符->5*7点阵->双倍大小-----------------------
+//横向取模5*7点位
+void Plot_Asc57_Scale2(u16 x,u16 y,u8 code);
+
 //------------------------绘制字符串->支持GB2312--------------------------
 void Plot_String(u16 x,u16 y,cc8* ptr,u8 length);//长度为0时为用strlen代替
 
@@ -112,6 +116,9 @@ void Plot_String_Scale2(u16 x,u16 y, cc8* ptr,u8 length);//长度为0时为用strlen代
 
 //---------------------------绘制asc8*8字符串->双倍大小-------------------------
 void Plot_StrAsc8_Scale2(u16 x,u16 y,cc8* ptr,u8 length);//长度为0时为用strlen代替
+
+//---------------------------绘制asc5*7字符串->双倍大小-------------------------
+void Plot_StrAsc57_Scale2(u16 x,u16 y,cc8* ptr,u8 length);//长度为0时为用strlen代替
 
 /*******************************************************************************
                               标准图形库

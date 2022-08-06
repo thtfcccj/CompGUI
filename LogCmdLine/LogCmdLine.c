@@ -20,20 +20,20 @@ static const char _CurcorOn[] = {"|"};
 void LogCmdLine_Task(void)
 {
   if(LogCmdLine.Index & 0x01) //显示周期
-    LogCmdLine_cbUpdateLine(LogCmdLine.Pos, _CurcorOn);
-  else LogCmdLine_cbUpdateLine(LogCmdLine.Pos, _CurcorOff); 
+    LogCmdLine_cbUpdateLine(LogCmdLine.Line, _CurcorOn);
+  else LogCmdLine_cbUpdateLine(LogCmdLine.Line, _CurcorOff); 
   LogCmdLine.Index++;
 }
 
 //---------------------------更新日志------------------------------
 void LogCmdLine_UpdateLog(const char *pStr)
 {
-  LogCmdLine_cbUpdateLine(LogCmdLine.Pos, pStr); //更新当前行显示
-  LogCmdLine.Pos++;
-  if(LogCmdLine.Pos >= LOG_CMD_LINE_HIGHT) //回环了
-    LogCmdLine.Pos = LOG_CMD_LINE_NEXT_START;
+  LogCmdLine_cbUpdateLine(LogCmdLine.Line, pStr); //更新当前行显示
+  LogCmdLine.Line++;
+  if(LogCmdLine.Line >= LOG_CMD_LINE_COUNT) //回环了
+    LogCmdLine.Line = LOG_CMD_LINE_NEXT_START;
   //清除下一行显示以为闪动及送字符做好准备
-  LogCmdLine_cbClrLine(LogCmdLine.Pos);
+  LogCmdLine_cbClrLine(LogCmdLine.Line);
 }
 
 
