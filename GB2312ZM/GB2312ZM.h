@@ -23,6 +23,9 @@ const unsigned char *GB2312ZM_pGetHZ(unsigned short GB2312);
 //--------------------------------获得英文8*8字模--------------------------
 const unsigned char *GB2312ZM_pGetAsc8(char Asc);
 
+//--------------------------------获得英文5*7字模--------------------------
+const unsigned char *GB2312ZM_pGetAsc57(char Asc);
+
 //----------------------------------扩展字模-------------------------------
 //支持用户字模时，需实现：
 #ifdef SUPPORT_USER_ZM
