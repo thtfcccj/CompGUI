@@ -63,13 +63,8 @@ void Plot_FullRect(u16 x,u16 y,u16 w,u16 h)
   /*Color_t *pBuf = */Plot_cbAbsLocalArea(x,y, w, h); 
   Color_t color = PlotPalette.brushColor; //缓冲至寄存器，以加速度
   
-  for(; h > 0; h--){
-    for(u16 curW = w; curW > 0; curW--){
-      TftDbi_WrColor(color); //Plot_cbSetCurColor(pBuf, fullColor);
-    }
-    //Color_t *pEndBuf = pBuf + w; 
-    //for(; pBuf < pEndBuf;) Plot_cbSetCurColor(pBuf, color);
-    //pBuf = Plot_cbToNextRowStart(pBuf, TFT_DRV_H_PIXEl - w); //下一行
+  for(u32 c = h * w; c > 0; c--){
+    TftDbi_WrColor(color); //Plot_cbSetCurColor(pBuf, fullColor);
   }
 }
 

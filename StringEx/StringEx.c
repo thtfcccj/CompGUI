@@ -69,7 +69,7 @@ char *Value2StringMin(unsigned short Value,
                       char *pString,//接收缓冲
                       unsigned char Min)//保证的最小位数
 {
-  //短整型时
+  /*/短整型时
   //#if(TSIGNED_SIZE >= 2)
     if((Value >= 10000) || (Min >= 5)){
       *pString++ = Value / 10000 + '0';
@@ -95,8 +95,19 @@ char *Value2StringMin(unsigned short Value,
   }
   if((Value > 0) || (Min >= 1)){
     *pString++ = Value + '0';
-  }
+  }*/
   
+  //时间换空间方案
+  unsigned short Muti = 10000;
+  for(unsigned char Pos = 5; Pos > 0; Pos--){
+    if((Value >= Muti) || (Min >= Pos)){
+      *pString++ = (Value / Muti) + '0';
+      Value %= Muti;
+	    Min = 10;
+    }
+    Muti /= 10;
+  }
+
   *pString = '\0'; //强制填充结束字符
   return pString;
 }
