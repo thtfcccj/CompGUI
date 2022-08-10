@@ -27,7 +27,7 @@
   * DLight:  双色指示灯各种亮法驱动程序，单例化，可实现指示灯的不同闪法，如快闪，慢闪，三闪一停等(由应用层决定)
   * EO8Light: 扩展8位IO输出的指示灯的管理，用此抽像为开关对应指示灯
   * ePic：嵌入式图像格式：
-    + 此格式将BMP,GIF,PNG等图像式格，以及其中中的长，宽，图像深度，调色板，压缩信息等，提取至ePic结构中，以节省FLASH空间
+    + 此格式将WBM,BMP,GIF,PNG等图像格式，以及其中的长，宽，图像深度，调色板，压缩信息等，提取至ePic结构中，以节省FLASH空间
     + 通过https://gitee.com/thtfcccj/FileMergeIndex.git 上位机软件，读取对应图像后，可生成ePic图像格式。
     + 通过此模块，带入ePic嵌入式图像格式数据后，可实现其自动识别BMP,GIF,PNG图像并解码到显示屏显示
     + 支持BMP格式中的RLE，索引位置解码，GIF静态图像解码(依赖于DecodeGIF)，PNG静态图像解码(依赖于DecodePNG)
