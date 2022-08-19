@@ -23,7 +23,7 @@
 //#define SUPPORT_TFT_DRV_MV_ANTI 
 
 //初始化使用表实现，以时间换空间
-#define SUPPORT_TFT_DRV_INIT_TBL
+//#define SUPPORT_TFT_DRV_INIT_TBL
 
 //----------------------------------全局配置----------------------------------
 #ifndef TFT_DRV_H_PIXEl//水平像素点数
