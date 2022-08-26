@@ -223,10 +223,16 @@ void Plot_String(u16 x,u16 y, cc8* ptr,u8 length)//长度为0时为用strlen代替
       Plot_Asc(x, y, c);
       x += 8;
     }
-    else{//未GB2312检查正确性！！！！
-      ptr++; //取下半个字
-      Plot_GB2312(x,y,((u16)c << 8) | *ptr); //高位在前
-      x += 16;
+    else{//汉字了
+      ptr++; //取下半个字      
+      if(ptr < end){//没有截断时
+        Plot_GB2312(x,y,((u16)c << 8) | *ptr); //高位在前
+        x += 16;
+      }
+      else{//最末异常半个汉字了，填充为空格
+        Plot_Asc(x, y, ' ');
+        //x += 8;
+      }
     }
   }
 }
